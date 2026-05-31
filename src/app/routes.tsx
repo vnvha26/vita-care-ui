@@ -86,6 +86,65 @@ function LandingPage() {
     "Tôi đã phân tích. Với triệu chứng này, bạn nên ưu tiên đặt lịch khám trong 24-48 giờ. Hệ thống sẽ kết nối bạn với bác sĩ chuyên khoa phù hợp.",
   ];
 
+  const landingQuickReplies = [
+    "Tôi chưa biết nên khám khoa nào",
+    "Tôi sợ tốn tiền nếu đi khám",
+    "Tôi bị sốt và đau họng",
+    "Tôi bị đau ngực, khó thở",
+  ];
+
+  const landingChatScenarios = [
+    {
+      keywords: ["chưa biết", "không biết", "khoa nào", "khám khoa", "chọn khoa"],
+      reply: "Bạn không cần tự đoán chuyên khoa ngay. Hãy cho tôi 3 thông tin: triệu chứng chính, xuất hiện bao lâu, và mức độ ảnh hưởng sinh hoạt. Tôi sẽ gợi ý nhóm chuyên khoa phù hợp và khi nào nên đặt lịch khám.",
+    },
+    {
+      keywords: ["tốn tiền", "chi phí", "giá", "phí", "đắt", "tiền"],
+      reply: "Tôi hiểu nỗi lo chi phí. Trước mắt bạn có thể mô tả triệu chứng để tôi phân loại mức độ ưu tiên: theo dõi tại nhà, nên khám sớm, hay cần đi cấp cứu. Nếu cần khám, bạn có thể đăng nhập để xem bác sĩ/phòng khám phù hợp trước khi quyết định đặt lịch.",
+    },
+    {
+      keywords: ["sốt", "đau họng", "ho", "sổ mũi", "cảm"],
+      reply: "Sốt, đau họng hoặc ho thường gặp khi nhiễm siêu vi/viêm họng, nhưng cần theo dõi dấu hiệu nặng. Bạn cho tôi biết nhiệt độ cao nhất, đã sốt mấy ngày, có khó thở/đau ngực/phát ban không. Nếu sốt trên 39°C, khó thở, lơ mơ hoặc kéo dài quá 3 ngày, bạn nên đi khám sớm.",
+    },
+    {
+      keywords: ["đau đầu", "đau nửa đầu", "chóng mặt", "buồn nôn", "hoa mắt"],
+      reply: "Đau đầu/chóng mặt có thể liên quan căng thẳng, thiếu ngủ, huyết áp hoặc vấn đề thần kinh. Bạn hãy cho biết vị trí đau, mức độ đau từ 1-10, có nôn ói/yếu tay chân/mờ mắt không. Nếu đau đầu dữ dội đột ngột, méo miệng, yếu liệt hoặc mất ý thức, cần gọi cấp cứu ngay.",
+    },
+    {
+      keywords: ["đau bụng", "tiêu chảy", "buồn nôn", "nôn", "ợ chua", "thượng vị"],
+      reply: "Với triệu chứng tiêu hóa, tôi cần biết đau ở vị trí nào, đau liên tục hay từng cơn, có sốt/nôn nhiều/đi ngoài ra máu không. Bạn nên uống đủ nước, tránh tự dùng kháng sinh. Nếu đau bụng dữ dội, nôn liên tục, phân đen hoặc có máu, hãy đi khám ngay.",
+    },
+    {
+      keywords: ["con tôi", "bé", "trẻ", "em bé", "ho nhiều", "sốt ở trẻ"],
+      reply: "Với trẻ nhỏ, mình cần thận trọng hơn. Bạn cho biết bé bao nhiêu tuổi, sốt bao nhiêu độ, ho khan hay có đờm, bú/ăn uống thế nào. Nếu bé dưới 3 tháng tuổi bị sốt, thở nhanh, tím tái, li bì hoặc bỏ bú, cần đưa đi khám/cấp cứu ngay.",
+    },
+    {
+      keywords: ["đau ngực", "khó thở", "tức ngực", "tim đập nhanh", "hồi hộp"],
+      reply: "Đau ngực hoặc khó thở là nhóm triệu chứng cần ưu tiên cao. Nếu đau thắt ngực, lan ra tay/hàm/lưng, vã mồ hôi, chóng mặt hoặc khó thở tăng dần, bạn nên gọi cấp cứu ngay. Nếu nhẹ hơn, hãy cho tôi biết đau xuất hiện khi nghỉ hay gắng sức, kéo dài bao lâu và có bệnh tim/huyết áp không.",
+    },
+    {
+      keywords: ["da", "nổi mẩn", "ngứa", "dị ứng", "phát ban", "mụn"],
+      reply: "Tôi ghi nhận vấn đề da liễu. Bạn cho biết vùng da bị ảnh hưởng, có ngứa/đau/rỉ dịch không, xuất hiện sau ăn uống/thuốc/mỹ phẩm nào không. Nếu phát ban kèm khó thở, sưng môi/mặt hoặc chóng mặt, cần đi cấp cứu vì có thể là phản ứng dị ứng nặng.",
+    },
+    {
+      keywords: ["mất ngủ", "stress", "lo âu", "căng thẳng", "mệt mỏi"],
+      reply: "Mất ngủ, stress và mệt mỏi kéo dài có thể ảnh hưởng nhiều đến sức khỏe. Bạn cho tôi biết tình trạng kéo dài bao lâu, mỗi đêm ngủ được mấy tiếng, có hồi hộp/sụt cân/buồn bã kéo dài không. Nếu có ý nghĩ tự làm hại bản thân, hãy liên hệ người thân hoặc cơ sở y tế khẩn cấp ngay.",
+    },
+    {
+      keywords: ["bảo mật", "riêng tư", "dữ liệu", "lộ thông tin", "không đăng nhập"],
+      reply: "Bạn có thể hỏi nhanh ở đây khi chưa đăng nhập. Với thông tin cá nhân hoặc hồ sơ y tế, hệ thống sẽ yêu cầu đăng nhập để bảo vệ dữ liệu. Bạn nên tránh nhập số căn cước, địa chỉ cụ thể hoặc thông tin quá nhạy cảm trong phần tư vấn thử.",
+    },
+  ];
+
+  const getLandingAiReply = (text: string) => {
+    const normalized = text.toLowerCase();
+    const matchedScenario = landingChatScenarios.find((scenario) =>
+      scenario.keywords.some((keyword) => normalized.includes(keyword))
+    );
+
+    return matchedScenario?.reply ?? "Tôi đã ghi nhận triệu chứng của bạn. Để tư vấn sát hơn, bạn cho biết thêm: triệu chứng bắt đầu từ khi nào, mức độ từ 1-10, có sốt/khó thở/đau ngực/nôn ói hoặc bệnh nền không. Nếu triệu chứng nặng lên nhanh, hãy ưu tiên đi khám trực tiếp.";
+  };
+
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTo({
@@ -118,7 +177,7 @@ function LandingPage() {
           },
         ]);
       } else {
-        const reply = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+        const reply = getLandingAiReply(text);
         setChatMessages((prev) => [...prev, { from: "ai", text: reply }]);
       }
       setIsTyping(false);
@@ -305,7 +364,7 @@ function LandingPage() {
                 )}
                 {chatMessages.length === 1 && !isTyping && (
                   <div className="flex flex-wrap gap-2 pl-12 pt-1 animate-in fade-in duration-300">
-                    {quickReplies.map((q) => (
+                    {landingQuickReplies.map((q) => (
                       <button
                         key={q}
                         type="button"
