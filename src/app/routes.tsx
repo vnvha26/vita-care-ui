@@ -57,6 +57,7 @@ function LandingPage() {
     from: "ai" | "user";
     text: string;
     clinics?: Array<{ id: string; name: string; specialty: string; rating: string; image: string }>;
+    choices?: string[];
     showLoginBtn?: boolean;
   }>>([
     { from: "ai", text: "Xin chào! Tôi là trợ lý sức khỏe AI của VitaCare. Bạn đang gặp vấn đề gì? Hãy mô tả triệu chứng hoặc chọn bên dưới nhé." },
@@ -136,13 +137,36 @@ function LandingPage() {
     },
   ];
 
-  const getLandingAiReply = (text: string) => {
+  const landingConsultationFlow = [
+    {
+      keywords: ["tôi bị đau bụng", "đau bụng", "bụng đau"],
+      reply: "Tôi ghi nhận bạn đang bị đau bụng. Để phân loại mức độ trước, bạn chọn mô tả gần nhất với tình trạng hiện tại nhé:",
+      choices: ["Đau âm ỉ, vẫn sinh hoạt được", "Đau dữ dội hoặc đau tăng nhanh"],
+    },
+    {
+      keywords: ["đau âm ỉ", "vẫn sinh hoạt", "đau dữ dội", "đau tăng nhanh"],
+      reply: "Cảm ơn bạn. Bước tiếp theo tôi cần biết có dấu hiệu đi kèm không để gợi ý nên theo dõi hay đi khám sớm:",
+      choices: ["Có sốt, nôn hoặc tiêu chảy", "Không có dấu hiệu kèm theo"],
+    },
+  ];
+
+  const getLandingAiReply = (text: string): { text: string; choices?: string[] } => {
     const normalized = text.toLowerCase();
+    const matchedFlowStep = landingConsultationFlow.find((step) =>
+      step.keywords.some((keyword) => normalized.includes(keyword))
+    );
+
+    if (matchedFlowStep) {
+      return { text: matchedFlowStep.reply, choices: matchedFlowStep.choices };
+    }
+
     const matchedScenario = landingChatScenarios.find((scenario) =>
       scenario.keywords.some((keyword) => normalized.includes(keyword))
     );
 
-    return matchedScenario?.reply ?? "Tôi đã ghi nhận triệu chứng của bạn. Để tư vấn sát hơn, bạn cho biết thêm: triệu chứng bắt đầu từ khi nào, mức độ từ 1-10, có sốt/khó thở/đau ngực/nôn ói hoặc bệnh nền không. Nếu triệu chứng nặng lên nhanh, hãy ưu tiên đi khám trực tiếp.";
+    return {
+      text: matchedScenario?.reply ?? "Tôi đã ghi nhận triệu chứng của bạn. Để tư vấn sát hơn, bạn cho biết thêm: triệu chứng bắt đầu từ khi nào, mức độ từ 1-10, có sốt/khó thở/đau ngực/nôn ói hoặc bệnh nền không. Nếu triệu chứng nặng lên nhanh, hãy ưu tiên đi khám trực tiếp.",
+    };
   };
 
   useEffect(() => {
@@ -178,7 +202,7 @@ function LandingPage() {
         ]);
       } else {
         const reply = getLandingAiReply(text);
-        setChatMessages((prev) => [...prev, { from: "ai", text: reply }]);
+        setChatMessages((prev) => [...prev, { from: "ai", ...reply }]);
       }
       setIsTyping(false);
     }, 600 + Math.random() * 400);
@@ -334,6 +358,21 @@ function LandingPage() {
                                 Đặt lịch ngay
                               </button>
                             </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {msg.choices && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {msg.choices.map((choice) => (
+                            <button
+                              key={choice}
+                              type="button"
+                              onClick={() => sendMessage(choice)}
+                              className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-bold text-blue-700 transition hover:bg-blue-600 hover:text-white"
+                            >
+                              {choice}
+                            </button>
                           ))}
                         </div>
                       )}
