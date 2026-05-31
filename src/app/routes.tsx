@@ -140,12 +140,12 @@ function LandingPage() {
   const landingConsultationFlow = [
     {
       keywords: ["tôi bị đau bụng", "đau bụng", "bụng đau"],
-      reply: "Tôi ghi nhận bạn đang bị đau bụng. Để phân loại mức độ trước, bạn chọn mô tả gần nhất với tình trạng hiện tại nhé:",
+      reply: "Tôi ghi nhận bạn đang bị đau bụng. Để phân loại mức độ trước, bạn hãy chọn 1 trong 2 mô tả gần nhất: đau âm ỉ và vẫn sinh hoạt được, hoặc đau dữ dội/đau tăng nhanh.",
       choices: ["Đau âm ỉ, vẫn sinh hoạt được", "Đau dữ dội hoặc đau tăng nhanh"],
     },
     {
       keywords: ["đau âm ỉ", "vẫn sinh hoạt", "đau dữ dội", "đau tăng nhanh"],
-      reply: "Cảm ơn bạn. Bước tiếp theo tôi cần biết có dấu hiệu đi kèm không để gợi ý nên theo dõi hay đi khám sớm:",
+      reply: "Cảm ơn bạn. Bây giờ tôi cần kiểm tra dấu hiệu đi kèm để gợi ý hướng xử lý. Bạn hãy chọn 1 trong 2: có sốt/nôn/tiêu chảy, hoặc không có dấu hiệu kèm theo.",
       choices: ["Có sốt, nôn hoặc tiêu chảy", "Không có dấu hiệu kèm theo"],
     },
   ];
