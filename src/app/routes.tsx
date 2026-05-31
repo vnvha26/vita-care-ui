@@ -53,6 +53,7 @@ function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const [landingFlowStep, setLandingFlowStep] = useState<0 | 1 | 2>(0);
   const [chatMessages, setChatMessages] = useState<Array<{
     from: "ai" | "user";
     text: string;
@@ -137,27 +138,44 @@ function LandingPage() {
     },
   ];
 
-  const landingConsultationFlow = [
-    {
-      keywords: ["tôi bị đau bụng", "đau bụng", "bụng đau"],
-      reply: "Tôi ghi nhận bạn đang bị đau bụng. Để phân loại mức độ trước, bạn hãy chọn 1 trong 2 mô tả gần nhất: đau âm ỉ và vẫn sinh hoạt được, hoặc đau dữ dội/đau tăng nhanh.",
-      choices: ["Đau âm ỉ, vẫn sinh hoạt được", "Đau dữ dội hoặc đau tăng nhanh"],
-    },
-    {
-      keywords: ["đau âm ỉ", "vẫn sinh hoạt", "đau dữ dội", "đau tăng nhanh"],
-      reply: "Cảm ơn bạn. Bây giờ tôi cần kiểm tra dấu hiệu đi kèm để gợi ý hướng xử lý. Bạn hãy chọn 1 trong 2: có sốt/nôn/tiêu chảy, hoặc không có dấu hiệu kèm theo.",
-      choices: ["Có sốt, nôn hoặc tiêu chảy", "Không có dấu hiệu kèm theo"],
-    },
-  ];
+  const normalizeMessage = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d");
 
   const getLandingAiReply = (text: string): { text: string; choices?: string[] } => {
     const normalized = text.toLowerCase();
-    const matchedFlowStep = landingConsultationFlow.find((step) =>
-      step.keywords.some((keyword) => normalized.includes(keyword))
-    );
+    const plainText = normalizeMessage(text);
 
-    if (matchedFlowStep) {
-      return { text: matchedFlowStep.reply, choices: matchedFlowStep.choices };
+    if (landingFlowStep === 1) {
+      setLandingFlowStep(2);
+      return {
+        text: "Cảm ơn bạn. Bây giờ tôi cần kiểm tra dấu hiệu đi kèm để gợi ý hướng xử lý. Bạn hãy chọn 1 trong 2: có sốt/nôn/tiêu chảy, hoặc không có dấu hiệu kèm theo.",
+        choices: ["Có sốt, nôn hoặc tiêu chảy", "Không có dấu hiệu kèm theo"],
+      };
+    }
+
+    if (landingFlowStep === 2) {
+      setLandingFlowStep(0);
+      if (plainText.includes("co sot") || plainText.includes("non") || plainText.includes("tieu chay")) {
+        return {
+          text: "Bạn có dấu hiệu đi kèm nên tôi khuyên bạn nên đặt lịch khám sớm trong 24 giờ, đặc biệt nếu đau tăng, sốt cao, nôn liên tục hoặc đi ngoài ra máu. Trước mắt hãy uống đủ nước và tránh tự dùng kháng sinh.",
+        };
+      }
+
+      return {
+        text: "Nếu chưa có dấu hiệu kèm theo và cơn đau còn nhẹ, bạn có thể theo dõi tại nhà, ăn thức ăn mềm, uống đủ nước và nghỉ ngơi. Nếu đau kéo dài quá 24-48 giờ hoặc nặng lên, bạn nên đặt lịch khám.",
+      };
+    }
+
+    if (plainText.includes("dau bung") || plainText.includes("bung dau")) {
+      setLandingFlowStep(1);
+      return {
+        text: "Tôi ghi nhận bạn đang bị đau bụng. Để phân loại mức độ trước, bạn hãy chọn 1 trong 2 mô tả gần nhất: đau âm ỉ và vẫn sinh hoạt được, hoặc đau dữ dội/đau tăng nhanh.",
+        choices: ["Đau âm ỉ, vẫn sinh hoạt được", "Đau dữ dội hoặc đau tăng nhanh"],
+      };
     }
 
     const matchedScenario = landingChatScenarios.find((scenario) =>
