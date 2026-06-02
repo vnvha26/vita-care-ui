@@ -9,7 +9,7 @@ export interface PatientChatMessage {
 export interface PatientConversation {
   id: string;
   name: string;
-  role: "clinic" | "doctor";
+  role: "clinic" | "doctor" | "bot";
   roleName: string;
   preview: string;
   status: PatientConversationStatus;
@@ -18,6 +18,49 @@ export interface PatientConversation {
 }
 
 export const patientConversations: PatientConversation[] = [
+  {
+    id: "ai-1",
+    name: "Tư vấn sốt và đau họng",
+    role: "bot",
+    roleName: "Trợ lý AI sức khỏe",
+    preview: "AI khuyến nghị theo dõi nhiệt độ, uống đủ nước và đặt lịch nếu sốt kéo dài trên 3 ngày.",
+    status: "active",
+    lastAt: "Hôm nay, 14:56",
+    messages: [
+      { sender: "contact", text: "Xin chào Nguyễn Văn A, tôi là trợ lý sức khỏe AI của VitaCare. Bạn đang gặp triệu chứng gì hôm nay?", time: "14:51" },
+      { sender: "patient", text: "Tôi bị sốt và đau họng từ tối qua.", time: "14:52" },
+      { sender: "contact", text: "Bạn cho tôi biết nhiệt độ cao nhất, có ho, khó thở hoặc đau ngực không để đánh giá mức độ ưu tiên.", time: "14:53" },
+      { sender: "patient", text: "Tôi sốt 38.2 độ, hơi ho, không khó thở.", time: "14:54" },
+      { sender: "contact", text: "Bạn nên uống đủ nước, nghỉ ngơi, theo dõi nhiệt độ. Nếu sốt trên 39 độ, khó thở, lơ mơ hoặc kéo dài quá 3 ngày, hãy đặt lịch khám sớm.", time: "14:56" },
+    ],
+  },
+  {
+    id: "ai-2",
+    name: "Tư vấn đau bụng âm ỉ",
+    role: "bot",
+    roleName: "Trợ lý AI sức khỏe",
+    preview: "AI gợi ý theo dõi triệu chứng tiêu hóa và đặt lịch khám nếu đau tăng hoặc kèm nôn, sốt.",
+    status: "active",
+    lastAt: "Hôm qua",
+    messages: [
+      { sender: "contact", text: "Bạn hãy mô tả vị trí đau bụng, thời gian xuất hiện và các dấu hiệu đi kèm.", time: "Hôm qua" },
+      { sender: "patient", text: "Tôi đau âm ỉ vùng thượng vị, hơi buồn nôn sau khi ăn.", time: "Hôm qua" },
+      { sender: "contact", text: "Triệu chứng có thể liên quan tiêu hóa. Bạn nên ăn mềm, tránh đồ cay chua, không tự dùng kháng sinh. Nếu đau dữ dội, nôn liên tục hoặc đi ngoài ra máu, cần đi khám ngay.", time: "Hôm qua" },
+    ],
+  },
+  {
+    id: "ai-3",
+    name: "Tìm phòng khám phù hợp",
+    role: "bot",
+    roleName: "Trợ lý AI đặt lịch",
+    preview: "AI đã gợi ý phòng khám liên kết phù hợp với nhu cầu khám nội tổng quát.",
+    status: "active",
+    lastAt: "28/05",
+    messages: [
+      { sender: "patient", text: "Tôi muốn tìm phòng khám nội tổng quát gần khu Cầu Giấy.", time: "28/05" },
+      { sender: "contact", text: "Tôi ghi nhận nhu cầu khám nội tổng quát. Bạn có thể ưu tiên Phòng khám Đa khoa Quốc tế VitaCare hoặc các phòng khám liên kết có lịch trống trong ngày.", time: "28/05" },
+    ],
+  },
   {
     id: "c1",
     name: "Phòng khám Đa khoa Quốc tế VitaCare",

@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useLocation, useSearchParams } from "react-router";
-import { Archive, Inbox, MessageCircle, Search, Send, UserRound, Building2, Stethoscope, ChevronLeft } from "lucide-react";
+import { Archive, Inbox, MessageCircle, Search, Send, UserRound, Building2, Stethoscope, ChevronLeft, Bot } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 import { getPatientConversations, patientConversations, type PatientConversation } from "../../lib/patient-conversations";
 import { cn } from "../../lib/utils";
@@ -17,7 +17,7 @@ interface ChatMessage {
 interface Conversation {
   id: string;
   name: string;
-  role: "clinic" | "doctor";
+  role: "clinic" | "doctor" | "bot";
   roleName: string;
   preview: string;
   status: ConversationStatus;
@@ -173,10 +173,11 @@ export default function PatientChat() {
   }, [initialPatientConversations, requestedConversationId]);
 
   const filteredConversations = useMemo(() => {
+    const contactConversations = conversations.filter((item) => item.role !== "bot");
     const visibleByStatus =
       filter === "all"
-        ? conversations.filter((item) => item.status !== "archived")
-        : conversations.filter((item) => item.status === filter);
+        ? contactConversations.filter((item) => item.status !== "archived")
+        : contactConversations.filter((item) => item.status === filter);
     const keyword = searchQuery.trim().toLowerCase();
 
     if (!keyword) return visibleByStatus;
@@ -188,6 +189,20 @@ export default function PatientChat() {
         .includes(keyword)
     );
   }, [conversations, filter, searchQuery]);
+
+  const chatbotHistory = useMemo(() => {
+    const keyword = searchQuery.trim().toLowerCase();
+    const visibleHistory = conversations.filter((item) => item.role === "bot" && item.status !== "archived");
+
+    if (!keyword) return visibleHistory;
+
+    return visibleHistory.filter((item) =>
+      [item.name, item.roleName, item.preview, item.status, item.role]
+        .join(" ")
+        .toLowerCase()
+        .includes(keyword)
+    );
+  }, [conversations, searchQuery]);
 
   const selectedConversation = conversations.find((item) => item.id === selectedId) ?? conversations[0];
 
@@ -292,8 +307,56 @@ export default function PatientChat() {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               className="min-w-0 flex-1 bg-transparent text-sm outline-none"
-              placeholder="Tìm kiếm bác sĩ hoặc phòng khám..."
+              placeholder="Tìm kiếm chatbot, bác sĩ hoặc phòng khám..."
             />
+          </div>
+
+          <div className="mb-4 rounded-[20px] border border-[#CFE3FF] bg-gradient-to-br from-[#F7FBFF] to-[#E8FFF9] p-3">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-[#2F80ED] shadow-sm">
+                  <Bot className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-[#1E293B]">Lịch sử chatbot</p>
+                  <p className="text-[11px] font-semibold text-[#64748B]">{chatbotHistory.length} phiên tư vấn AI</p>
+                </div>
+              </div>
+              <StatusBadge tone="blue">AI</StatusBadge>
+            </div>
+
+            <div className="space-y-2">
+              {chatbotHistory.slice(0, 4).map((history) => (
+                <button
+                  key={history.id}
+                  type="button"
+                  onClick={() => handleSelect(history.id)}
+                  className={cn(
+                    "flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition cursor-pointer",
+                    selectedConversation.id === history.id
+                      ? "border-[#9CC8FF] bg-white shadow-sm"
+                      : "border-white/70 bg-white/55 hover:bg-white"
+                  )}
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EAF3FF] text-[#2F80ED]">
+                    <Bot className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="truncate text-xs font-black text-[#1E293B]">{history.name}</p>
+                      <span className="shrink-0 text-[10px] font-bold text-[#64748B]">{history.lastAt}</span>
+                    </div>
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#64748B]">{history.preview}</p>
+                  </div>
+                </button>
+              ))}
+
+              {chatbotHistory.length === 0 && (
+                <div className="rounded-2xl border border-dashed border-[#CFE3FF] bg-white/55 p-3 text-center text-xs font-bold text-[#64748B]">
+                  Chưa có phiên chatbot phù hợp.
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
