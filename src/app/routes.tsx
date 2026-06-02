@@ -242,10 +242,14 @@ function LandingPage() {
     }, 800);
   };
 
-  const certifications = [
-    { name: "ISO 27001" },
-    { name: "Bảo mật SSL" },
-    { name: "Mã hóa E2E" },
+  const trustTickerItems = [
+    { icon: "🛡️", text: "Dữ liệu được mã hóa & bảo mật", tone: "text-slate-600" },
+    { icon: "✅", text: "Không thay thế chẩn đoán bác sĩ", tone: "text-slate-600" },
+    { icon: "⚡", text: "Phản hồi trong 30 giây", tone: "text-slate-600" },
+    { icon: "🛡️", text: "Đạt chuẩn ISO 27001", tone: "text-emerald-700" },
+    { icon: "🏥", text: "Bộ Y Tế chứng nhận cấp phép", tone: "text-blue-700" },
+    { icon: "🔒", text: "Mã hóa E2E & Bảo mật SSL", tone: "text-indigo-700" },
+    { icon: "📋", text: "Tiêu chuẩn bảo mật HIPAA", tone: "text-purple-700" },
   ];
 
   const testimonials = [
@@ -285,19 +289,20 @@ function LandingPage() {
               Giải pháp tầm soát triệu chứng ban đầu ứng dụng trí tuệ nhân tạo thế hệ mới. Tuyệt đối bảo mật, kết nối bác sĩ chuyên khoa ngay lập tức.
             </p>
 
-            {/* Trust Badges */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <div className="flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-emerald-50/70 px-4 py-1.5 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
-                <span className="text-sm">🛡️</span> Đạt chuẩn ISO 27001
-              </div>
-              <div className="flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-blue-50/70 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm backdrop-blur">
-                <span className="text-sm">🏥</span> Bộ Y Tế chứng nhận cấp phép
-              </div>
-              <div className="flex items-center gap-1.5 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-1.5 text-xs font-bold text-indigo-700 shadow-sm backdrop-blur">
-                <span className="text-sm">🔒</span> Mã hóa E2E & Bảo mật SSL
-              </div>
-              <div className="flex items-center gap-1.5 rounded-full border border-purple-200/80 bg-purple-50/70 px-4 py-1.5 text-xs font-bold text-purple-700 shadow-sm backdrop-blur">
-                <span className="text-sm">📋</span> Tiêu chuẩn bảo mật HIPAA
+            {/* Trust ticker */}
+            <div className="relative mx-auto mt-8 w-full max-w-[860px] overflow-hidden rounded-full border border-white/50 bg-white/30 py-2.5 shadow-sm backdrop-blur">
+              <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#e6f0ff] to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#e3e8ff] to-transparent" />
+              <div className="trust-ticker-track flex w-max items-center gap-4 whitespace-nowrap">
+                {[...trustTickerItems, ...trustTickerItems].map((item, index) => (
+                  <div
+                    key={`${item.text}-${index}`}
+                    className={`inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/55 px-4 py-1.5 text-xs font-extrabold shadow-sm ${item.tone}`}
+                  >
+                    <span className="text-sm">{item.icon}</span>
+                    <span>{item.text}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -454,20 +459,6 @@ function LandingPage() {
               </div>
             </div>
           )}
-
-          {/* Trust + CTA row */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-            {[
-              { icon: "🛡️", text: "Dữ liệu được mã hóa & bảo mật" },
-              { icon: "✅", text: "Không thay thế chẩn đoán bác sĩ" },
-              { icon: "⚡", text: "Phản hồi trong 30 giây" },
-            ].map((t) => (
-              <div key={t.text} className="flex items-center gap-2 text-slate-500">
-                <span>{t.icon}</span>
-                <span className="font-medium">{t.text}</span>
-              </div>
-            ))}
-          </div>
 
           {/* Testimonials */}
           <div className="mx-auto mt-10 w-full max-w-[900px]">
