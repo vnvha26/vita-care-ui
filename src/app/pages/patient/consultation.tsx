@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Bot, Send, ShieldCheck, Sparkles, ChevronDown, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { getPatientConversations, type PatientConversation } from "../../lib/patient-conversations";
 
 interface Clinic {
   id: string;
@@ -82,7 +83,12 @@ export default function PatientConsultation() {
     ];
   });
   const [isTyping, setIsTyping] = useState(false);
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const chatbotHistory = useMemo(
+    () => getPatientConversations().filter((item) => item.role === "bot" && item.status !== "archived"),
+    []
+  );
 
   const quickReplies = [
     "Tôi cần tìm phòng khám",
@@ -178,8 +184,19 @@ export default function PatientConsultation() {
     ]);
   };
 
+  const openChatbotHistory = (history: PatientConversation) => {
+    setSelectedHistoryId(history.id);
+    setChatMessages(
+      history.messages.map((message) => ({
+        from: message.sender === "patient" ? "user" : "ai",
+        text: message.text,
+      }))
+    );
+  };
+
   return (
-    <div className="mx-auto w-full max-w-[1000px] h-[calc(100vh-140px)] min-h-[500px]">
+    <div className="mx-auto grid w-full max-w-[1280px] gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="h-[calc(100vh-140px)] min-h-[500px]">
       <div className="relative flex flex-col h-full w-full rounded-[30px] border border-white/60 bg-white/70 shadow-[0_24px_70px_rgba(63,78,111,0.18)] backdrop-blur-xl overflow-hidden">
         
         {/* Chat header - Glassmorphic overlay */}
@@ -349,6 +366,48 @@ export default function PatientConsultation() {
           </button>
         </div>
       </div>
+      </div>
+
+      <aside className="rounded-[30px] border border-[#CFE3FF] bg-gradient-to-br from-[#F7FBFF] to-[#E8FFF9] p-5 shadow-[0_18px_50px_rgba(47,128,237,0.08)] xl:h-[calc(100vh-140px)] xl:min-h-[500px]">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#2F80ED] shadow-sm">
+              <Bot className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-[#1E293B]">Lịch sử chatbot</h2>
+              <p className="text-sm font-semibold text-[#64748B]">{chatbotHistory.length} phiên tư vấn AI</p>
+            </div>
+          </div>
+          <span className="rounded-full border border-[#CFE3FF] bg-[#EAF3FF] px-4 py-2 text-sm font-black text-[#1C64D1]">AI</span>
+        </div>
+
+        <div className="space-y-3 overflow-y-auto pr-1 custom-scrollbar xl:max-h-[calc(100vh-250px)]">
+          {chatbotHistory.map((history) => (
+            <button
+              key={history.id}
+              type="button"
+              onClick={() => openChatbotHistory(history)}
+              className={`flex w-full items-start gap-4 rounded-[22px] border p-4 text-left transition cursor-pointer ${
+                selectedHistoryId === history.id
+                  ? "border-[#9CC8FF] bg-white shadow-sm ring-2 ring-[#CFE3FF]"
+                  : "border-white/70 bg-white/55 hover:bg-white hover:shadow-sm"
+              }`}
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF3FF] text-[#2F80ED]">
+                <Bot className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="truncate text-sm font-black text-[#1E293B]">{history.name}</p>
+                  <span className="shrink-0 text-xs font-bold text-[#64748B]">{history.lastAt}</span>
+                </div>
+                <p className="mt-1 line-clamp-2 text-sm font-semibold leading-6 text-[#64748B]">{history.preview}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </aside>
     </div>
   );
 }

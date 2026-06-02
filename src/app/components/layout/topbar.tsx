@@ -40,7 +40,7 @@ type MockContact = {
 };
 
 const mapPatientTopbarContacts = (conversations: PatientConversation[]): MockContact[] => conversations
-  .filter((conversation) => conversation.status !== "archived")
+  .filter((conversation) => conversation.status !== "archived" && conversation.role !== "bot")
   .map((conversation) => ({
     id: conversation.id,
     name: conversation.name,
