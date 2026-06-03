@@ -41,8 +41,54 @@ const patientPageLabels: Record<string, string> = {
   "/patient/profile": "H\u1ed3 s\u01a1 c\u00e1 nh\u00e2n",
 };
 
+const doctorPageLabels: Record<string, string> = {
+  "/doctor": HOME_LABEL,
+  "/doctor/patients": "H\u1ed3 s\u01a1 b\u1ec7nh nh\u00e2n",
+  "/doctor/examination": "L\u1ecbch kh\u00e1m",
+  "/doctor/chat": "Tin nh\u1eafn",
+  "/doctor/feedback": "Tra c\u1ee9u thu\u1ed1c",
+  "/doctor/profile": "H\u1ed3 s\u01a1 b\u00e1c s\u0129",
+};
+
+const managerPageLabels: Record<string, string> = {
+  "/manager": HOME_LABEL,
+  "/manager/clinic-profile": "Th\u00f4ng tin ph\u00f2ng kh\u00e1m",
+  "/manager/clinic-registration": "C\u1eadp nh\u1eadt ph\u00f2ng kh\u00e1m",
+  "/manager/doctors": "Qu\u1ea3n l\u00fd b\u00e1c s\u0129",
+  "/manager/doctors/new": "Th\u00eam b\u00e1c s\u0129",
+  "/manager/appointments": "Ti\u1ebfp nh\u1eadn l\u1ecbch h\u1eb9n",
+  "/manager/schedule": "Gi\u1edd l\u00e0m vi\u1ec7c",
+  "/manager/chat": "Tin nh\u1eafn",
+  "/manager/ai-data": "Qu\u1ea3n l\u00fd d\u1eef li\u1ec7u AI",
+  "/manager/reports": "B\u00e1o c\u00e1o t\u1ed5ng h\u1ee3p",
+};
+
+const expertPageLabels: Record<string, string> = {
+  "/expert": HOME_LABEL,
+  "/expert/cases": "Ca c\u1ea7n \u0111\u00e1nh gi\u00e1",
+  "/expert/chat": "Tr\u00f2 chuy\u1ec7n AI",
+  "/expert/conversations": "H\u1ed9i tho\u1ea1i",
+  "/expert/knowledge": "Kho tri th\u1ee9c",
+  "/expert/patients": "B\u1ec7nh nh\u00e2n",
+  "/expert/reports": "B\u00e1o c\u00e1o",
+  "/expert/profile": "H\u1ed3 s\u01a1 chuy\u00ean gia",
+};
+
 function getCurrentPageLabel(role: Role, pathname: string) {
   if (role === "patient") return patientPageLabels[pathname] ?? HOME_LABEL;
+  if (role === "doctor") {
+    if (pathname.startsWith("/doctor/patients/")) return "Chi ti\u1ebft b\u1ec7nh nh\u00e2n";
+    return doctorPageLabels[pathname] ?? HOME_LABEL;
+  }
+  if (role === "manager") {
+    if (pathname.startsWith("/manager/doctors/") && pathname.endsWith("/edit")) return "Ch\u1ec9nh s\u1eeda b\u00e1c s\u0129";
+    if (pathname.startsWith("/manager/doctors/")) return "Chi ti\u1ebft b\u00e1c s\u0129";
+    return managerPageLabels[pathname] ?? HOME_LABEL;
+  }
+  if (role === "expert") {
+    if (pathname.startsWith("/expert/cases/")) return "Chi ti\u1ebft ca \u0111\u00e1nh gi\u00e1";
+    return expertPageLabels[pathname] ?? HOME_LABEL;
+  }
   return HOME_LABEL;
 }
 
