@@ -543,3 +543,4 @@ export const mockNotifications: Notification[] = [
     read: false,
   },
 ];
+

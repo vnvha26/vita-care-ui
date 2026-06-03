@@ -3,52 +3,52 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Button } from "../../components/ui/button";
 
 const permissions = [
-  { id: "view_patients", name: "Xem danh sách bệnh nhân", doctor: true, expert: false, manager: true },
-  { id: "edit_patients", name: "Chỉnh sửa thông tin bệnh nhân", doctor: true, expert: false, manager: true },
-  { id: "view_cases", name: "Xem ca đánh giá", doctor: true, expert: true, manager: true },
-  { id: "review_cases", name: "Đánh giá ca bệnh", doctor: false, expert: true, manager: false },
-  { id: "manage_users", name: "Quản lý người dùng", doctor: false, expert: false, manager: true },
-  { id: "manage_clinics", name: "Quản lý phòng khám", doctor: false, expert: false, manager: true },
-  { id: "view_reports", name: "Xem báo cáo", doctor: true, expert: true, manager: true },
-  { id: "export_data", name: "Xuất dữ liệu", doctor: false, expert: true, manager: true },
-  { id: "system_settings", name: "Cài đặt hệ thống", doctor: false, expert: false, manager: true },
+  { id: "view_patients", name: "Xem danh s�ch b?nh nh�n", doctor: true, expert: false, manager: true },
+  { id: "edit_patients", name: "Ch?nh s?a th�ng tin b?nh nh�n", doctor: true, expert: false, manager: true },
+  { id: "view_cases", name: "Xem ca d�nh gi�", doctor: true, expert: true, manager: true },
+  { id: "review_cases", name: "��nh gi� ca b?nh", doctor: false, expert: true, manager: false },
+  { id: "manage_users", name: "Qu?n l� ngu?i d�ng", doctor: false, expert: false, manager: true },
+  { id: "manage_clinics", name: "Qu?n l� ph�ng kh�m", doctor: false, expert: false, manager: true },
+  { id: "view_reports", name: "Xem b�o c�o", doctor: true, expert: true, manager: true },
+  { id: "export_data", name: "Xu?t d? li?u", doctor: false, expert: true, manager: true },
+  { id: "system_settings", name: "C�i d?t h? th?ng", doctor: false, expert: false, manager: true },
 ];
 
 export default function ManagerPermissions() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold text-gray-900">Quản lý phân quyền</h1>
-        <p className="text-gray-500 mt-1">Cấu hình quyền truy cập theo vai trò</p>
+        <h1 className="text-3xl font-semibold text-gray-900">Qu?n l� ph�n quy?n</h1>
+        <p className="text-gray-500 mt-1">C?u h�nh quy?n truy c?p theo vai tr�</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Ma trận phân quyền</CardTitle>
-          <CardDescription>Quản lý quyền truy cập cho từng vai trò</CardDescription>
+          <CardTitle>Ma tr?n ph�n quy?n</CardTitle>
+          <CardDescription>Qu?n l� quy?n truy c?p cho t?ng vai tr�</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left p-4 font-medium text-gray-700">Quyền</th>
+                  <th className="text-left p-4 font-medium text-gray-700">Quy?n</th>
                   <th className="text-center p-4 font-medium text-gray-700">
                     <div className="flex flex-col items-center gap-1">
                       <Shield className="h-5 w-5 text-blue-600" />
-                      <span>Bác sĩ</span>
+                      <span>B�c si</span>
                     </div>
                   </th>
                   <th className="text-center p-4 font-medium text-gray-700">
                     <div className="flex flex-col items-center gap-1">
                       <Shield className="h-5 w-5 text-green-600" />
-                      <span>Chuyên gia</span>
+                      <span>Chuy�n gia</span>
                     </div>
                   </th>
                   <th className="text-center p-4 font-medium text-gray-700">
                     <div className="flex flex-col items-center gap-1">
                       <Shield className="h-5 w-5 text-purple-600" />
-                      <span>Quản lý</span>
+                      <span>Qu?n l�</span>
                     </div>
                   </th>
                 </tr>
@@ -90,8 +90,8 @@ export default function ManagerPermissions() {
             </table>
           </div>
           <div className="flex gap-3 mt-6">
-            <Button>Lưu thay đổi</Button>
-            <Button variant="outline">Khôi phục mặc định</Button>
+            <Button>Luu thay d?i</Button>
+            <Button variant="outline">Kh�i ph?c m?c d?nh</Button>
           </div>
         </CardContent>
       </Card>
@@ -101,23 +101,23 @@ export default function ManagerPermissions() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-blue-600" />
-              Bác sĩ
+              B�c si
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600 mb-3">Quyền cơ bản:</p>
+            <p className="text-sm text-gray-600 mb-3">Quy?n co b?n:</p>
             <ul className="text-sm text-gray-700 space-y-2">
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-600" />
-                Quản lý bệnh nhân
+                Qu?n l� b?nh nh�n
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-600" />
-                Nhập liệu khám bệnh
+                Nh?p li?u kh�m b?nh
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-600" />
-                Chat với chuyên gia
+                Chat v?i chuy�n gia
               </li>
             </ul>
           </CardContent>
@@ -127,23 +127,23 @@ export default function ManagerPermissions() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-green-600" />
-              Chuyên gia
+              Chuy�n gia
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600 mb-3">Quyền cơ bản:</p>
+            <p className="text-sm text-gray-600 mb-3">Quy?n co b?n:</p>
             <ul className="text-sm text-gray-700 space-y-2">
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-600" />
-                Đánh giá ca bệnh
+                ��nh gi� ca b?nh
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-600" />
-                Phản hồi chuyên môn
+                Ph?n h?i chuy�n m�n
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-600" />
-                Xem báo cáo
+                Xem b�o c�o
               </li>
             </ul>
           </CardContent>
@@ -153,23 +153,23 @@ export default function ManagerPermissions() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-purple-600" />
-              Quản lý
+              Qu?n l�
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600 mb-3">Quyền quản trị:</p>
+            <p className="text-sm text-gray-600 mb-3">Quy?n qu?n tr?:</p>
             <ul className="text-sm text-gray-700 space-y-2">
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-600" />
-                Toàn quyền hệ thống
+                To�n quy?n h? th?ng
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-600" />
-                Quản lý người dùng
+                Qu?n l� ngu?i d�ng
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-600" />
-                Cấu hình hệ thống
+                C?u h�nh h? th?ng
               </li>
             </ul>
           </CardContent>
