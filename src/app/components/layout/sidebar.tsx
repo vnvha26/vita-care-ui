@@ -42,8 +42,7 @@ const patientNav: NavItem[] = [
 
 const doctorNav: NavItem[] = [
   { title: "Trang chủ", href: "/doctor", icon: LayoutDashboard },
-  { title: "Lịch khám", href: "/doctor/examination", icon: Calendar },
-  { title: "Quản lý lịch hẹn", href: "/doctor/patients", icon: ClipboardList },
+  { title: "Quản lý lịch khám", href: "/doctor/examination", icon: Calendar },
   { title: "Tin nhắn", href: "/doctor/chat", icon: MessageCircle },
   { title: "Hồ sơ bệnh án", href: "/doctor/patients", icon: FileText },
   { title: "Tra cứu thuốc", href: "/doctor/feedback", icon: Pill },

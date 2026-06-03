@@ -1,8 +1,7 @@
-import { Bell, Search } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
-import { Input } from "../ui/input";
 
 type Role = "doctor" | "expert" | "manager" | "patient";
 
@@ -14,13 +13,6 @@ interface TopbarProps {
 }
 
 const HOME_LABEL = "Trang ch\u1ee7";
-
-const searchPlaceholders: Record<Role, string> = {
-  patient: "T\u00ecm d\u1ecbch b\u1ec7nh, b\u00e1c s\u0129, l\u1ecbch h\u1eb9n...",
-  doctor: "T\u00ecm b\u1ec7nh nh\u00e2n, thu\u1ed1c, l\u1ecbch kh\u00e1m...",
-  manager: "T\u00ecm b\u1ec7nh nh\u00e2n, b\u00e1c s\u0129, b\u00e1o c\u00e1o...",
-  expert: "T\u00ecm ca \u0111\u00e1nh gi\u00e1, b\u1ec7nh nh\u00e2n, h\u1ed9i tho\u1ea1i, t\u00e0i li\u1ec7u...",
-};
 
 const roleHome: Record<Role, string> = {
   patient: "/patient/dashboard",
@@ -44,7 +36,8 @@ const patientPageLabels: Record<string, string> = {
 const doctorPageLabels: Record<string, string> = {
   "/doctor": HOME_LABEL,
   "/doctor/patients": "H\u1ed3 s\u01a1 b\u1ec7nh nh\u00e2n",
-  "/doctor/examination": "L\u1ecbch kh\u00e1m",
+  "/doctor/examination": "Qu\u1ea3n l\u00fd l\u1ecbch kh\u00e1m",
+  "/doctor/appointments": "Qu\u1ea3n l\u00fd l\u1ecbch h\u1eb9n",
   "/doctor/chat": "Tin nh\u1eafn",
   "/doctor/feedback": "Tra c\u1ee9u thu\u1ed1c",
   "/doctor/profile": "H\u1ed3 s\u01a1 b\u00e1c s\u0129",
@@ -95,7 +88,6 @@ function getCurrentPageLabel(role: Role, pathname: string) {
 export function Topbar({ role, userName, userRole, notifications = 0 }: TopbarProps) {
   const location = useLocation();
   const currentPageLabel = getCurrentPageLabel(role, location.pathname);
-  const showSearch = role !== "patient";
   const initials = userName
     .split(" ")
     .map((name) => name[0])
@@ -113,16 +105,6 @@ export function Topbar({ role, userName, userRole, notifications = 0 }: TopbarPr
       </div>
 
       <div className="flex items-center gap-3">
-        {showSearch && (
-          <div className="relative hidden w-[min(430px,36vw)] md:block">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
-            <Input
-              placeholder={searchPlaceholders[role]}
-              className="h-11 rounded-full border-0 bg-[#F2F7FB] pl-11 text-sm text-[#1E293B] placeholder:text-[#94A3B8] focus-visible:ring-[#2F80ED]"
-            />
-          </div>
-        )}
-
         <Link
           to={role === "patient" ? "/patient/notifications" : roleHome[role]}
           className="relative flex h-11 w-11 items-center justify-center rounded-full bg-[#F2F7FB] text-[#64748B] hover:bg-[#EAF3FF] hover:text-[#1C64D1]"
