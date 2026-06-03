@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Archive, Inbox, MessageCircle, Search, Send, UserRound } from "lucide-react";
+import { Archive, BellRing, Inbox, MessageCircle, Search, Send, Sparkles, UserRound } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 import { cn } from "../../lib/utils";
 
@@ -78,6 +78,21 @@ const initialConversations: Conversation[] = [
   },
 ];
 
+const paidConsultationConversation: Conversation = {
+  id: "consult-paid-001",
+  name: "Nguyễn Minh Anh",
+  patientCode: "P009",
+  role: "Tư vấn chuyên sâu",
+  preview: "Bệnh nhân đã chuyển từ Chatbot AI sang yêu cầu kết nối trực tiếp.",
+  status: "unread",
+  lastAt: "Vừa xong",
+  messages: [
+    { sender: "contact", text: "Chào bác sĩ, em vừa thanh toán tư vấn chuyên sâu. Em hay đau vùng thượng vị và bị ợ chua nhiều sau bữa tối.", time: "Vừa xong" },
+    { sender: "doctor", text: "Chào bạn, bác sĩ đã nhận phiên tư vấn. Bạn cho bác sĩ biết triệu chứng kéo dài bao lâu và đã dùng thuốc gì chưa?", time: "Vừa xong" },
+    { sender: "contact", text: "Khoảng một tuần, em mới dùng thuốc dạ dày mua ngoài nhưng chưa đỡ hẳn ạ.", time: "Vừa xong" },
+  ],
+};
+
 const filterLabels: Record<ConversationFilter, string> = {
   all: "Tất cả",
   unread: "Chưa xem",
@@ -89,6 +104,7 @@ export default function DoctorChat() {
   const [conversations, setConversations] = useState(initialConversations);
   const [selectedId, setSelectedId] = useState(initialConversations[0].id);
   const [draft, setDraft] = useState("");
+  const [consultAccepted, setConsultAccepted] = useState(false);
 
   const filteredConversations = useMemo(() => {
     if (filter === "all") return conversations.filter((item) => item.status !== "archived");
@@ -131,12 +147,41 @@ export default function DoctorChat() {
     );
   };
 
+  const acceptPaidConsultation = () => {
+    setConsultAccepted(true);
+    setFilter("all");
+    setConversations((current) => {
+      if (current.some((item) => item.id === paidConsultationConversation.id)) return current;
+      return [paidConsultationConversation, ...current];
+    });
+    setSelectedId(paidConsultationConversation.id);
+  };
+
   return (
     <div>
       <PageHeader
         title="Tin nhắn"
         description="Trao đổi với bệnh nhân, chuyên gia và đồng nghiệp theo từng cuộc trò chuyện."
       />
+
+      {!consultAccepted && (
+        <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-[#CFE3FF] bg-[#EAF3FF] p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2D4A86] text-white">
+              <BellRing className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-extrabold text-[#1E293B]">Yêu cầu Tư vấn chuyên sâu (Trả phí)</h2>
+              <p className="mt-1 text-sm font-semibold leading-6 text-[#64748B]">
+                Bệnh nhân Nguyễn Minh Anh đã chuyển từ Chatbot AI sang yêu cầu kết nối trực tiếp bác sĩ.
+              </p>
+            </div>
+          </div>
+          <ActionButton icon={<Sparkles className="h-4 w-4" />} onClick={acceptPaidConsultation}>
+            Chấp nhận tư vấn
+          </ActionButton>
+        </div>
+      )}
 
       <div className="grid min-h-[640px] gap-6 xl:grid-cols-[380px_1fr]">
         <SectionCard title="Cuộc trò chuyện" className="overflow-hidden">
