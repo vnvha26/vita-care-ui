@@ -53,7 +53,7 @@ const managerNav: NavItem[] = [
   { title: "Trang chủ", href: "/manager", icon: LayoutDashboard },
   { title: "Thông tin phòng khám", href: "/manager/clinic-profile", icon: Users },
   { title: "Quản lý bác sĩ", href: "/manager/doctors", icon: Stethoscope },
-  { title: "Messenger", href: "/manager/chat", icon: MessageCircle },
+  { title: "Tin nhắn", href: "/manager/chat", icon: MessageCircle },
   { title: "Tiếp nhận lịch hẹn", href: "/manager/appointments", icon: Calendar },
   { title: "Giờ làm việc", href: "/manager/schedule", icon: Bell },
   { title: "Quản lý dữ liệu AI", href: "/manager/ai-data", icon: Database },
