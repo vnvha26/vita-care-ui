@@ -60,8 +60,7 @@ const appointments: Appointment[] = [
 ];
 
 export default function PatientAppointments() {
-  const [selectedId, setSelectedId] = useState(appointments[0].id);
-  const selectedAppointment = appointments.find((appointment) => appointment.id === selectedId) ?? appointments[0];
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
     <div className="space-y-6">
@@ -80,50 +79,58 @@ export default function PatientAppointments() {
           {appointments.map((appointment) => (
             <div
               key={appointment.id}
-              className={`flex flex-col gap-4 rounded-[18px] border p-4 transition sm:flex-row sm:items-center ${
-                selectedId === appointment.id ? "border-[#CFE3FF] bg-[#EAF3FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F2F7FB]"
+              className={`rounded-[18px] border p-4 transition ${
+                expandedId === appointment.id ? "border-[#CFE3FF] bg-[#EAF3FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F2F7FB]"
               }`}
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[#2F80ED] ring-1 ring-[#CFE3FF]">
-                <CalendarClock className="h-5 w-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-extrabold text-[#1E293B]">{appointment.title}</h3>
-                  <StatusBadge tone={getStatusTone(appointment.status)}>{appointment.status}</StatusBadge>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[#2F80ED] ring-1 ring-[#CFE3FF]">
+                  <CalendarClock className="h-5 w-5" />
                 </div>
-                <p className="mt-1 text-sm font-bold text-[#2D4A86]">
-                  {appointment.time} · {appointment.date} · {appointment.doctor}
-                </p>
-                <p className="mt-1 text-sm leading-6 text-[#64748B]">{appointment.reason}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-extrabold text-[#1E293B]">{appointment.title}</h3>
+                    <StatusBadge tone={getStatusTone(appointment.status)}>{appointment.status}</StatusBadge>
+                  </div>
+                  <p className="mt-1 text-sm font-bold text-[#2D4A86]">
+                    {appointment.time} · {appointment.date} · {appointment.doctor}
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-[#64748B]">{appointment.reason}</p>
+                </div>
+                <ActionButton variant="secondary" onClick={() => setExpandedId((current) => (current === appointment.id ? null : appointment.id))}>
+                  {expandedId === appointment.id ? "Ẩn chi tiết" : "Chi tiết"}
+                </ActionButton>
               </div>
-              <ActionButton variant="secondary" onClick={() => setSelectedId(appointment.id)}>
-                Chi tiết
-              </ActionButton>
+
+              {expandedId === appointment.id && <AppointmentDetail appointment={appointment} />}
             </div>
           ))}
         </div>
       </SectionCard>
+    </div>
+  );
+}
 
-      <SectionCard title="Thông tin chi tiết lịch khám">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <Info icon={<Clock className="h-5 w-5" />} label="Thời gian" value={`${selectedAppointment.time} · ${selectedAppointment.date}`} />
-          <Info icon={<Stethoscope className="h-5 w-5" />} label="Bác sĩ" value={selectedAppointment.doctor} />
-          <Info icon={<UserRound className="h-5 w-5" />} label="Chuyên khoa" value={selectedAppointment.specialty} />
-          <Info icon={<MapPin className="h-5 w-5" />} label="Địa điểm" value={selectedAppointment.clinic} />
-        </div>
+function AppointmentDetail({ appointment }: { appointment: Appointment }) {
+  return (
+    <div className="mt-4 rounded-2xl border border-[#CFE3FF] bg-white p-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Info icon={<Clock className="h-5 w-5" />} label="Thời gian" value={`${appointment.time} · ${appointment.date}`} />
+        <Info icon={<Stethoscope className="h-5 w-5" />} label="Bác sĩ" value={appointment.doctor} />
+        <Info icon={<UserRound className="h-5 w-5" />} label="Chuyên khoa" value={appointment.specialty} />
+        <Info icon={<MapPin className="h-5 w-5" />} label="Địa điểm" value={appointment.clinic} />
+      </div>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-[#E2E8F0] bg-[#F7FAFC] p-4">
-            <p className="text-sm font-extrabold text-[#1E293B]">Địa chỉ</p>
-            <p className="mt-2 text-sm font-medium leading-6 text-[#64748B]">{selectedAppointment.address}</p>
-          </div>
-          <div className="rounded-2xl border border-[#CFE3FF] bg-white p-4">
-            <p className="text-sm font-extrabold text-[#1E293B]">Lưu ý trước khám</p>
-            <p className="mt-2 text-sm font-medium leading-6 text-[#64748B]">{selectedAppointment.note}</p>
-          </div>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-[#E2E8F0] bg-[#F7FAFC] p-4">
+          <p className="text-sm font-extrabold text-[#1E293B]">Địa chỉ</p>
+          <p className="mt-2 text-sm font-medium leading-6 text-[#64748B]">{appointment.address}</p>
         </div>
-      </SectionCard>
+        <div className="rounded-2xl border border-[#CFE3FF] bg-white p-4">
+          <p className="text-sm font-extrabold text-[#1E293B]">Lưu ý trước khám</p>
+          <p className="mt-2 text-sm font-medium leading-6 text-[#64748B]">{appointment.note}</p>
+        </div>
+      </div>
     </div>
   );
 }

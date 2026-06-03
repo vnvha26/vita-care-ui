@@ -54,13 +54,6 @@ const loginRoles: Record<LoginRole, { label: string; name: string; email: string
   expert: { label: "Chuyên gia", name: "Nguyễn Văn D", email: "expert@vitacare.vn", route: "/expert" },
 };
 
-const roleCards = [
-  ["Bệnh nhân", "Theo dõi lịch khám, hồ sơ và dữ liệu sức khỏe.", "/patient/dashboard", HeartPulse],
-  ["Bác sĩ", "Quản lý lịch khám, tin nhắn và hồ sơ bệnh án.", "/doctor", Stethoscope],
-  ["Quản lý phòng khám", "Điều phối bác sĩ, lịch hẹn và báo cáo vận hành.", "/manager", CalendarCheck],
-  ["Chuyên gia y tế", "Kiểm duyệt dữ liệu y tế và chất lượng phản hồi AI.", "/expert", ShieldCheck],
-] as const;
-
 function LoginModal({ onClose }: { onClose: () => void }) {
   const [role, setRole] = useState<LoginRole>("patient");
   const current = loginRoles[role];
@@ -144,10 +137,9 @@ function LandingPage() {
           </div>
           <span className="text-lg font-extrabold">{BRAND_NAME}</span>
         </Link>
-        <nav className="hidden items-center gap-8 text-sm font-bold text-[#64748B] md:flex">
+        <nav className="hidden">
           <a href="#intro">Giới thiệu</a>
           <a href="#services">Dịch vụ</a>
-          <a href="#roles">Đội ngũ bác sĩ</a>
           <Link to="/guest/chat">Trải nghiệm AI</Link>
         </nav>
         <div className="flex items-center gap-2">
@@ -211,22 +203,6 @@ function LandingPage() {
               <div className="text-4xl font-extrabold text-[#CFE3FF]">{value}</div>
               <div className="mt-2 text-sm font-semibold text-white/75">{label}</div>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section id="roles" className="mx-auto max-w-7xl px-6 py-14">
-        <h2 className="text-3xl font-extrabold">Đăng nhập theo vai trò</h2>
-        <p className="mt-2 text-sm text-[#64748B]">Khách vãng lai dùng chatbot tại /guest/chat; các role dưới đây dùng dashboard riêng.</p>
-        <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {roleCards.map(([title, description, route, Icon]) => (
-            <Link key={route} to={route} className="rounded-[24px] border border-[#E2E8F0] bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] transition hover:-translate-y-1 hover:border-[#CFE3FF]">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF3FF] text-[#2F80ED]">
-                <Icon className="h-6 w-6" />
-              </div>
-              <h3 className="mt-5 text-lg font-extrabold">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-[#64748B]">{description}</p>
-            </Link>
           ))}
         </div>
       </section>

@@ -98,7 +98,7 @@ export function Sidebar({ role, userName }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "relative z-40 flex min-h-screen shrink-0 flex-col border-r border-[#E2E8F0] bg-white/90 px-4 py-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)] backdrop-blur transition-all duration-300",
+        "sticky top-0 z-40 flex h-screen shrink-0 flex-col border-r border-[#E2E8F0] bg-white/90 px-3 py-4 shadow-[0_14px_40px_rgba(15,23,42,0.04)] backdrop-blur transition-all duration-300",
         isCollapsed ? "w-20" : "w-[260px]"
       )}
     >
@@ -111,9 +111,9 @@ export function Sidebar({ role, userName }: SidebarProps) {
         {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
       </button>
 
-      <Link to="/" className={cn("flex h-16 items-center gap-3", isCollapsed ? "justify-center" : "px-2")}>
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF3FF] text-[#2F80ED] shadow-sm">
-          <ShieldCheck className="h-7 w-7" />
+      <Link to="/" className={cn("flex h-14 items-center gap-3", isCollapsed ? "justify-center" : "px-2")}>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#EAF3FF] text-[#2F80ED] shadow-sm">
+          <ShieldCheck className="h-6 w-6" />
         </div>
         {!isCollapsed && (
           <div className="min-w-0">
@@ -123,7 +123,7 @@ export function Sidebar({ role, userName }: SidebarProps) {
         )}
       </Link>
 
-      <nav className="mt-8 flex-1 space-y-2 overflow-y-auto overflow-x-hidden">
+      <nav className="mt-5 min-h-0 flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden pr-1">
         {navItems.map((item) => {
           const isActive =
             location.pathname === item.href || (item.href !== `/${role}` && location.pathname.startsWith(`${item.href}/`));
@@ -135,7 +135,7 @@ export function Sidebar({ role, userName }: SidebarProps) {
               to={item.href}
               title={isCollapsed ? item.title : undefined}
               className={cn(
-                "flex h-[46px] items-center gap-3 rounded-[14px] text-sm font-semibold transition-colors",
+                "flex h-10 items-center gap-3 rounded-[14px] text-sm font-semibold transition-colors",
                 isCollapsed ? "justify-center px-0" : "px-[14px]",
                 isActive
                   ? "bg-gradient-to-r from-[#EAF3FF] to-[#E8FFF9] text-[#1C64D1] shadow-sm"
@@ -150,9 +150,9 @@ export function Sidebar({ role, userName }: SidebarProps) {
       </nav>
 
       {!isCollapsed && (
-        <div className="border-t border-[#E2E8F0] pt-4">
-          <div className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F2F7FB] p-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EAF3FF] text-sm font-bold text-[#2F80ED]">
+        <div className="border-t border-[#E2E8F0] pt-3">
+          <div className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F2F7FB] p-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EAF3FF] text-sm font-bold text-[#2F80ED]">
               {userName
                 .split(" ")
                 .slice(-1)[0]
@@ -166,7 +166,7 @@ export function Sidebar({ role, userName }: SidebarProps) {
           </div>
           <Link
             to="/"
-            className="mt-3 flex h-11 items-center gap-2 rounded-[14px] px-3 text-sm font-bold text-[#64748B] hover:bg-[#F2F7FB] hover:text-[#1E293B]"
+            className="mt-2 flex h-10 items-center gap-2 rounded-[14px] px-3 text-sm font-bold text-[#64748B] hover:bg-[#F2F7FB] hover:text-[#1E293B]"
           >
             <LogOut className="h-4 w-4" />
             Đăng xuất

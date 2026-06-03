@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, CalendarPlus, Mic, Paperclip, Send, Stethoscope } from "lucide-react";
+import { Bot, CalendarPlus, FileText, FolderOpen, Image, Mic, Paperclip, Send, Stethoscope } from "lucide-react";
 import { Link, useSearchParams } from "react-router";
 
 type Mode = "ai" | "doctor";
@@ -19,10 +19,64 @@ type ChatSession = {
 };
 
 const quickSymptoms = ["Sốt", "Đau đầu", "Buồn nôn", "Chóng mặt", "Đau họng", "Ho"];
+const attachmentOptions = [
+  { label: "Ảnh", icon: Image },
+  { label: "Tệp", icon: FileText },
+  { label: "Thư mục", icon: FolderOpen },
+];
 
-const aiHistories = [
+const legacyAiHistories = [
   ["AI Health Assistant", "Phân tích ho, đau họng và sốt nhẹ", "Hôm nay"],
   ["AI Health Assistant", "Tư vấn đau bụng sau ăn", "20/05/2026"],
+];
+
+const initialAiSessions: ChatSession[] = [
+  {
+    id: "ai-current",
+    name: "AI Health Assistant",
+    topic: "Phi\u00ean t\u01b0 v\u1ea5n nhanh v\u1edbi tr\u1ee3 l\u00fd AI",
+    date: "H\u00f4m nay",
+    messages: [
+      {
+        role: "bot",
+        content: "Ch\u00e0o Nguy\u1ec5n V\u0103n A, t\u00f4i l\u00e0 tr\u1ee3 l\u00fd s\u1ee9c kh\u1ecfe AI. B\u1ea1n \u0111ang g\u1eb7p v\u1ea5n \u0111\u1ec1 g\u00ec v\u1ec1 s\u1ee9c kh\u1ecfe?",
+      },
+    ],
+  },
+  {
+    id: "ai-old-1",
+    name: "AI Health Assistant",
+    topic: "Ph\u00e2n t\u00edch ho, \u0111au h\u1ecdng v\u00e0 s\u1ed1t nh\u1eb9",
+    date: "25/05/2026",
+    messages: [
+      { role: "user", content: "T\u00f4i b\u1ecb ho khan, \u0111au h\u1ecdng v\u00e0 s\u1ed1t nh\u1eb9 t\u1eeb h\u00f4m qua." },
+      {
+        role: "bot",
+        content: "Tri\u1ec7u ch\u1ee9ng c\u00f3 th\u1ec3 li\u00ean quan vi\u00eam h\u1ecdng ho\u1eb7c nhi\u1ec5m virus nh\u1eb9. B\u1ea1n n\u00ean u\u1ed1ng nhi\u1ec1u n\u01b0\u1edbc, ngh\u1ec9 ng\u01a1i v\u00e0 theo d\u00f5i nhi\u1ec7t \u0111\u1ed9.",
+      },
+      {
+        role: "bot",
+        content: "N\u1ebfu s\u1ed1t tr\u00ean 38.5\u00b0C, kh\u00f3 th\u1edf, \u0111au ng\u1ef1c ho\u1eb7c tri\u1ec7u ch\u1ee9ng k\u00e9o d\u00e0i qu\u00e1 3 ng\u00e0y, b\u1ea1n n\u00ean \u0111\u1eb7t l\u1ecbch kh\u00e1m.",
+      },
+    ],
+  },
+  {
+    id: "ai-old-2",
+    name: "AI Health Assistant",
+    topic: "T\u01b0 v\u1ea5n \u0111au b\u1ee5ng sau \u0103n",
+    date: legacyAiHistories[1][2],
+    messages: [
+      { role: "user", content: "Sau khi \u0103n t\u1ed1i t\u00f4i hay \u0111au \u00e2m \u1ec9 v\u00f9ng b\u1ee5ng tr\u00ean v\u00e0 h\u01a1i bu\u1ed3n n\u00f4n." },
+      {
+        role: "bot",
+        content: "B\u1ea1n n\u00ean theo d\u00f5i m\u00f3n \u0103n g\u00e2y kh\u00f3 ch\u1ecbu, tr\u00e1nh \u0103n qu\u00e1 no v\u00e0 h\u1ea1n ch\u1ebf \u0111\u1ed3 cay, chua, nhi\u1ec1u d\u1ea7u m\u1ee1.",
+      },
+      {
+        role: "bot",
+        content: "N\u1ebfu \u0111au t\u0103ng, n\u00f4n nhi\u1ec1u, \u0111i ngo\u00e0i ph\u00e2n \u0111en ho\u1eb7c s\u00fat c\u00e2n, b\u1ea1n c\u1ea7n kh\u00e1m tr\u1ef1c ti\u1ebfp s\u1edbm.",
+      },
+    ],
+  },
 ];
 
 const initialDoctorSessions: ChatSession[] = [
@@ -85,6 +139,9 @@ export default function PatientConsultation() {
   const [mode, setMode] = useState<Mode>(() => (searchParams.get("mode") === "doctor" ? "doctor" : "ai"));
   const [aiInput, setAiInput] = useState("");
   const [doctorInput, setDoctorInput] = useState("");
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [selectedAiSessionId, setSelectedAiSessionId] = useState(initialAiSessions[0].id);
+  const [aiSessions, setAiSessions] = useState<ChatSession[]>(initialAiSessions);
   const [selectedDoctorSessionId, setSelectedDoctorSessionId] = useState(initialDoctorSessions[0].id);
   const [doctorSessions, setDoctorSessions] = useState<ChatSession[]>(initialDoctorSessions);
   const [aiMessages, setAiMessages] = useState<Message[]>([
@@ -94,18 +151,35 @@ export default function PatientConsultation() {
     },
   ]);
 
+  const selectedAiSession = aiSessions.find((session) => session.id === selectedAiSessionId) ?? aiSessions[0];
   const selectedDoctorSession = doctorSessions.find((session) => session.id === selectedDoctorSessionId) ?? doctorSessions[0];
-  const currentMessages = mode === "ai" ? aiMessages : selectedDoctorSession.messages;
+  const currentMessages = mode === "ai" ? selectedAiSession.messages : selectedDoctorSession.messages;
   const currentInput = mode === "ai" ? aiInput : doctorInput;
   const setCurrentInput = mode === "ai" ? setAiInput : setDoctorInput;
 
   const sendAiMessage = (value = aiInput) => {
     if (!value.trim()) return;
 
-    setAiMessages((previous) => [...previous, { role: "user", content: value }]);
+    setAiSessions((sessions) =>
+      sessions.map((session) =>
+        session.id === selectedAiSessionId ? { ...session, messages: [...session.messages, { role: "user", content: value }] } : session
+      )
+    );
     setAiInput("");
+    const aiAutoReply =
+      "T\u00f4i \u0111\u00e3 ghi nh\u1eadn tri\u1ec7u ch\u1ee9ng. B\u1ea1n c\u00f3 th\u1ec3 cho bi\u1ebft tri\u1ec7u ch\u1ee9ng b\u1eaft \u0111\u1ea7u t\u1eeb khi n\u00e0o, m\u1ee9c \u0111\u1ed9 n\u1eb7ng nh\u1eb9 v\u00e0 c\u00f3 s\u1ed1t cao, kh\u00f3 th\u1edf ho\u1eb7c \u0111au ng\u1ef1c kh\u00f4ng?";
 
     setTimeout(() => {
+      setAiSessions((sessions) =>
+        sessions.map((session) =>
+          session.id === selectedAiSessionId
+            ? {
+                ...session,
+                messages: [...session.messages, { role: "bot", content: aiAutoReply }],
+              }
+            : session
+        )
+      );
       setAiMessages((previous) => [
         ...previous,
         {
@@ -172,7 +246,7 @@ export default function PatientConsultation() {
                 {mode === "ai" ? "Tư vấn sức khỏe AI" : selectedDoctorSession.name}
               </h1>
               <p className="mt-1 text-sm text-[#64748B]">
-                {mode === "ai" ? "Phiên tư vấn nhanh với trợ lý AI" : selectedDoctorSession.topic}
+                {mode === "ai" ? selectedAiSession.topic : selectedDoctorSession.topic}
               </p>
             </div>
           </div>
@@ -211,9 +285,30 @@ export default function PatientConsultation() {
           )}
 
           <div className="flex items-center gap-3">
-            <button className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2F7FB] text-[#64748B]">
-              <Paperclip className="h-5 w-5" />
-            </button>
+            <div className="relative">
+              {showAttachMenu && (
+                <div className="absolute bottom-14 left-0 z-20 w-44 rounded-2xl border border-[#E2E8F0] bg-white p-2 shadow-[0_14px_40px_rgba(15,23,42,0.12)]">
+                  {attachmentOptions.map(({ label, icon: Icon }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setShowAttachMenu(false)}
+                      className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-bold text-[#1E293B] hover:bg-[#F2F7FB]"
+                    >
+                      <Icon className="h-4 w-4 text-[#2F80ED]" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowAttachMenu((current) => !current)}
+                className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2F7FB] text-[#64748B] hover:bg-[#EAF3FF] hover:text-[#2F80ED]"
+              >
+                <Paperclip className="h-5 w-5" />
+              </button>
+            </div>
             <input
               value={currentInput}
               onChange={(event) => setCurrentInput(event.target.value)}
@@ -243,12 +338,18 @@ export default function PatientConsultation() {
             </h2>
             <div className="mt-4 space-y-3">
               {mode === "ai"
-                ? aiHistories.map(([name, topic, date]) => (
-                    <div key={`${name}-${date}`} className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-                      <p className="font-extrabold text-[#1E293B]">{name}</p>
-                      <p className="mt-1 text-sm font-medium leading-6 text-[#64748B]">{topic}</p>
-                      <p className="mt-2 text-xs font-bold text-[#94A3B8]">{date}</p>
-                    </div>
+                ? aiSessions.map((session) => (
+                    <button
+                      key={session.id}
+                      type="button"
+                      onClick={() => setSelectedAiSessionId(session.id)}
+                      className={`block w-full rounded-2xl border p-4 text-left transition ${
+                        selectedAiSessionId === session.id ? "border-[#CFE3FF] bg-[#EAF3FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F7FAFC]"
+                      }`}
+                    >
+                      <p className="text-sm font-extrabold leading-6 text-[#1E293B]">{session.topic}</p>
+                      <p className="mt-2 text-xs font-bold text-[#94A3B8]">{session.date}</p>
+                    </button>
                   ))
                 : doctorSessions.map((session) => (
                     <button
@@ -274,7 +375,7 @@ export default function PatientConsultation() {
             <div className="rounded-2xl bg-[#F2F7FB] p-4">
               <div className="font-bold text-[#1E293B]">Triệu chứng ghi nhận</div>
               <div className="mt-1 text-[#64748B]">
-                {(mode === "ai" ? aiMessages : selectedDoctorSession.messages).some((message) => message.role === "user") ? "Đã có mô tả ban đầu" : "Chưa có triệu chứng"}
+                {(mode === "ai" ? selectedAiSession.messages : selectedDoctorSession.messages).some((message) => message.role === "user") ? "Đã có mô tả ban đầu" : "Chưa có triệu chứng"}
               </div>
             </div>
             <div className="rounded-2xl bg-[#FFF7E8] p-4 text-[#C77805]">
