@@ -13,9 +13,9 @@ export function Layout({ role, userName, userRole }: LayoutProps) {
     <div className="flex min-h-screen bg-[#F7FAFC] font-sans text-[#1E293B]">
       <Sidebar role={role} userName={userName} />
 
-      <div className="flex min-w-0 flex-1 flex-col p-5">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden p-5">
         <Topbar role={role} userName={userName} userRole={userRole} notifications={5} />
-        <main className="min-h-0 flex-1 overflow-y-auto pt-5">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden pt-5">
           <Outlet />
         </main>
       </div>
