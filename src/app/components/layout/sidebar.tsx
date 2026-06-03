@@ -51,10 +51,13 @@ const doctorNav: NavItem[] = [
 
 const managerNav: NavItem[] = [
   { title: "Trang chủ", href: "/manager", icon: LayoutDashboard },
-  { title: "Quản lý", href: "/manager/clinic-profile", icon: Users },
-  { title: "Điều phối bác sĩ", href: "/manager/doctors", icon: Stethoscope },
-  { title: "Nhắc lịch", href: "/manager/schedule", icon: Bell },
-  { title: "Báo cáo, phân tích", href: "/manager/reports", icon: BarChart3 },
+  { title: "Thông tin phòng khám", href: "/manager/clinic-profile", icon: Users },
+  { title: "Quản lý bác sĩ", href: "/manager/doctors", icon: Stethoscope },
+  { title: "Messenger", href: "/manager/chat", icon: MessageCircle },
+  { title: "Tiếp nhận lịch hẹn", href: "/manager/appointments", icon: Calendar },
+  { title: "Giờ làm việc", href: "/manager/schedule", icon: Bell },
+  { title: "Quản lý dữ liệu AI", href: "/manager/ai-data", icon: Database },
+  { title: "Báo cáo tổng hợp", href: "/manager/reports", icon: BarChart3 },
 ];
 
 const expertNav: NavItem[] = [
