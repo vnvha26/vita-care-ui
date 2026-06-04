@@ -52,7 +52,9 @@ function RoleSwitcher() {
       <div className="space-y-6 text-center">
         <div>
           <h1 className="text-4xl font-bold text-gray-900">NHÓM 4</h1>
-          <p className="mt-2 text-gray-500">Hệ thống quản lý phòng khám đa vai trò</p>
+          <p className="text-gray-500 mt-2">
+            Hệ thống quản lý phòng khám đa vai trò
+          </p>
         </div>
 
         <div className="grid max-w-7xl gap-4 md:grid-cols-5">
@@ -60,9 +62,11 @@ function RoleSwitcher() {
             href="/consultant/login"
             className="block rounded-xl border-2 border-gray-200 bg-white p-8 transition-all hover:border-pink-500 hover:shadow-lg"
           >
-            <div className="mb-4 text-5xl">👤</div>
-            <h2 className="text-xl font-semibold text-gray-900">Người cần tư vấn</h2>
-            <p className="mt-2 text-sm text-gray-500">Tư vấn sức khỏe ban đầu</p>
+            <div className="text-5xl mb-4">👤</div>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Người cần tư vấn
+            </h2>
+            <p className="text-sm text-gray-500 mt-2">Chưa đăng nhập</p>
           </a>
 
           <a
@@ -148,20 +152,13 @@ export const router = createBrowserRouter([
     element: <PatientRegister />,
   },
   {
-    path: "/patient/doctors",
-    element: <PatientDoctors />,
-  },
-  {
     path: "/patient",
     element: (
-      <Layout
-        role="patient"
-        userName="Nguyễn Văn An"
-        userRole="Bệnh nhân"
-      />
+      <Layout role="patient" userName="Nguyễn Văn An" userRole="Bệnh nhân" />
     ),
     children: [
       { path: "dashboard", element: <PatientDashboard /> },
+      { path: "doctors", element: <PatientDoctors /> },
       { path: "appointments", element: <PatientAppointments /> },
       { path: "book", element: <PatientBook /> },
       { path: "medical-records", element: <PatientMedicalRecords /> },
@@ -173,11 +170,7 @@ export const router = createBrowserRouter([
   {
     path: "/doctor",
     element: (
-      <Layout
-        role="doctor"
-        userName="BS. Nguyễn Văn A"
-        userRole="Bác sĩ"
-      />
+      <Layout role="doctor" userName="BS. Nguyễn Văn A" userRole="Bác sĩ" />
     ),
     children: [
       { index: true, element: <DoctorDashboard /> },
