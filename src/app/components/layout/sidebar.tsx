@@ -21,6 +21,7 @@ import {
   Stethoscope,
   UserRound,
   Users,
+  Video,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -43,10 +44,12 @@ const patientNav: NavItem[] = [
 
 const doctorNav: NavItem[] = [
   { title: "Trang chủ", href: "/doctor", icon: LayoutDashboard },
-  { title: "Quản lý lịch khám", href: "/doctor/examination", icon: Calendar },
+  { title: "Quản lý lịch hẹn", href: "/doctor/appointments", icon: Calendar },
+  { title: "Dữ liệu lâm sàng", href: "/doctor/patients", icon: ClipboardList },
+  { title: "Khám bệnh & Kê đơn", href: "/doctor/examination", icon: Stethoscope },
+  { title: "Giám sát & Điều phối", href: "/doctor/operational", icon: BarChart3 },
+  { title: "Phòng khám trực tuyến", href: "/doctor/telemedicine", icon: Video },
   { title: "Tin nhắn", href: "/doctor/chat", icon: MessageCircle },
-  { title: "Hồ sơ bệnh án", href: "/doctor/patients", icon: FileText },
-  { title: "Tra cứu thuốc", href: "/doctor/feedback", icon: Pill },
 ];
 
 const managerNav: NavItem[] = [
