@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { ClipboardList, FileText, FlaskConical, Pill, Stethoscope } from "lucide-react";
+import { ClipboardList, FileText, FlaskConical, MessageCircle, Pill, Stethoscope } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 
 type MedicalRecord = {
@@ -15,6 +15,34 @@ type MedicalRecord = {
   tests: { name: string; result: string }[];
   advice: string;
 };
+
+type ConsultationSession = {
+  id: string;
+  doctor: string;
+  specialty: string;
+  date: string;
+  price: string;
+  summary: string;
+};
+
+const defaultConsultations: ConsultationSession[] = [
+  {
+    id: "consult-demo-1",
+    doctor: "BS. Trần Thị B",
+    specialty: "Tiêu hóa",
+    date: "20/05/2026",
+    price: "220.000 VND",
+    summary: "Tư vấn chuyên sâu về đau dạ dày, ợ chua và chế độ ăn.",
+  },
+  {
+    id: "consult-demo-2",
+    doctor: "BS. Nguyễn Văn A",
+    specialty: "Tim mạch",
+    date: "12/05/2026",
+    price: "250.000 VND",
+    summary: "Tư vấn theo dõi huyết áp, nhịp tim và dấu hiệu cần đi khám.",
+  },
+];
 
 const records: MedicalRecord[] = [
   {
@@ -70,6 +98,14 @@ const records: MedicalRecord[] = [
 
 export default function PatientMedicalRecords() {
   const [selectedId, setSelectedId] = useState(records[0].id);
+  const [consultations] = useState<ConsultationSession[]>(() => {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem("patient-consultation-history") ?? "[]") as ConsultationSession[];
+      return [...saved, ...defaultConsultations];
+    } catch {
+      return defaultConsultations;
+    }
+  });
   const selectedRecord = records.find((record) => record.id === selectedId) ?? records[0];
 
   return (
@@ -104,6 +140,30 @@ export default function PatientMedicalRecords() {
               <ActionButton variant="secondary" onClick={() => setSelectedId(record.id)}>
                 Chi tiết
               </ActionButton>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Lịch sử tư vấn">
+        <div className="grid gap-3 md:grid-cols-2">
+          {consultations.map((session) => (
+            <div key={session.id} className="rounded-[18px] border border-[#E2E8F0] bg-white p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF3FF] text-[#2F80ED]">
+                  <MessageCircle className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-extrabold text-[#1E293B]">{session.doctor}</h3>
+                    <StatusBadge tone="violet">Tư vấn trả phí</StatusBadge>
+                  </div>
+                  <p className="mt-1 text-sm font-bold text-[#2D4A86]">
+                    {session.specialty} · {session.date} · {session.price}
+                  </p>
+                  <p className="mt-2 text-sm font-medium leading-6 text-[#64748B]">{session.summary}</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
