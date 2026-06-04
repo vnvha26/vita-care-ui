@@ -48,6 +48,7 @@ const BRAND_NAME = "VitaCare AI";
 
 function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState([
     { from: "ai", text: "Xin chào! Tôi là trợ lý sức khỏe AI của VitaCare. Bạn đang gặp vấn đề gì? Hãy mô tả triệu chứng hoặc chọn bên dưới nhé." },
@@ -57,7 +58,10 @@ function LandingPage() {
   const chatSectionRef = useRef<HTMLDivElement>(null);
 
   const scrollToChat = () => {
-    chatSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setShowChat(true);
+    setTimeout(() => {
+      chatSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
   };
 
   const quickReplies = [
@@ -171,75 +175,89 @@ function LandingPage() {
           </div>
 
           {/* Interactive AI Chat - the hero element */}
-          <div ref={chatSectionRef} className="mb-8 rounded-[24px] border border-white/60 bg-white/80 shadow-[0_24px_60px_rgba(63,78,111,0.14)] backdrop-blur scroll-mt-6">
-            {/* Chat header */}
-            <div className="flex items-center gap-3 border-b border-slate-200/60 px-6 py-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] to-[#27C3A2] text-white shadow-md">
-                <Bot className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-extrabold text-slate-700">VitaCare AI</p>
-                <p className="text-xs text-slate-400">Trợ lý sức khỏe · Trực tuyến</p>
-              </div>
-              <div className="ml-auto flex items-center gap-1.5">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
-                <span className="text-xs font-semibold text-green-600">Sẵn sàng</span>
-              </div>
-            </div>
-
-            {/* Chat messages */}
-            <div className="min-h-[280px] max-h-[320px] space-y-4 overflow-y-auto px-6 py-5">
-              {chatMessages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] rounded-[18px] px-4 py-3 text-sm leading-relaxed shadow-sm ${
-                    msg.from === "user"
-                      ? "rounded-br-md bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white"
-                      : "rounded-bl-md bg-slate-100 text-slate-700"
-                  }`}>
-                    {msg.text}
-                  </div>
+          {showChat && (
+            <div
+              ref={chatSectionRef}
+              className="mb-8 flex flex-col h-[75vh] md:h-[82vh] max-h-[800px] min-h-[480px] rounded-[30px] border border-white/60 bg-white/70 shadow-[0_24px_70px_rgba(63,78,111,0.18)] backdrop-blur-xl scroll-mt-6 animate-in fade-in slide-in-from-bottom-12 duration-500 overflow-hidden"
+            >
+              {/* Chat header */}
+              <div className="flex items-center gap-3 border-b border-white/40 bg-white/20 px-6 py-4 shrink-0">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#27C3A2] text-white shadow-md shadow-blue-500/10">
+                  <Bot className="h-5 w-5 animate-pulse" />
                 </div>
-              ))}
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="rounded-[18px] rounded-bl-md bg-slate-100 px-4 py-3">
-                    <div className="flex gap-1">
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "0ms" }} />
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "160ms" }} />
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "320ms" }} />
+                <div>
+                  <p className="font-black text-slate-800 text-base">VitaCare AI Assistant</p>
+                  <p className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                    Hệ thống đang hoạt động
+                  </p>
+                </div>
+                <div className="ml-auto hidden sm:flex items-center gap-2 rounded-xl bg-white/40 px-3 py-1.5 border border-white/40 shadow-sm">
+                  <ShieldCheck className="h-4 w-4 text-blue-600" />
+                  <span className="text-[11px] font-bold text-slate-600">Được mã hóa bảo mật</span>
+                </div>
+              </div>
+
+              {/* Chat messages */}
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 min-h-0 custom-scrollbar">
+                {chatMessages.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[82%] rounded-[22px] px-5 py-3.5 text-sm leading-relaxed shadow-sm ${
+                      msg.from === "user"
+                        ? "rounded-br-none bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white font-semibold"
+                        : "rounded-bl-none bg-white/80 border border-white/50 text-slate-700 font-medium backdrop-blur-sm"
+                    }`}>
+                      {msg.text}
                     </div>
                   </div>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
+                ))}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="rounded-[22px] rounded-bl-none bg-white/85 border border-white/50 px-5 py-3.5 backdrop-blur-sm">
+                      <div className="flex gap-1.5 items-center h-4">
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-blue-500" style={{ animationDelay: "0ms" }} />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-emerald-500" style={{ animationDelay: "160ms" }} />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" style={{ animationDelay: "320ms" }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
 
-            {/* Quick replies */}
-            <div className="flex flex-wrap gap-2 px-6 pb-4">
-              {quickReplies.map((q) => (
-                <button key={q} type="button" onClick={() => sendMessage(q)} className="rounded-full border border-slate-200/80 bg-white/60 px-4 py-2 text-xs font-semibold text-slate-600 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white hover:text-slate-800 hover:shadow-md">
-                  {q}
+              {/* Quick replies */}
+              <div className="flex flex-wrap gap-2 px-6 pb-4 shrink-0 bg-white/10">
+                {quickReplies.map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    onClick={() => sendMessage(q)}
+                    className="rounded-full border border-white/80 bg-white/60 px-4 py-2.5 text-xs font-bold text-slate-600 backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white hover:text-slate-800 hover:shadow-md cursor-pointer"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+
+              {/* Input - Premium Glassmorphism */}
+              <div className="flex items-center gap-3 bg-white/30 backdrop-blur-lg border-t border-white/40 px-6 py-4 shrink-0">
+                <input
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") sendMessage(chatInput); }}
+                  placeholder="Mô tả triệu chứng hoặc câu hỏi của bạn tại đây..."
+                  className="h-12 flex-1 rounded-full border border-white/80 bg-white/50 px-5 text-sm font-semibold outline-none placeholder:text-slate-400 backdrop-blur-lg focus:bg-white/80 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 text-slate-800 transition-all duration-300 shadow-inner"
+                />
+                <button
+                  type="button"
+                  onClick={() => sendMessage(chatInput)}
+                  className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition hover:scale-105 hover:rotate-6 active:scale-95 cursor-pointer"
+                >
+                  <Send className="h-4 w-4" />
                 </button>
-              ))}
+              </div>
             </div>
-
-            {/* Input */}
-            <div className="flex items-center gap-3 border-t border-slate-200/60 px-6 py-4">
-              <input
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") sendMessage(chatInput); }}
-                placeholder="Mô tả triệu chứng của bạn..."
-                className="h-11 flex-1 rounded-full border border-slate-200/80 bg-slate-50/60 px-5 text-sm outline-none placeholder:text-slate-400 backdrop-blur focus:ring-2 focus:ring-[#2563eb]/30"
-              />
-              <Link
-                to="/guest/chat"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white shadow-md transition hover:shadow-lg hover:scale-105"
-              >
-                <Send className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
+          )}
 
           {/* Trust + CTA row */}
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
