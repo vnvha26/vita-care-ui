@@ -3,19 +3,23 @@ import { Link, useLocation } from "react-router";
 import {
   BarChart3,
   Bell,
+  BookOpen,
   Bot,
   Calendar,
   ChevronLeft,
   ChevronRight,
+  ClipboardCheck,
   ClipboardList,
   Database,
   FileText,
   LayoutDashboard,
   LogOut,
   MessageCircle,
+  MessageSquareText,
   Pill,
   ShieldCheck,
   Stethoscope,
+  UserRound,
   Users,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -55,10 +59,13 @@ const managerNav: NavItem[] = [
 
 const expertNav: NavItem[] = [
   { title: "Trang chủ", href: "/expert", icon: LayoutDashboard },
-  { title: "Dữ liệu y tế", href: "/expert/cases", icon: Database },
-  { title: "Kịch bản Chatbot", href: "/expert/chat", icon: Bot },
-  { title: "Đánh giá AI", href: "/expert/reports", icon: ShieldCheck },
-  { title: "Báo cáo, phân tích", href: "/expert/reports", icon: BarChart3 },
+  { title: "Ca đánh giá", href: "/expert/cases", icon: ClipboardCheck },
+  { title: "Chat & yêu cầu", href: "/expert/chat", icon: MessageCircle },
+  { title: "Quản lý hội thoại", href: "/expert/conversations", icon: MessageSquareText },
+  { title: "Quản lý tri thức", href: "/expert/knowledge", icon: BookOpen },
+  { title: "Quản lý bệnh nhân", href: "/expert/patients", icon: UserRound },
+  { title: "Báo cáo & phân tích", href: "/expert/reports", icon: BarChart3 },
+  { title: "Hồ sơ cá nhân", href: "/expert/profile", icon: ShieldCheck },
 ];
 
 const roleNavMap: Record<Role, NavItem[]> = {

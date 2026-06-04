@@ -14,7 +14,10 @@ import DoctorProfile from "./pages/doctor/profile";
 import ExpertCaseDetail from "./pages/expert/case-detail";
 import ExpertCases from "./pages/expert/cases";
 import ExpertChat from "./pages/expert/chat";
+import ExpertConversations from "./pages/expert/conversations";
 import ExpertDashboard from "./pages/expert/dashboard";
+import ExpertKnowledge from "./pages/expert/knowledge";
+import ExpertPatients from "./pages/expert/patients";
 import ExpertProfile from "./pages/expert/profile";
 import ExpertReports from "./pages/expert/reports";
 import ManagerAIData from "./pages/manager/ai-data";
@@ -293,6 +296,9 @@ export const router = createBrowserRouter([
       { path: "cases", element: <ExpertCases /> },
       { path: "cases/:id", element: <ExpertCaseDetail /> },
       { path: "chat", element: <ExpertChat /> },
+      { path: "conversations", element: <ExpertConversations /> },
+      { path: "knowledge", element: <ExpertKnowledge /> },
+      { path: "patients", element: <ExpertPatients /> },
       { path: "reports", element: <ExpertReports /> },
       { path: "profile", element: <ExpertProfile /> },
     ],

@@ -17,7 +17,7 @@ const searchPlaceholders: Record<Role, string> = {
   patient: "Tìm dịch bệnh, bác sĩ, lịch hẹn...",
   doctor: "Tìm bệnh nhân, thuốc, lịch khám...",
   manager: "Tìm bệnh nhân, bác sĩ, báo cáo...",
-  expert: "Tìm bệnh, thuốc, kịch bản AI...",
+  expert: "Tìm ca đánh giá, bệnh nhân, hội thoại, tài liệu...",
 };
 
 const roleHome: Record<Role, string> = {
