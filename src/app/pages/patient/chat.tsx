@@ -1,97 +1,89 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Archive, BellRing, ChevronLeft, Inbox, MessageCircle, Search, Send, Sparkles, UserRound } from "lucide-react";
+import { Archive, Inbox, MessageCircle, Search, Send, UserRound, Building2, Stethoscope, ChevronLeft } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 import { cn } from "../../lib/utils";
 
 type ConversationStatus = "active" | "unread" | "archived";
 type ConversationFilter = "all" | "unread" | "archived";
 
-type ChatMessage = {
-  sender: "doctor" | "contact";
+interface ChatMessage {
+  sender: "patient" | "contact";
   text: string;
   time: string;
-};
+}
 
-type Conversation = {
+interface Conversation {
   id: string;
   name: string;
-  patientCode?: string;
-  role: string;
+  role: "clinic" | "doctor";
+  roleName: string;
   preview: string;
   status: ConversationStatus;
   lastAt: string;
   messages: ChatMessage[];
-};
+  image?: string;
+}
 
 const initialConversations: Conversation[] = [
   {
-    id: "p001",
-    name: "Đỗ Minh Tú",
-    patientCode: "P001",
-    role: "Bệnh nhân",
-    preview: "Em vẫn còn đau vùng thượng vị sau ăn.",
+    id: "c1",
+    name: "Phòng khám Đa khoa Quốc tế VitaCare",
+    role: "clinic",
+    roleName: "Phòng khám liên kết",
+    preview: "Chào anh A, phòng khám đã nhận yêu cầu đặt lịch. Anh muốn khám ca sáng hay ca chiều ngày mai ạ?",
     status: "unread",
-    lastAt: "09:24",
+    lastAt: "14:15",
     messages: [
-      { sender: "contact", text: "Chào bác sĩ, em vẫn còn đau vùng thượng vị sau ăn.", time: "09:12" },
-      { sender: "doctor", text: "Em cho bác sĩ biết cơn đau kéo dài bao lâu và có buồn nôn không?", time: "09:16" },
-      { sender: "contact", text: "Khoảng 30 phút, ợ chua nhiều hơn sau bữa tối ạ.", time: "09:24" },
+      { sender: "contact", text: "Chào anh Nguyễn Văn A, tôi là lễ tân tại Phòng khám VitaCare. Chúng tôi đã nhận được yêu cầu đặt lịch từ Trợ lý AI.", time: "14:10" },
+      { sender: "contact", text: "Anh muốn đăng ký khám ca sáng hay ca chiều ngày mai ạ? Hiện tại các bác sĩ Nội khoa đều có lịch rảnh.", time: "14:15" },
     ],
   },
   {
-    id: "p002",
-    name: "Nguyễn Văn An",
-    patientCode: "P002",
-    role: "Bệnh nhân",
-    preview: "Bác sĩ ơi, em muốn hỏi về đơn thuốc.",
+    id: "c2",
+    name: "Nha khoa Thẩm mỹ Công nghệ cao Paris",
+    role: "clinic",
+    roleName: "Phòng khám liên kết",
+    preview: "Cảm ơn anh đã phản hồi. Hẹn gặp anh vào 9:00 sáng mai ạ.",
     status: "active",
-    lastAt: "08:50",
+    lastAt: "10:30",
     messages: [
-      { sender: "contact", text: "Bác sĩ ơi, em uống thuốc trước ăn hay sau ăn ạ?", time: "08:41" },
-      { sender: "doctor", text: "Omeprazole uống trước ăn sáng 30 phút, thuốc giảm đau uống sau ăn.", time: "08:50" },
+      { sender: "patient", text: "Chào phòng khám, tôi muốn đặt lịch cạo vôi răng và kiểm tra định kỳ.", time: "10:20" },
+      { sender: "contact", text: "Dạ vâng, nha khoa Paris có lịch trống lúc 9:00 sáng mai ạ. Anh có sắp xếp qua được giờ đó không?", time: "10:25" },
+      { sender: "patient", text: "Được nhé, tôi sẽ qua đúng giờ.", time: "10:28" },
+      { sender: "contact", text: "Cảm ơn anh đã phản hồi. Hẹn gặp anh vào 9:00 sáng mai ạ.", time: "10:30" },
     ],
   },
   {
-    id: "expert001",
-    name: "TS. Nguyễn Thị Lan",
-    role: "Chuyên gia",
-    preview: "Cần xem thêm xét nghiệm chức năng thận.",
+    id: "d1",
+    name: "BS. Nguyễn Khám Bệnh",
+    role: "doctor",
+    roleName: "Bác sĩ chuyên khoa Nội",
+    preview: "Kết quả siêu âm của em bình thường, uống thuốc đúng liều nhé.",
     status: "active",
     lastAt: "Hôm qua",
     messages: [
-      { sender: "contact", text: "Tôi đã xem hồ sơ, nên bổ sung creatinine và eGFR.", time: "Hôm qua" },
-      { sender: "doctor", text: "Tôi sẽ chỉ định thêm xét nghiệm và gửi lại kết quả.", time: "Hôm qua" },
+      { sender: "patient", text: "Thưa bác sĩ, em đã uống hết đơn thuốc dạ dày 5 ngày rồi ạ.", time: "Hôm qua" },
+      { sender: "contact", text: "Em còn cảm giác ợ chua hay đau tức ngực sau khi ăn không?", time: "Hôm qua" },
+      { sender: "patient", text: "Dạ giảm nhiều rồi bác sĩ, chỉ còn hơi đầy bụng nhẹ thôi ạ.", time: "Hôm qua" },
+      { sender: "contact", text: "Tốt lắm. Kết quả siêu âm dạ dày trước đó của em bình thường. Em uống hết số thuốc còn lại đúng liều nhé.", time: "Hôm qua" },
     ],
   },
   {
-    id: "p003",
-    name: "Trần Thị Bình",
-    patientCode: "P003",
-    role: "Bệnh nhân",
-    preview: "Đã kết thúc tư vấn, lưu lại để theo dõi.",
+    id: "d2",
+    name: "BS. Trần Hay Hỏi",
+    role: "doctor",
+    roleName: "Bác sĩ chuyên khoa Nhi",
+    preview: "Nếu bé hết sốt và chơi ngoan thì yên tâm theo dõi tiếp được.",
     status: "archived",
-    lastAt: "28/05",
+    lastAt: "25/05",
     messages: [
-      { sender: "contact", text: "Cảm ơn bác sĩ, huyết áp của em đã ổn hơn.", time: "28/05" },
-      { sender: "doctor", text: "Em tiếp tục đo huyết áp mỗi sáng và tái khám đúng lịch.", time: "28/05" },
+      { sender: "patient", text: "Chào bác sĩ, bé nhà em sốt 38 độ từ tối qua, có ho húng hắng.", time: "25/05" },
+      { sender: "contact", text: "Bé có bú tốt không em? Có bị nôn trớ hay phát ban gì không?", time: "25/05" },
+      { sender: "patient", text: "Bé vẫn ăn chơi bình thường ạ, không bị nôn.", time: "25/05" },
+      { sender: "contact", text: "Nếu bé hết sốt và chơi ngoan thì yên tâm theo dõi tiếp được. Cho bé uống nhiều nước và lau mát người nhé.", time: "25/05" },
     ],
   },
 ];
-
-const paidConsultationConversation: Conversation = {
-  id: "consult-paid-001",
-  name: "Nguyễn Minh Anh",
-  patientCode: "P009",
-  role: "Tư vấn chuyên sâu",
-  preview: "Bệnh nhân đã chuyển từ Chatbot AI sang yêu cầu kết nối trực tiếp.",
-  status: "unread",
-  lastAt: "Vừa xong",
-  messages: [
-    { sender: "contact", text: "Chào bác sĩ, em vừa thanh toán tư vấn chuyên sâu. Em hay đau vùng thượng vị và bị ợ chua nhiều sau bữa tối.", time: "Vừa xong" },
-    { sender: "doctor", text: "Chào bạn, bác sĩ đã nhận phiên tư vấn. Bạn cho bác sĩ biết triệu chứng kéo dài bao lâu và đã dùng thuốc gì chưa?", time: "Vừa xong" },
-    { sender: "contact", text: "Khoảng một tuần, em mới dùng thuốc dạ dày mua ngoài nhưng chưa đỡ hẳn ạ.", time: "Vừa xong" },
-  ],
-};
 
 const filterLabels: Record<ConversationFilter, string> = {
   all: "Tất cả",
@@ -99,21 +91,12 @@ const filterLabels: Record<ConversationFilter, string> = {
   archived: "Lưu trữ",
 };
 
-export default function DoctorChat() {
+export default function PatientChat() {
   const [filter, setFilter] = useState<ConversationFilter>("all");
-  const [conversations, setConversations] = useState(initialConversations);
-  const [selectedId, setSelectedId] = useState(initialConversations[0].id);
+  const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
+  const [selectedId, setSelectedId] = useState<string>(initialConversations[0].id);
   const [draft, setDraft] = useState("");
-  const [consultAccepted, setConsultAccepted] = useState(false);
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
-
-  const filteredConversations = useMemo(() => {
-    if (filter === "all") return conversations.filter((item) => item.status !== "archived");
-    return conversations.filter((item) => item.status === filter);
-  }, [conversations, filter]);
-
-  const selectedConversation = conversations.find((item) => item.id === selectedId) ?? conversations[0];
-
   const chatEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -150,13 +133,24 @@ export default function DoctorChat() {
     };
   }, []);
 
+  const filteredConversations = useMemo(() => {
+    if (filter === "all") return conversations.filter((item) => item.status !== "archived");
+    return conversations.filter((item) => item.status === filter);
+  }, [conversations, filter]);
+
+  const selectedConversation = conversations.find((item) => item.id === selectedId) ?? conversations[0];
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [selectedConversation.messages]);
 
   const handleSelect = (id: string) => {
     setSelectedId(id);
-    setConversations((current) => current.map((item) => (item.id === id && item.status === "unread" ? { ...item, status: "active" } : item)));
+    setConversations((current) =>
+      current.map((item) =>
+        item.id === id && item.status === "unread" ? { ...item, status: "active" } : item
+      )
+    );
     setShowChatOnMobile(true);
   };
 
@@ -165,6 +159,8 @@ export default function DoctorChat() {
     if (!text) return;
 
     const time = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    
+    // Add user message
     setConversations((current) =>
       current.map((item) =>
         item.id === selectedConversation.id
@@ -173,62 +169,55 @@ export default function DoctorChat() {
               preview: text,
               lastAt: time,
               status: item.status === "archived" ? "archived" : "active",
-              messages: [...item.messages, { sender: "doctor", text, time }],
+              messages: [...item.messages, { sender: "patient", text, time }],
             }
           : item
       )
     );
     setDraft("");
+
+    // Simulate an interactive reply after 1.2s
+    setTimeout(() => {
+      const replyTime = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+      const mockReplyText = `Cảm ơn bạn đã nhắn tin. Yêu cầu của bạn ("${text}") đang được hệ thống chuyển tới nhân viên phụ trách để xử lý. Vui lòng đợi trong giây lát.`;
+      
+      setConversations((current) =>
+        current.map((item) =>
+          item.id === selectedConversation.id
+            ? {
+                ...item,
+                preview: mockReplyText,
+                lastAt: replyTime,
+                messages: [...item.messages, { sender: "contact", text: mockReplyText, time: replyTime }],
+              }
+            : item
+        )
+      );
+    }, 1200);
   };
 
   const toggleArchive = () => {
     setConversations((current) =>
       current.map((item) =>
-        item.id === selectedConversation.id ? { ...item, status: item.status === "archived" ? "active" : "archived" } : item
+        item.id === selectedConversation.id
+          ? { ...item, status: item.status === "archived" ? "active" : "archived" }
+          : item
       )
     );
-  };
-
-  const acceptPaidConsultation = () => {
-    setConsultAccepted(true);
-    setFilter("all");
-    setConversations((current) => {
-      if (current.some((item) => item.id === paidConsultationConversation.id)) return current;
-      return [paidConsultationConversation, ...current];
-    });
-    setSelectedId(paidConsultationConversation.id);
   };
 
   return (
     <div className="h-full flex flex-col min-h-0 min-w-0 overflow-hidden" ref={containerRef}>
       <PageHeader
-        title="Tin nhắn"
-        description="Trao đổi với bệnh nhân, chuyên gia và đồng nghiệp theo từng cuộc trò chuyện."
+        title="Hộp thư tư vấn"
+        description="Nhắn tin trò chuyện với các bác sĩ chuyên khoa hoặc các phòng khám liên kết."
       />
 
-      {!consultAccepted && (
-        <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-[#CFE3FF] bg-[#EAF3FF] p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2D4A86] text-white">
-              <BellRing className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="font-extrabold text-[#1E293B]">Yêu cầu Tư vấn chuyên sâu (Trả phí)</h2>
-              <p className="mt-1 text-sm font-semibold leading-6 text-[#64748B]">
-                Bệnh nhân Nguyễn Minh Anh đã chuyển từ Chatbot AI sang yêu cầu kết nối trực tiếp bác sĩ.
-              </p>
-            </div>
-          </div>
-          <ActionButton icon={<Sparkles className="h-4 w-4" />} onClick={acceptPaidConsultation}>
-            Chấp nhận tư vấn
-          </ActionButton>
-        </div>
-      )}
-
       <div className="grid flex-1 min-h-0 min-w-0 gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
+        {/* Left column - Conversations list */}
         <SectionCard
           title="Cuộc trò chuyện"
-          className={cn("h-full flex flex-col min-h-0 min-w-0 overflow-hidden", showChatOnMobile ? "hidden lg:flex" : "flex")}
+          className={cn("h-full flex flex-col min-w-0 overflow-hidden", showChatOnMobile ? "hidden lg:flex" : "flex")}
         >
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-2xl bg-[#F2F7FB] p-1">
             {(Object.keys(filterLabels) as ConversationFilter[]).map((item) => (
@@ -237,7 +226,7 @@ export default function DoctorChat() {
                 type="button"
                 onClick={() => setFilter(item)}
                 className={cn(
-                  "h-10 rounded-xl text-sm font-bold transition",
+                  "h-10 rounded-xl text-sm font-bold transition cursor-pointer",
                   filter === item ? "bg-white text-[#1C64D1] shadow-sm" : "text-[#64748B] hover:text-[#1E293B]"
                 )}
               >
@@ -248,7 +237,10 @@ export default function DoctorChat() {
 
           <div className="mb-4 flex h-11 items-center gap-2 rounded-2xl border border-[#E2E8F0] px-3 text-[#64748B]">
             <Search className="h-4 w-4" />
-            <input className="min-w-0 flex-1 bg-transparent text-sm outline-none" placeholder="Tìm theo tên hoặc mã bệnh nhân" />
+            <input
+              className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+              placeholder="Tìm kiếm bác sĩ hoặc phòng khám..."
+            />
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
@@ -258,36 +250,48 @@ export default function DoctorChat() {
                 type="button"
                 onClick={() => handleSelect(contact.id)}
                 className={cn(
-                  "flex w-full gap-3 rounded-[18px] border p-4 text-left transition",
+                  "flex w-full gap-3 rounded-[18px] border p-4 text-left transition cursor-pointer",
                   selectedConversation.id === contact.id
                     ? "border-[#CFE3FF] bg-[#EAF3FF]"
                     : "border-[#E2E8F0] bg-white hover:bg-[#F2F7FB]"
                 )}
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[#2F80ED] ring-1 ring-[#CFE3FF]">
-                  {contact.status === "archived" ? <Archive className="h-5 w-5" /> : <UserRound className="h-5 w-5" />}
+                  {contact.role === "clinic" ? (
+                    <Building2 className="h-5 w-5 text-emerald-600" />
+                  ) : (
+                    <Stethoscope className="h-5 w-5 text-blue-600" />
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="truncate font-bold text-[#1E293B]">{contact.name}</p>
+                    <p className="truncate font-bold text-[#1E293B] text-sm">{contact.name}</p>
                     <span className="shrink-0 text-xs font-bold text-[#64748B]">{contact.lastAt}</span>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <StatusBadge tone={contact.status === "unread" ? "rose" : contact.status === "archived" ? "slate" : "blue"}>
-                      {contact.status === "unread" ? "Chưa xem" : contact.role}
+                    <StatusBadge
+                      tone={
+                        contact.status === "unread"
+                          ? "rose"
+                          : contact.role === "clinic"
+                          ? "emerald"
+                          : "blue"
+                      }
+                    >
+                      {contact.status === "unread" ? "Chưa đọc" : contact.roleName}
                     </StatusBadge>
-                    {contact.patientCode && <span className="text-xs font-semibold text-[#64748B]">{contact.patientCode}</span>}
                   </div>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#64748B]">{contact.preview}</p>
+                  <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#64748B]">{contact.preview}</p>
                 </div>
               </button>
             ))}
           </div>
         </SectionCard>
 
+        {/* Right column - Messages area */}
         <SectionCard
           title={selectedConversation.name}
-          description={`${selectedConversation.role}${selectedConversation.patientCode ? ` · ${selectedConversation.patientCode}` : ""}`}
+          description={selectedConversation.roleName}
           actions={
             <div className="flex items-center gap-2">
               <button
@@ -300,26 +304,38 @@ export default function DoctorChat() {
               </button>
               <ActionButton
                 variant="secondary"
-                icon={selectedConversation.status === "archived" ? <Inbox className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+                icon={<Archive className="h-4 w-4" />}
                 onClick={toggleArchive}
               >
                 {selectedConversation.status === "archived" ? "Bỏ lưu trữ" : "Lưu trữ"}
               </ActionButton>
             </div>
           }
-          className={cn("h-full flex flex-col min-h-0 min-w-0 overflow-hidden", showChatOnMobile ? "flex" : "hidden lg:flex")}
+          className={cn("h-full flex min-w-0 flex-col overflow-hidden", showChatOnMobile ? "flex" : "hidden lg:flex")}
         >
           <div className="flex-1 min-h-0 space-y-4 overflow-y-auto rounded-2xl bg-[#F7FAFC] p-5 custom-scrollbar">
             {selectedConversation.messages.map((message, index) => (
-              <div key={`${message.time}-${index}`} className={cn("flex", message.sender === "doctor" ? "justify-end" : "justify-start")}>
+              <div
+                key={`${message.time}-${index}`}
+                className={cn("flex", message.sender === "patient" ? "justify-end" : "justify-start")}
+              >
                 <div
                   className={cn(
                     "max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm",
-                    message.sender === "doctor" ? "rounded-tr-sm bg-[#2F80ED] text-white" : "rounded-tl-sm bg-white text-[#1E293B]"
+                    message.sender === "patient"
+                      ? "rounded-tr-sm bg-[#2F80ED] text-white"
+                      : "rounded-tl-sm bg-white text-[#1E293B]"
                   )}
                 >
                   <p>{message.text}</p>
-                  <p className={cn("mt-2 text-xs font-bold", message.sender === "doctor" ? "text-white/75" : "text-[#94A3B8]")}>{message.time}</p>
+                  <p
+                    className={cn(
+                      "mt-2 text-[10px] font-bold text-right",
+                      message.sender === "patient" ? "text-white/75" : "text-[#94A3B8]"
+                    )}
+                  >
+                    {message.time}
+                  </p>
                 </div>
               </div>
             ))}
@@ -334,7 +350,7 @@ export default function DoctorChat() {
                 onKeyDown={(event) => {
                   if (event.key === "Enter") handleSend();
                 }}
-                placeholder="Nhập tin nhắn..."
+                placeholder={`Nhắn tin với ${selectedConversation.name}...`}
                 className="min-w-0 flex-1 rounded-full border border-[#E2E8F0] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#2F80ED]"
               />
               <ActionButton icon={<Send className="h-4 w-4" />} onClick={handleSend}>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createBrowserRouter, Link } from "react-router";
-import { Bot, Send, ShieldCheck } from "lucide-react";
+import { Bot, Send, ShieldCheck, ChevronDown } from "lucide-react";
 import { LoginModal } from "./components/auth/login-modal";
 import { Layout } from "./components/layout/layout";
 
@@ -43,17 +43,32 @@ import PatientMedicalRecords from "./pages/patient/medical-records";
 import PatientNotifications from "./pages/patient/notifications";
 import PatientProfile from "./pages/patient/profile";
 import PatientRegister from "./pages/patient/register";
+import PatientChat from "./pages/patient/chat";
 
 const BRAND_NAME = "VitaCare AI";
 
 function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState([
+  const [chatMessages, setChatMessages] = useState<Array<{
+    from: "ai" | "user";
+    text: string;
+    clinics?: Array<{ id: string; name: string; specialty: string; rating: string; image: string }>;
+    showLoginBtn?: boolean;
+  }>>([
     { from: "ai", text: "Xin chào! Tôi là trợ lý sức khỏe AI của VitaCare. Bạn đang gặp vấn đề gì? Hãy mô tả triệu chứng hoặc chọn bên dưới nhé." },
   ]);
   const [isTyping, setIsTyping] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const chatSectionRef = useRef<HTMLDivElement>(null);
+
+  const scrollToChat = () => {
+    setShowChat(true);
+    setTimeout(() => {
+      chatSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 180);
+  };
 
   const quickReplies = [
     "Tôi bị đau đầu kéo dài",
@@ -70,8 +85,19 @@ function LandingPage() {
   ];
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
   }, [chatMessages]);
+
+  const mockClinics = [
+    { id: "c1", name: "Phòng khám Đa khoa Quốc tế VitaCare", specialty: "Đa khoa, Nội nhi", rating: "4.9 ⭐ (120 đánh giá)", image: "🏥" },
+    { id: "c2", name: "Phòng khám Chuyên khoa Tim mạch Hà Nội", specialty: "Tim mạch, Nội tiết", rating: "4.8 ⭐ (85 đánh giá)", image: "❤️" },
+    { id: "c3", name: "Nha khoa Thẩm mỹ Công nghệ cao Paris", specialty: "Răng Hàm Mặt", rating: "4.7 ⭐ (96 đánh giá)", image: "🦷" },
+  ];
 
   const sendMessage = (text: string) => {
     if (!text.trim()) return;
@@ -79,10 +105,38 @@ function LandingPage() {
     setChatInput("");
     setIsTyping(true);
     setTimeout(() => {
-      const reply = aiResponses[Math.floor(Math.random() * aiResponses.length)];
-      setChatMessages((prev) => [...prev, { from: "ai", text: reply }]);
+      const normalizedText = text.toLowerCase();
+      if (normalizedText.includes("phòng khám") || normalizedText.includes("phong kham")) {
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            from: "ai",
+            text: "Dưới đây là danh sách các phòng khám nổi bật liên kết với hệ thống của chúng tôi. Bạn có thể bấm đặt lịch trực tiếp:",
+            clinics: mockClinics,
+          },
+        ]);
+      } else {
+        const reply = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+        setChatMessages((prev) => [...prev, { from: "ai", text: reply }]);
+      }
       setIsTyping(false);
     }, 600 + Math.random() * 400);
+  };
+
+  const handleBookClinic = (clinicName: string) => {
+    setChatMessages((prev) => [...prev, { from: "user", text: `Tôi muốn đặt lịch khám tại ${clinicName}` }]);
+    setIsTyping(true);
+    setTimeout(() => {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          from: "ai",
+          text: "Để đặt lịch khám trực tuyến tại phòng khám này, quý khách vui lòng đăng nhập vào tài khoản bệnh nhân của VitaCare.",
+          showLoginBtn: true,
+        },
+      ]);
+      setIsTyping(false);
+    }, 800);
   };
 
   const certifications = [
@@ -99,115 +153,189 @@ function LandingPage() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#dfe9ff] font-sans text-slate-700">
-      <header className="relative z-20 shrink-0 border-t-4 border-slate-900 border-b border-slate-200/80 bg-white/78 shadow-[0_2px_14px_rgba(42,64,104,0.12)] backdrop-blur-xl">
-        <div className="mx-auto flex h-[72px] max-w-[1480px] items-center justify-between px-6 sm:px-10">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#EAF3FF] text-[#2F80ED] shadow-sm">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-[26px] font-extrabold leading-none tracking-tight text-[#2761f1]">{BRAND_NAME}</h1>
-            </div>
-          </Link>
-
-          <div className="flex items-center gap-4">
-            <div className="hidden items-center gap-2 md:flex">
-              {certifications.map((cert) => (
-                <div key={cert.name} className="flex items-center gap-1.5 rounded-full border border-slate-200/60 bg-white/60 px-3 py-1 text-xs font-semibold text-slate-500 backdrop-blur">
-                  ✓ {cert.name}
-                </div>
-              ))}
-            </div>
-            <button type="button" onClick={() => setShowLogin(true)} className="rounded-[14px] bg-gradient-to-r from-[#2563eb] to-[#4f35f5] px-5 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_rgba(61,79,226,0.22)] transition hover:translate-y-[-1px]">
-              Đăng nhập / Đăng ký
-            </button>
-          </div>
-        </div>
-      </header>
-
       <main className="relative flex flex-1 flex-col overflow-y-auto bg-[radial-gradient(circle_at_8%_12%,rgba(121,177,255,0.36)_0,transparent_34%),radial-gradient(circle_at_84%_58%,rgba(107,87,255,0.24)_0,transparent_39%),linear-gradient(135deg,#dfeeff_0%,#eef4ff_40%,#dbe3ff_100%)]">
-        <section className="mx-auto flex w-full max-w-[900px] flex-col px-5 pb-10 pt-10 sm:px-8">
+        <section className="mx-auto flex w-full max-w-[940px] flex-col px-5 pb-12 pt-16 sm:px-8">
+          
+          {/* Brand Logo Floating */}
+          <div className="flex justify-center mb-8">
+            <div className="flex items-center gap-2.5 rounded-full border border-white/60 bg-white/40 px-5 py-2 backdrop-blur shadow-sm">
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-[#2563eb] to-[#27C3A2] text-white">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+              <span className="font-extrabold text-sm tracking-tight text-slate-800">{BRAND_NAME}</span>
+              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+          </div>
 
-          {/* Big headline */}
-          <div className="mb-8 text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-700 md:text-[36px]">
-              Trợ lý sức khỏe AI — tư vấn ngay trong 30 giây
-            </h2>
-            <p className="mx-auto mt-3 max-w-[560px] text-base text-slate-500">
-              Mô tả triệu chứng của bạn, AI sẽ phân tích và đưa ra khuyến nghị phù hợp. Nếu cần, kết nối bác sĩ chuyên khoa ngay.
+          {/* Hero Content Area */}
+          <div className="mb-12 text-center">
+            {/* Main Headline */}
+            <h1 className="text-4xl font-black tracking-tight text-slate-850 md:text-[52px] leading-[1.15]">
+              Trợ lý sức khỏe AI
+              <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 bg-clip-text text-transparent">
+                tư vấn chính xác trong 10 giây
+              </span>
+            </h1>
+            
+            {/* Description */}
+            <p className="mx-auto mt-6 max-w-[620px] text-[17px] leading-relaxed text-slate-600 font-medium">
+              Giải pháp tầm soát triệu chứng ban đầu ứng dụng trí tuệ nhân tạo thế hệ mới. Tuyệt đối bảo mật, kết nối bác sĩ chuyên khoa ngay lập tức.
             </p>
+
+            {/* Trust Badges */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <div className="flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-emerald-50/70 px-4 py-1.5 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
+                <span className="text-sm">🛡️</span> Đạt chuẩn ISO 27001
+              </div>
+              <div className="flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-blue-50/70 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm backdrop-blur">
+                <span className="text-sm">🏥</span> Bộ Y Tế chứng nhận cấp phép
+              </div>
+              <div className="flex items-center gap-1.5 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-1.5 text-xs font-bold text-indigo-700 shadow-sm backdrop-blur">
+                <span className="text-sm">🔒</span> Mã hóa E2E & Bảo mật SSL
+              </div>
+              <div className="flex items-center gap-1.5 rounded-full border border-purple-200/80 bg-purple-50/70 px-4 py-1.5 text-xs font-bold text-purple-700 shadow-sm backdrop-blur">
+                <span className="text-sm">📋</span> Tiêu chuẩn bảo mật HIPAA
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={scrollToChat}
+                className="group relative flex h-14 w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#2563eb] to-[#27C3A2] px-8 text-base font-extrabold text-white shadow-[0_12px_30px_rgba(37,99,235,0.24)] transition-all hover:scale-[1.02] hover:shadow-[0_16px_36px_rgba(37,99,235,0.32)] active:scale-95 cursor-pointer animate-pulse-subtle"
+              >
+                Tư vấn ngay
+                <ChevronDown className="h-5 w-5 animate-bounce group-hover:translate-y-0.5 transition-transform" />
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setShowLogin(true)}
+                className="flex h-14 w-full sm:w-auto items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-8 text-base font-extrabold text-slate-800 shadow-sm hover:bg-white hover:text-blue-600 transition-all hover:border-blue-200 cursor-pointer"
+              >
+                Đăng nhập / Đăng ký
+              </button>
+            </div>
           </div>
 
           {/* Interactive AI Chat - the hero element */}
-          <div className="mb-8 rounded-[24px] border border-white/60 bg-white/80 shadow-[0_24px_60px_rgba(63,78,111,0.14)] backdrop-blur">
-            {/* Chat header */}
-            <div className="flex items-center gap-3 border-b border-slate-200/60 px-6 py-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] to-[#27C3A2] text-white shadow-md">
-                <Bot className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-extrabold text-slate-700">VitaCare AI</p>
-                <p className="text-xs text-slate-400">Trợ lý sức khỏe · Trực tuyến</p>
-              </div>
-              <div className="ml-auto flex items-center gap-1.5">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
-                <span className="text-xs font-semibold text-green-600">Sẵn sàng</span>
-              </div>
-            </div>
-
-            {/* Chat messages */}
-            <div className="min-h-[280px] max-h-[320px] space-y-4 overflow-y-auto px-6 py-5">
-              {chatMessages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] rounded-[18px] px-4 py-3 text-sm leading-relaxed shadow-sm ${
-                    msg.from === "user"
-                      ? "rounded-br-md bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white"
-                      : "rounded-bl-md bg-slate-100 text-slate-700"
-                  }`}>
-                    {msg.text}
-                  </div>
+          {showChat && (
+            <div
+              ref={chatSectionRef}
+              className="relative mb-8 flex flex-col h-[calc(100vh-48px)] md:h-[calc(100vh-64px)] rounded-[30px] border border-white/60 bg-white/70 shadow-[0_24px_70px_rgba(63,78,111,0.18)] backdrop-blur-xl scroll-mt-6 animate-in fade-in slide-in-from-bottom-12 duration-500 overflow-hidden"
+            >
+              {/* Chat header - Glassmorphic overlay */}
+              <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 border-b border-white/30 bg-white/35 backdrop-blur-xl px-6 py-4 shrink-0">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#27C3A2] text-white shadow-md shadow-blue-500/10">
+                  <Bot className="h-5 w-5 animate-pulse" />
                 </div>
-              ))}
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="rounded-[18px] rounded-bl-md bg-slate-100 px-4 py-3">
-                    <div className="flex gap-1">
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "0ms" }} />
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "160ms" }} />
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "320ms" }} />
+                <div>
+                  <p className="font-black text-slate-800 text-base">VitaCare AI Assistant</p>
+                  <p className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                    Hệ thống đang hoạt động
+                  </p>
+                </div>
+                <div className="ml-auto hidden sm:flex items-center gap-2 rounded-xl bg-white/40 px-3 py-1.5 border border-white/40 shadow-sm">
+                  <ShieldCheck className="h-4 w-4 text-blue-600" />
+                  <span className="text-[11px] font-bold text-slate-600">Được mã hóa bảo mật</span>
+                </div>
+              </div>
+
+              {/* Chat messages - Scrolls behind header/input */}
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto overscroll-contain pt-[84px] pb-[88px] px-6 py-6 space-y-4 min-h-0 custom-scrollbar">
+                {chatMessages.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[85%] rounded-[22px] px-5 py-3.5 text-sm leading-relaxed shadow-sm ${
+                      msg.from === "user"
+                        ? "rounded-br-none bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white font-semibold"
+                        : "rounded-bl-none bg-white/80 border border-white/50 text-slate-700 font-medium backdrop-blur-sm"
+                    }`}>
+                      <p>{msg.text}</p>
+
+                      {/* Structured Clinics Demo */}
+                      {msg.clinics && (
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 max-w-full">
+                          {msg.clinics.map((clinic) => (
+                            <div key={clinic.id} className="flex flex-col justify-between rounded-2xl border border-slate-200/50 bg-slate-50/50 p-4 shadow-sm backdrop-blur-sm">
+                              <div>
+                                <div className="text-2xl mb-2">{clinic.image}</div>
+                                <h4 className="font-extrabold text-slate-800 text-xs line-clamp-2">{clinic.name}</h4>
+                                <p className="text-[10px] text-slate-500 font-bold mt-1">{clinic.specialty}</p>
+                                <p className="text-[10px] text-slate-400 mt-1 font-semibold">{clinic.rating}</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleBookClinic(clinic.name)}
+                                className="mt-3 flex h-8 w-full items-center justify-center rounded-xl bg-blue-600 text-[10px] font-extrabold text-white shadow-sm hover:bg-blue-700 hover:shadow transition-colors cursor-pointer"
+                              >
+                                Đặt lịch ngay
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Login CTA button inside chat bubble */}
+                      {msg.showLoginBtn && (
+                        <button
+                          type="button"
+                          onClick={() => setShowLogin(true)}
+                          className="mt-3 flex h-9 w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 text-xs font-extrabold text-white shadow-md hover:scale-[1.01] hover:shadow-lg transition cursor-pointer"
+                        >
+                          Đăng nhập ngay
+                        </button>
+                      )}
                     </div>
                   </div>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
+                ))}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="rounded-[22px] rounded-bl-none bg-white/85 border border-white/50 px-5 py-3.5 backdrop-blur-sm">
+                      <div className="flex gap-1.5 items-center h-4">
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-blue-500" style={{ animationDelay: "0ms" }} />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-emerald-500" style={{ animationDelay: "160ms" }} />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" style={{ animationDelay: "320ms" }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {chatMessages.length === 1 && !isTyping && (
+                  <div className="flex flex-wrap gap-2 pl-12 pt-1 animate-in fade-in duration-300">
+                    {quickReplies.map((q) => (
+                      <button
+                        key={q}
+                        type="button"
+                        onClick={() => sendMessage(q)}
+                        className="rounded-full border border-blue-200 bg-blue-50/80 px-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-600 hover:text-white hover:-translate-y-0.5 transition duration-300 shadow-sm cursor-pointer"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-            {/* Quick replies */}
-            <div className="flex flex-wrap gap-2 px-6 pb-4">
-              {quickReplies.map((q) => (
-                <button key={q} type="button" onClick={() => sendMessage(q)} className="rounded-full border border-slate-200/80 bg-white/60 px-4 py-2 text-xs font-semibold text-slate-600 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white hover:text-slate-800 hover:shadow-md">
-                  {q}
+              {/* Input - Glassmorphic overlay */}
+              <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center gap-3 bg-white/35 backdrop-blur-xl border-t border-white/30 px-6 py-4 shrink-0">
+                <input
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") sendMessage(chatInput); }}
+                  placeholder="Mô tả triệu chứng hoặc câu hỏi của bạn tại đây..."
+                  className="h-12 flex-1 rounded-full border border-white/85 bg-white/60 px-5 text-sm font-semibold outline-none placeholder:text-slate-400 backdrop-blur-lg focus:bg-white/90 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 text-slate-800 transition-all duration-300 shadow-inner"
+                />
+                <button
+                  type="button"
+                  onClick={() => sendMessage(chatInput)}
+                  className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition hover:scale-105 hover:rotate-6 active:scale-95 cursor-pointer"
+                >
+                  <Send className="h-4 w-4" />
                 </button>
-              ))}
+              </div>
             </div>
-
-            {/* Input */}
-            <div className="flex items-center gap-3 border-t border-slate-200/60 px-6 py-4">
-              <input
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") sendMessage(chatInput); }}
-                placeholder="Mô tả triệu chứng của bạn..."
-                className="h-11 flex-1 rounded-full border border-slate-200/80 bg-slate-50/60 px-5 text-sm outline-none placeholder:text-slate-400 backdrop-blur focus:ring-2 focus:ring-[#2563eb]/30"
-              />
-              <Link
-                to="/guest/chat"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white shadow-md transition hover:shadow-lg hover:scale-105"
-              >
-                <Send className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
+          )}
 
           {/* Trust + CTA row */}
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
@@ -268,6 +396,7 @@ export const router = createBrowserRouter([
       { index: true, element: <PatientDashboard /> },
       { path: "dashboard", element: <PatientDashboard /> },
       { path: "consultation", element: <PatientConsultation /> },
+      { path: "chat", element: <PatientChat /> },
       { path: "doctors", element: <PatientDoctors /> },
       { path: "appointments", element: <PatientAppointments /> },
       { path: "book", element: <PatientBook /> },
