@@ -38,7 +38,7 @@ const doctorNav: NavItem[] = [
 const expertNav: NavItem[] = [
   { title: "Dashboard", href: "/expert", icon: LayoutDashboard },
   { title: "Danh sách ca đánh giá", href: "/expert/cases", icon: ClipboardList },
-  { title: "Chat trao đổi", href: "/expert/chat", icon: MessageCircle },
+  { title: "Chat & yêu cầu", href: "/expert/chat", icon: MessageCircle },
   { title: "Báo cáo thống kê", href: "/expert/reports", icon: BarChart3 },
   { title: "Hồ sơ cá nhân", href: "/expert/profile", icon: Settings },
 ];
