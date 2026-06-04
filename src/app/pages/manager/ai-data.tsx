@@ -9,7 +9,7 @@ const datasets = [
 
 export default function ManagerAIData() {
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Dữ liệu lịch sử khám bệnh"
         description="Tải lên lịch sử ca khám thực tế để AI học hỏi cách tư vấn khách hàng."
@@ -46,8 +46,8 @@ export default function ManagerAIData() {
           </SectionCard>
         </div>
 
-        <SectionCard title="Sandbox kiểm thử" description="Thử hỏi AI bằng dữ liệu đã huấn luyện." className="flex min-h-[680px] flex-col p-0">
-          <div className="flex-1 space-y-4 overflow-y-auto bg-[#F7FAFC] p-5">
+        <SectionCard title="Sandbox kiểm thử" description="Thử hỏi AI bằng dữ liệu đã huấn luyện." className="flex min-h-[680px] flex-col overflow-hidden">
+          <div className="flex-1 space-y-4 bg-[#F7FAFC] p-6 -mx-6 -mt-5">
             <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
               <div className="flex items-center gap-2 text-sm font-extrabold text-[#1C64D1]">
                 <Bot className="h-4 w-4" />
@@ -76,7 +76,7 @@ export default function ManagerAIData() {
             </div>
           </div>
 
-          <div className="border-t border-[#E2E8F0] bg-white p-4">
+          <div className="shrink-0 border-t border-[#E2E8F0] bg-white p-4 -mx-6 -mb-6">
             <div className="flex gap-3">
               <input className="min-w-0 flex-1 rounded-full border border-[#E2E8F0] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#2F80ED]" placeholder="Hỏi AI về tài liệu..." />
               <ActionButton icon={<Send className="h-4 w-4" />}>Gửi</ActionButton>

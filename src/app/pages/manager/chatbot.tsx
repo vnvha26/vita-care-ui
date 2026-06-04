@@ -1,145 +1,179 @@
-import { useState } from "react";
-import { Bot, CalendarDays, Hospital, Send, Users } from "lucide-react";
-import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
+import { useState, useRef, useEffect } from "react";
+import { Send, Bot, User, Clock } from "lucide-react";
+import { Avatar, AvatarFallback } from "../../components/ui/avatar";
 
-const quickPrompts = [
+interface Message {
+  id: string;
+  content: string;
+  isBot: boolean;
+  timestamp: string;
+}
+
+const initialMessages: Message[] = [
+  {
+    id: "1",
+    content: "Xin chào! Tôi là trợ lý ảo ClinicPro được trang bị AI. Tôi có thể giúp bạn quản lý phòng khám, tra cứu thông tin bệnh nhân, hay thống kê doanh thu. Bạn cần hỗ trợ gì hôm nay?",
+    isBot: true,
+    timestamp: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+  },
+];
+
+const suggestedQuestions = [
   "Số lượng bệnh nhân hôm nay?",
   "Báo cáo lịch khám ngày mai",
   "Thống kê ca bệnh khẩn cấp",
   "Tình trạng các phòng khám",
 ];
 
-type Message = {
-  role: "assistant" | "manager";
-  content: string;
-  time: string;
-};
-
 export default function ManagerChatbot() {
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content:
-        "Xin chào! Tôi là trợ lý quản lý VitaCare AI. Tôi có thể giúp bạn tra cứu lịch khám, tình trạng phòng khám, dữ liệu bệnh nhân và báo cáo vận hành.",
-      time: "17:26",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const askAssistant = (value = input) => {
-    const question = value.trim();
-    if (!question) return;
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-    setMessages((current) => [...current, { role: "manager", content: question, time: "17:27" }]);
-    setInput("");
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
+
+  const handleSend = (text: string = inputMessage) => {
+    if (!text.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: text,
+      isBot: false,
+      timestamp: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    if (inputMessage === text) setInputMessage("");
+    setIsTyping(true);
 
     setTimeout(() => {
-      setMessages((current) => [
-        ...current,
-        {
-          role: "assistant",
-          content:
-            "Tôi đã ghi nhận yêu cầu. Hiện có 19 lịch hẹn trong ngày, 4 bác sĩ đang trực và 2 lịch cần xác nhận lại trước 10:00.",
-          time: "17:28",
-        },
-      ]);
-    }, 300);
+      const botResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: `Tôi đã nhận được yêu cầu "${text}". Đây là phiên bản thử nghiệm. Trong tương lai, tôi sẽ kết nối với cơ sở dữ liệu để trả lời chính xác thông tin này!`,
+        isBot: true,
+        timestamp: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+      };
+      setMessages((prev) => [...prev, botResponse]);
+      setIsTyping(false);
+    }, 1500);
   };
 
   return (
-    <div className="min-h-[calc(100vh-112px)]">
-      <PageHeader
-        title="Trang chủ quản lý"
-        description="Trợ lý AI hỗ trợ điều phối lịch khám, bác sĩ, dữ liệu vận hành và báo cáo phòng khám."
-      />
+    <div className="absolute inset-0 flex flex-col pt-[64px]">
+      {/* Decorative animated gradient blobs for glassmorphism background */}
+      <div className="absolute top-[-5%] left-[-5%] w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob pointer-events-none"></div>
+      <div className="absolute bottom-[-5%] right-[-5%] w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-2000 pointer-events-none"></div>
+      <div className="absolute top-[20%] right-[30%] w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-4000 pointer-events-none"></div>
 
-      <section className="relative overflow-hidden rounded-[24px] border border-[#E2E8F0] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,#CFE3FF_0,transparent_34%),radial-gradient(circle_at_78%_24%,#F1EFFF_0,transparent_30%),radial-gradient(circle_at_80%_85%,#E8D7FF_0,transparent_34%)]" />
-        <div className="relative mx-auto flex min-h-[620px] max-w-4xl flex-col px-5 py-10">
-          <div className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-[#2F80ED] shadow-sm ring-1 ring-[#CFE3FF]">
-              <Bot className="h-8 w-8" />
+      {/* Chat Area */}
+      <div className="flex-1 overflow-y-auto px-4 py-8 relative z-10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="w-full max-w-4xl mx-auto space-y-8">
+          {/* Welcome Logo (Optional since we removed the header) */}
+          <div className="flex flex-col items-center justify-center pt-8 pb-12 opacity-80">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl mb-4">
+              <Bot className="h-8 w-8 text-white" />
             </div>
-            <h1 className="mt-5 text-3xl font-extrabold text-[#1E293B]">Bạn cần hỗ trợ gì?</h1>
-            <p className="mt-2 text-sm font-medium text-[#64748B]">Chọn gợi ý nhanh hoặc nhập yêu cầu quản lý phòng khám.</p>
+            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+              Bạn cần hỗ trợ gì?
+            </h2>
           </div>
 
-          <div className="mx-auto mt-10 grid w-full max-w-2xl gap-3 sm:grid-cols-2">
-            {quickPrompts.map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                onClick={() => askAssistant(prompt)}
-                className="rounded-2xl border border-white/70 bg-white/80 px-5 py-4 text-left text-sm font-bold text-[#1E293B] shadow-sm backdrop-blur hover:bg-white"
-              >
-                <span className="mr-2 text-[#2F80ED]">→</span>
-                {prompt}
-              </button>
-            ))}
-          </div>
+          {messages.length === 1 && (
+            <div className="w-full flex justify-center mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl w-full">
+                {suggestedQuestions.map((q, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSend(q)}
+                    className="px-5 py-4 bg-white/60 hover:bg-white/90 backdrop-blur-md border border-white/50 rounded-2xl text-sm font-medium text-gray-700 text-left transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+                  >
+                    <span className="text-blue-500 group-hover:text-blue-600 mr-2 text-lg leading-none">→</span>
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <div className="mt-8 flex-1 space-y-4">
-            {messages.map((message, index) => (
-              <div key={`${message.time}-${index}`} className={`flex ${message.role === "manager" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[78%] rounded-2xl px-5 py-4 text-sm leading-6 shadow-sm ${
-                    message.role === "manager" ? "rounded-tr-sm bg-[#2F80ED] text-white" : "rounded-tl-sm bg-white text-[#1E293B]"
-                  }`}
-                >
-                  <p>{message.content}</p>
-                  <p className={`mt-2 text-xs font-bold ${message.role === "manager" ? "text-white/75" : "text-[#94A3B8]"}`}>{message.time}</p>
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.isBot ? "justify-start" : "justify-end"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+            >
+              <div className={`flex gap-4 max-w-[85%] md:max-w-[75%] ${message.isBot ? "" : "flex-row-reverse"}`}>
+                <Avatar className="h-10 w-10 shrink-0 shadow-md">
+                  <AvatarFallback className={message.isBot ? "bg-gradient-to-br from-blue-100 to-purple-100 text-blue-600" : "bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700"}>
+                    {message.isBot ? <Bot className="h-5 w-5" /> : <User className="h-5 w-5" />}
+                  </AvatarFallback>
+                </Avatar>
+                <div className={`flex flex-col ${message.isBot ? "items-start" : "items-end"}`}>
+                  <div
+                    className={`rounded-2xl px-5 py-4 shadow-sm backdrop-blur-md ${
+                      message.isBot
+                        ? "bg-white/70 border border-white/60 text-gray-800 rounded-tl-sm"
+                        : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-sm shadow-blue-500/30"
+                    }`}
+                  >
+                    <p className="text-[15px] leading-relaxed">{message.content}</p>
+                  </div>
+                  <div className="flex items-center gap-1 mt-2 px-1 opacity-70">
+                    {message.isBot && <Clock className="h-3 w-3 text-gray-500" />}
+                    <span className="text-xs font-medium text-gray-500">{message.timestamp}</span>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="mx-auto mt-8 w-full max-w-3xl rounded-full border border-[#E2E8F0] bg-white p-2 shadow-sm">
-            <div className="flex items-center gap-2">
-              <input
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                onKeyDown={(event) => event.key === "Enter" && askAssistant()}
-                placeholder="Nhập yêu cầu cho AI..."
-                className="min-w-0 flex-1 bg-transparent px-4 text-sm outline-none"
-              />
-              <ActionButton icon={<Send className="h-4 w-4" />} onClick={() => askAssistant()}>
-                Gửi
-              </ActionButton>
             </div>
-          </div>
-
-          <p className="mt-4 text-center text-xs font-medium text-[#64748B]">AI có thể mắc lỗi. Vui lòng kiểm tra lại thông tin quan trọng.</p>
+          ))}
+          
+          {isTyping && (
+            <div className="flex justify-start animate-in fade-in duration-300">
+              <div className="flex gap-4 max-w-[85%]">
+                <Avatar className="h-10 w-10 shrink-0 shadow-md">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-100 to-purple-100 text-blue-600">
+                    <Bot className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="rounded-2xl px-5 py-5 bg-white/70 backdrop-blur-md border border-white/60 rounded-tl-sm shadow-sm flex items-center gap-1.5">
+                  <div className="h-2 w-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="h-2 w-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="h-2 w-2 bg-blue-500 rounded-full animate-bounce"></div>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} className="h-4" />
         </div>
-      </section>
+      </div>
 
-      <div className="mt-6 grid gap-5 md:grid-cols-3">
-        <SectionCard>
-          <div className="flex items-center gap-3">
-            <Users className="h-5 w-5 text-[#2F80ED]" />
-            <div>
-              <p className="text-sm font-bold text-[#64748B]">Bệnh nhân hôm nay</p>
-              <p className="mt-1 text-2xl font-extrabold text-[#1E293B]">125</p>
-            </div>
-          </div>
-        </SectionCard>
-        <SectionCard>
-          <div className="flex items-center gap-3">
-            <CalendarDays className="h-5 w-5 text-[#27C3A2]" />
-            <div>
-              <p className="text-sm font-bold text-[#64748B]">Lịch cần xác nhận</p>
-              <p className="mt-1 text-2xl font-extrabold text-[#1E293B]">7</p>
-            </div>
-          </div>
-        </SectionCard>
-        <SectionCard>
-          <div className="flex items-center gap-3">
-            <Hospital className="h-5 w-5 text-[#8B7CF6]" />
-            <div>
-              <p className="text-sm font-bold text-[#64748B]">Trạng thái phòng khám</p>
-              <div className="mt-1"><StatusBadge tone="green">Ổn định</StatusBadge></div>
-            </div>
-          </div>
-        </SectionCard>
+      {/* Floating Input Area */}
+      <div className="relative z-20 pb-4 pt-2 px-4 w-full">
+        <div className="relative flex items-center w-full max-w-4xl mx-auto">
+          <input
+            type="text"
+            placeholder="Nhập yêu cầu cho AI..."
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend(inputMessage)}
+            className="w-full pl-6 pr-14 py-4 rounded-full bg-white/80 backdrop-blur-xl border border-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 shadow-[0_8px_30px_rgb(0,0,0,0.08)] text-[15px] placeholder:text-gray-500 transition-all"
+          />
+          <button 
+            onClick={() => handleSend(inputMessage)}
+            disabled={!inputMessage.trim()}
+            className="absolute right-2 p-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-all disabled:opacity-50 disabled:hover:bg-blue-600 shadow-md"
+          >
+            <Send className="h-5 w-5 ml-0.5" />
+          </button>
+        </div>
+        <p className="text-center text-[11px] text-gray-500 mt-3 font-medium">
+          AI có thể mắc lỗi. Vui lòng kiểm tra lại thông tin quan trọng.
+        </p>
       </div>
     </div>
   );
