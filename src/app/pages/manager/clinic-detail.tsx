@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router";
 import { Camera, Clock, Edit3, Hospital, Mail, MapPin, Phone, Star, Stethoscope, Users } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 
@@ -34,7 +35,10 @@ export default function ClinicDetail() {
                 <h1 className="mt-2 text-3xl font-extrabold text-[#1E293B]">Phòng khám Đa khoa Quốc tế VitaCare</h1>
               </div>
             </div>
-            <ActionButton icon={<Edit3 className="h-4 w-4" />}>Chỉnh sửa hồ sơ</ActionButton>
+            <Link to="/manager/clinic-registration" className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-[#1E293B] shadow-sm ring-1 ring-inset ring-[#E2E8F0] transition-colors hover:bg-[#F7FAFC]">
+              <Edit3 className="h-4 w-4" />
+              Chỉnh sửa hồ sơ
+            </Link>
           </div>
 
           <div className="grid gap-4 pt-5 md:grid-cols-2 xl:grid-cols-4">
@@ -90,6 +94,22 @@ export default function ClinicDetail() {
           </div>
         </SectionCard>
       </div>
+
+      <SectionCard title="Hình ảnh cơ sở vật chất">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+          {[
+            "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1538108149393-cebb47cbdc17?q=80&w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1504813184591-01572f98c85f?q=80&w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=600&auto=format&fit=crop"
+          ].map((src, idx) => (
+            <div key={idx} className="group relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 shadow-sm">
+              <img src={src} alt="Clinic facility" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
     </div>
   );
 }

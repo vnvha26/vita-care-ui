@@ -1,247 +1,234 @@
-import { useMemo, useState } from "react";
-import { Archive, Inbox, Search, Send, UserRound } from "lucide-react";
-import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
-import { cn } from "../../lib/utils";
+import { useState } from "react";
+import { Search, Phone, Video, Info, Send, UserCircle, Check, CheckCircle2, Bot, CalendarPlus } from "lucide-react";
 
-type ConversationStatus = "active" | "unread" | "archived";
-type ConversationFilter = "all" | "unread" | "archived";
-
-type ChatMessage = {
-  sender: "manager" | "contact";
-  text: string;
-  time: string;
-};
-
-type Conversation = {
+interface ChatContact {
   id: string;
   name: string;
-  code?: string;
-  role: string;
-  preview: string;
-  status: ConversationStatus;
-  lastAt: string;
-  messages: ChatMessage[];
-};
+  lastMessage: string;
+  time: string;
+  unread: number;
+  online: boolean;
+  avatar?: string;
+}
 
-const initialConversations: Conversation[] = [
-  {
-    id: "c1",
-    name: "Nguyễn Khám Bệnh",
-    code: "KH001",
-    role: "Bệnh nhân",
-    preview: "Dạo này nắng nóng, em hay bị choáng váng.",
-    status: "unread",
-    lastAt: "10:32",
-    messages: [
-      { sender: "contact", text: "Dạo này thời tiết nắng nóng, em hay bị choáng váng và chóng mặt.", time: "10:32" },
-      { sender: "manager", text: "Bạn nên hạn chế ra ngoài giờ cao điểm và uống nhiều nước. Phòng khám còn lịch tổng quát sáng mai.", time: "10:35" },
-      { sender: "contact", text: "Vậy cho em đặt lịch 09:00 sáng mai được không ạ?", time: "10:36" },
-    ],
-  },
-  {
-    id: "c2",
-    name: "BS. Nguyễn Văn A",
-    role: "Bác sĩ",
-    preview: "Cần đổi lịch chiều nay sang phòng 203.",
-    status: "active",
-    lastAt: "09:15",
-    messages: [
-      { sender: "contact", text: "Quản lý ơi, lịch 14:00 chiều nay cần chuyển sang phòng 203.", time: "09:15" },
-      { sender: "manager", text: "Mình đã cập nhật phòng khám và báo lại cho lễ tân.", time: "09:18" },
-    ],
-  },
-  {
-    id: "c3",
-    name: "Trần Hay Hỏi",
-    code: "KH002",
-    role: "Bệnh nhân",
-    preview: "Em muốn hỏi lịch xét nghiệm sốt xuất huyết.",
-    status: "active",
-    lastAt: "Hôm qua",
-    messages: [
-      { sender: "contact", text: "Em muốn hỏi lịch xét nghiệm sốt xuất huyết còn không ạ?", time: "Hôm qua" },
-      { sender: "manager", text: "Hiện còn slot 15:30 hôm nay. Bạn có muốn đặt lịch không?", time: "Hôm qua" },
-    ],
-  },
-  {
-    id: "c4",
-    name: "Thánh Bùng Lịch",
-    code: "KH003",
-    role: "Bệnh nhân",
-    preview: "Đã xử lý đổi lịch, lưu lại để đối soát.",
-    status: "archived",
-    lastAt: "28/05",
-    messages: [
-      { sender: "contact", text: "Em cần đổi lịch khám răng sang thứ sáu.", time: "28/05" },
-      { sender: "manager", text: "Phòng khám còn lịch 14:00 thứ sáu, mình đã đổi lịch cho bạn.", time: "28/05" },
-    ],
-  },
+const mockContacts: ChatContact[] = [
+  { id: "1", name: "Nguyễn Khám Bệnh", lastMessage: "Dạo này nắng nóng tia cực tím cao quá...", time: "10:32", unread: 2, online: true },
+  { id: "2", name: "Trần Hay Hỏi", lastMessage: "Bác sĩ ơi đợt dịch sốt xuất huyết này căng quá...", time: "09:15", unread: 0, online: false },
+  { id: "3", name: "Lê Googler", lastMessage: "Em tra thông tin y tế trên mạng thấy...", time: "Hôm qua", unread: 0, online: true },
+  { id: "4", name: "Thánh Bùng Lịch", lastMessage: "Bão số 3 vào nên em xin dời lịch nhé.", time: "Hôm qua", unread: 1, online: false },
+  { id: "5", name: "Trùm Trả Giá", lastMessage: "Nhổ răng khôn bớt em 200k nha phòng khám.", time: "T2", unread: 0, online: false },
 ];
 
-const filterLabels: Record<ConversationFilter, string> = {
-  all: "Tất cả",
-  unread: "Chưa xem",
-  archived: "Lưu trữ",
-};
-
 export default function ManagerChat() {
-  const [filter, setFilter] = useState<ConversationFilter>("all");
-  const [conversations, setConversations] = useState(initialConversations);
-  const [selectedId, setSelectedId] = useState(initialConversations[0].id);
-  const [draft, setDraft] = useState("");
-
-  const filteredConversations = useMemo(() => {
-    if (filter === "all") return conversations.filter((item) => item.status !== "archived");
-    return conversations.filter((item) => item.status === filter);
-  }, [conversations, filter]);
-
-  const selectedConversation = conversations.find((item) => item.id === selectedId) ?? conversations[0];
-
-  const handleSelect = (id: string) => {
-    setSelectedId(id);
-    setConversations((current) => current.map((item) => (item.id === id && item.status === "unread" ? { ...item, status: "active" } : item)));
-  };
-
-  const handleSend = () => {
-    const text = draft.trim();
-    if (!text) return;
-
-    const time = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
-    setConversations((current) =>
-      current.map((item) =>
-        item.id === selectedConversation.id
-          ? {
-              ...item,
-              preview: text,
-              lastAt: time,
-              status: item.status === "archived" ? "archived" : "active",
-              messages: [...item.messages, { sender: "manager", text, time }],
-            }
-          : item
-      )
-    );
-    setDraft("");
-  };
-
-  const toggleArchive = () => {
-    setConversations((current) =>
-      current.map((item) =>
-        item.id === selectedConversation.id ? { ...item, status: item.status === "archived" ? "active" : "archived" } : item
-      )
-    );
-  };
+  const [activeContact, setActiveContact] = useState<ChatContact>(mockContacts[0]);
+  const [message, setMessage] = useState("");
+  const [isAddedToSchedule, setIsAddedToSchedule] = useState(false);
 
   return (
-    <div className="min-w-0 overflow-hidden">
-      <PageHeader
-        title="Tin nhắn"
-        description="Trao đổi với bệnh nhân, bác sĩ và các yêu cầu điều phối theo từng cuộc trò chuyện."
-      />
-
-      <div className="grid min-h-[640px] min-w-0 gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
-        <SectionCard title="Cuộc trò chuyện" className="min-w-0 overflow-hidden">
-          <div className="mb-4 grid grid-cols-3 gap-1 rounded-2xl bg-[#F2F7FB] p-1">
-            {(Object.keys(filterLabels) as ConversationFilter[]).map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setFilter(item)}
-                className={cn(
-                  "h-10 rounded-xl text-sm font-bold transition",
-                  filter === item ? "bg-white text-[#1C64D1] shadow-sm" : "text-[#64748B] hover:text-[#1E293B]"
-                )}
-              >
-                {filterLabels[item]}
-              </button>
-            ))}
+    <div className="flex h-[calc(100vh-100px)] gap-6 animate-in fade-in duration-500 pb-2">
+      
+      {/* Left Sidebar - Contact List */}
+      <div className="w-80 flex flex-col bg-white/60 backdrop-blur-xl rounded-3xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden shrink-0">
+        <div className="p-5 border-b border-white/60 bg-white/40">
+          <h2 className="text-xl font-bold text-[#1E293B] mb-4">Tin nhắn</h2>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm bệnh nhân..." 
+              className="w-full pl-10 pr-4 py-2.5 bg-white/80 border border-white/80 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] text-[#1E293B] placeholder:text-[#94A3B8]"
+            />
           </div>
-
-          <div className="mb-4 flex h-11 items-center gap-2 rounded-2xl border border-[#E2E8F0] px-3 text-[#64748B]">
-            <Search className="h-4 w-4" />
-            <input className="min-w-0 flex-1 bg-transparent text-sm outline-none" placeholder="Tìm theo tên hoặc mã khách" />
-          </div>
-
-          <div className="space-y-3">
-            {filteredConversations.map((contact) => (
-              <button
-                key={contact.id}
-                type="button"
-                onClick={() => handleSelect(contact.id)}
-                className={cn(
-                  "flex w-full gap-3 rounded-[18px] border p-4 text-left transition",
-                  selectedConversation.id === contact.id
-                    ? "border-[#CFE3FF] bg-[#EAF3FF]"
-                    : "border-[#E2E8F0] bg-white hover:bg-[#F2F7FB]"
-                )}
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[#2F80ED] ring-1 ring-[#CFE3FF]">
-                  {contact.status === "archived" ? <Archive className="h-5 w-5" /> : <UserRound className="h-5 w-5" />}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="truncate font-bold text-[#1E293B]">{contact.name}</p>
-                    <span className="shrink-0 text-xs font-bold text-[#64748B]">{contact.lastAt}</span>
-                  </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <StatusBadge tone={contact.status === "unread" ? "rose" : contact.status === "archived" ? "slate" : "blue"}>
-                      {contact.status === "unread" ? "Chưa xem" : contact.role}
-                    </StatusBadge>
-                    {contact.code && <span className="text-xs font-semibold text-[#64748B]">{contact.code}</span>}
-                  </div>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#64748B]">{contact.preview}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          title={selectedConversation.name}
-          description={`${selectedConversation.role}${selectedConversation.code ? ` · ${selectedConversation.code}` : ""}`}
-          actions={
-            <ActionButton
-              variant="secondary"
-              icon={selectedConversation.status === "archived" ? <Inbox className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
-              onClick={toggleArchive}
+        </div>
+        
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
+          {mockContacts.map((contact) => (
+            <div 
+              key={contact.id}
+              onClick={() => setActiveContact(contact)}
+              className={`flex items-center gap-3 p-4 cursor-pointer transition-colors border-l-4 ${
+                activeContact.id === contact.id 
+                  ? "bg-blue-50/40 border-blue-600" 
+                  : "border-transparent hover:bg-white/40"
+              }`}
             >
-              {selectedConversation.status === "archived" ? "Bỏ lưu trữ" : "Lưu trữ"}
-            </ActionButton>
-          }
-          className="flex min-w-0 flex-col"
-        >
-          <div className="min-h-[420px] flex-1 space-y-4 overflow-y-auto rounded-2xl bg-[#F7FAFC] p-5">
-            {selectedConversation.messages.map((message, index) => (
-              <div key={`${message.time}-${index}`} className={cn("flex", message.sender === "manager" ? "justify-end" : "justify-start")}>
-                <div
-                  className={cn(
-                    "max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm",
-                    message.sender === "manager" ? "rounded-tr-sm bg-[#2F80ED] text-white" : "rounded-tl-sm bg-white text-[#1E293B]"
-                  )}
-                >
-                  <p>{message.text}</p>
-                  <p className={cn("mt-2 text-xs font-bold", message.sender === "manager" ? "text-white/75" : "text-[#94A3B8]")}>{message.time}</p>
+              <div className="relative">
+                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                  {contact.name.charAt(0)}
                 </div>
+                {contact.online && (
+                  <div className="absolute bottom-0 right-0 h-3.5 w-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+                )}
               </div>
-            ))}
-          </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <h3 className="font-semibold text-[#1E293B] truncate pr-2">{contact.name}</h3>
+                  <span className={`text-xs ${contact.unread > 0 ? "text-blue-600 font-bold" : "text-[#94A3B8]"}`}>
+                    {contact.time}
+                  </span>
+                </div>
+                <p className={`text-sm truncate ${contact.unread > 0 ? "text-[#1E293B] font-medium" : "text-[#64748B]"}`}>
+                  {contact.lastMessage}
+                </p>
+              </div>
+              {contact.unread > 0 && (
+                <div className="h-5 w-5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                  {contact.unread}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
-          <div className="mt-4 border-t border-[#E2E8F0] bg-white pt-4">
-            <div className="flex gap-3">
-              <input
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") handleSend();
-                }}
-                placeholder="Nhập tin nhắn..."
-                className="min-w-0 flex-1 rounded-full border border-[#E2E8F0] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#2F80ED]"
-              />
-              <ActionButton icon={<Send className="h-4 w-4" />} onClick={handleSend}>
-                Gửi
-              </ActionButton>
+      {/* Right Area - Chat Window */}
+      <div className="flex-1 flex flex-col bg-white/60 backdrop-blur-xl rounded-3xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden relative">
+        
+        {/* Subtle decorative background inside chat */}
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none"></div>
+
+        {/* Chat Header */}
+        <div className="absolute top-0 left-0 right-0 h-20 px-6 border-b border-white/60 bg-white/40 backdrop-blur-xl flex items-center justify-between z-20">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center text-blue-600 font-bold text-lg shadow-sm">
+                {activeContact.name.charAt(0)}
+              </div>
+              {activeContact.online && (
+                <div className="absolute bottom-0 right-0 h-3.5 w-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+              )}
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-[#1E293B]">{activeContact.name}</h2>
+              <p className="text-sm text-[#64748B] flex items-center gap-1">
+                {activeContact.online ? (
+                  <><span className="h-2 w-2 bg-green-500 rounded-full inline-block"></span> Đang hoạt động</>
+                ) : (
+                  "Ngoại tuyến"
+                )}
+              </p>
             </div>
           </div>
-        </SectionCard>
+          <div className="flex gap-2">
+            <button className="p-2.5 text-[#64748B] hover:text-blue-600 hover:bg-white/60 rounded-full transition-colors">
+              <Phone className="h-5 w-5" />
+            </button>
+            <button className="p-2.5 text-[#64748B] hover:text-blue-600 hover:bg-white/60 rounded-full transition-colors">
+              <Video className="h-5 w-5" />
+            </button>
+            <button className="p-2.5 text-[#64748B] hover:text-blue-600 hover:bg-white/60 rounded-full transition-colors">
+              <Info className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Chat Messages */}
+        <div className="flex-1 overflow-y-auto pt-24 px-6 pb-6 space-y-6 z-10 bg-transparent [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex justify-center">
+            <span className="text-xs font-medium text-[#94A3B8] bg-white/60 border border-white/60 px-3 py-1 rounded-full">Hôm nay</span>
+          </div>
+
+          <div className="flex justify-start">
+            <div className="flex gap-3 max-w-[75%]">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center shrink-0 mt-1">
+                <UserCircle className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <div className="bg-white/80 border border-white/60 text-[#1E293B] px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm leading-relaxed">
+                  <p className="text-[14px]">Bác sĩ ơi, dạo này thời tiết nắng nóng gay gắt, tia cực tím (UV) ngoài đường cao quá làm em hay bị choáng váng, say nắng chóng mặt liên tục.</p>
+                </div>
+                <p className="text-xs text-[#94A3B8] mt-1 ml-1">10:30</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-start">
+            <div className="flex gap-3 max-w-[75%]">
+              <div className="h-8 w-8 rounded-full shrink-0 mt-1 opacity-0"></div> {/* Spacer for alignment */}
+              <div>
+                <div className="bg-white/80 border border-white/60 text-[#1E293B] px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm leading-relaxed">
+                  <p className="text-[14px]">Đài báo đang có đợt nắng nóng kỷ lục, em muốn đặt lịch qua phòng khám kiểm tra sức khỏe tổng quát và nội thần kinh cho an tâm ạ.</p>
+                </div>
+                <p className="text-xs text-[#94A3B8] mt-1 ml-1">10:32</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <div className="flex gap-3 max-w-[75%] flex-row-reverse">
+              <div>
+                <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-3 rounded-2xl rounded-tr-sm shadow-md shadow-blue-500/20 leading-relaxed">
+                  <p className="text-[14px]">Chào bạn, thời tiết hiện tại đúng là rất khắc nghiệt. Bạn nên hạn chế ra ngoài vào giờ cao điểm từ 11h - 15h và uống nhiều nước nhé. Phòng khám sẽ sắp xếp lịch kiểm tra tổng quát cho bạn vào đầu giờ sáng ngày mai để tránh nắng gắt.</p>
+                </div>
+                <div className="flex justify-end items-center gap-1 mt-1 mr-1">
+                  <p className="text-xs text-[#94A3B8]">10:35</p>
+                  <CheckCircle2 className="h-3 w-3 text-blue-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-start">
+            <div className="flex gap-3 max-w-[75%]">
+              <div className="h-8 w-8 rounded-full shrink-0 mt-1 opacity-0"></div> {/* Spacer for alignment */}
+              <div>
+                <div className="bg-white/80 border border-white/60 text-[#1E293B] px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm space-y-3 leading-relaxed">
+                  <div className="flex items-center gap-2 text-blue-600 mb-1">
+                    <Bot className="h-4 w-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Trợ lý AI ClinicPro</span>
+                  </div>
+                  <p className="text-[14px] text-[#475569]">Bệnh nhân vừa cung cấp thông tin đặt lịch hẹn:</p>
+                  <div className="bg-white/50 p-3 rounded-xl border border-white/60 text-sm space-y-1.5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+                    <p><span className="font-medium text-[#64748B]">Người đặt:</span> Nguyễn Khám Bệnh</p>
+                    <p><span className="font-medium text-[#64748B]">SĐT:</span> 0901 234 567</p>
+                    <p><span className="font-medium text-[#64748B]">Ngày khám:</span> Ngày mai, 09:00</p>
+                    <p><span className="font-medium text-[#64748B]">Lý do:</span> Khám lại dạ dày</p>
+                  </div>
+                  <button 
+                    onClick={() => setIsAddedToSchedule(true)}
+                    className={`w-full py-2.5 rounded-xl font-medium transition-all text-sm flex items-center justify-center gap-2 ${
+                      isAddedToSchedule 
+                        ? "bg-green-50 text-green-700 border border-green-200" 
+                        : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md"
+                    }`}
+                  >
+                    {isAddedToSchedule ? (
+                      <><Check className="h-4 w-4" /> Đã thêm vào lịch hẹn</>
+                    ) : (
+                      <><CalendarPlus className="h-4 w-4" /> Thêm vào lịch khám</>
+                    )}
+                  </button>
+                </div>
+                <p className="text-xs text-[#94A3B8] mt-1 ml-1">10:36</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Chat Input */}
+        <div className="p-4 bg-white/40 backdrop-blur-md border-t border-white/60 z-10">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 relative">
+              <input 
+                type="text" 
+                placeholder="Nhập tin nhắn..." 
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full pl-5 pr-4 py-3.5 bg-white/70 border border-white/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-[15px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] text-[#1E293B] placeholder:text-[#94A3B8]"
+              />
+            </div>
+            <button 
+              className={`p-3.5 rounded-2xl flex items-center justify-center transition-all ${
+                message.trim() 
+                  ? "bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:-translate-y-0.5" 
+                  : "bg-slate-100 text-[#94A3B8]"
+              }`}
+            >
+              <Send className="h-5 w-5 ml-0.5" />
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );
