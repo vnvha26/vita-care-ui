@@ -6,13 +6,13 @@ const specialties = ["Nội tổng quát", "Tim mạch", "Nhi khoa", "Tai Mũi H
 
 export default function ClinicDetail() {
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6 overflow-hidden">
       <PageHeader
         title="Thông tin phòng khám"
         description="Tổng hợp hồ sơ phòng khám, năng lực tiếp nhận và trạng thái vận hành."
       />
 
-      <section className="overflow-hidden rounded-[24px] border border-[#E2E8F0] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
+      <section className="min-w-0 overflow-hidden rounded-[24px] border border-[#E2E8F0] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
         <div className="relative h-48 bg-gradient-to-r from-[#2F80ED] via-[#6D5FE5] to-[#A855F7]">
           <button className="absolute bottom-5 right-5 inline-flex items-center gap-2 rounded-2xl bg-white/18 px-4 py-2 text-sm font-bold text-white backdrop-blur hover:bg-white/25">
             <Camera className="h-4 w-4" />
@@ -20,13 +20,13 @@ export default function ClinicDetail() {
           </button>
         </div>
 
-        <div className="px-6 pb-6">
-          <div className="-mt-16 flex flex-col gap-5 border-b border-[#E2E8F0] pb-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-              <div className="flex h-28 w-28 items-center justify-center rounded-[20px] border-4 border-white bg-[#F7FAFC] text-[#2F80ED] shadow-lg">
+        <div className="px-6 py-6">
+          <div className="flex min-w-0 flex-col gap-5 border-b border-[#E2E8F0] pb-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[20px] border border-[#E2E8F0] bg-[#F7FAFC] text-[#2F80ED] shadow-sm">
                 <Hospital className="h-12 w-12" />
               </div>
-              <div className="pb-1">
+              <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge tone="green">Đã xác thực</StatusBadge>
                   <span className="text-sm font-bold text-[#64748B]">Phòng khám đa khoa</span>

@@ -132,14 +132,14 @@ export default function ManagerChat() {
   };
 
   return (
-    <div>
+    <div className="min-w-0 overflow-hidden">
       <PageHeader
         title="Tin nhắn"
         description="Trao đổi với bệnh nhân, bác sĩ và các yêu cầu điều phối theo từng cuộc trò chuyện."
       />
 
-      <div className="grid min-h-[640px] gap-6 xl:grid-cols-[380px_1fr]">
-        <SectionCard title="Cuộc trò chuyện" className="overflow-hidden">
+      <div className="grid min-h-[640px] min-w-0 gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+        <SectionCard title="Cuộc trò chuyện" className="min-w-0 overflow-hidden">
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-2xl bg-[#F2F7FB] p-1">
             {(Object.keys(filterLabels) as ConversationFilter[]).map((item) => (
               <button
@@ -207,9 +207,9 @@ export default function ManagerChat() {
               {selectedConversation.status === "archived" ? "Bỏ lưu trữ" : "Lưu trữ"}
             </ActionButton>
           }
-          className="flex flex-col p-0"
+          className="flex min-w-0 flex-col"
         >
-          <div className="flex-1 space-y-4 overflow-y-auto bg-[#F7FAFC] p-5">
+          <div className="min-h-[420px] flex-1 space-y-4 overflow-y-auto rounded-2xl bg-[#F7FAFC] p-5">
             {selectedConversation.messages.map((message, index) => (
               <div key={`${message.time}-${index}`} className={cn("flex", message.sender === "manager" ? "justify-end" : "justify-start")}>
                 <div
@@ -225,7 +225,7 @@ export default function ManagerChat() {
             ))}
           </div>
 
-          <div className="border-t border-[#E2E8F0] bg-white p-4">
+          <div className="mt-4 border-t border-[#E2E8F0] bg-white pt-4">
             <div className="flex gap-3">
               <input
                 value={draft}
