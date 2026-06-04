@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Archive, BellRing, ChevronLeft, Inbox, MessageCircle, Search, Send, Sparkles, UserRound } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 import { cn } from "../../lib/utils";
@@ -114,6 +114,46 @@ export default function DoctorChat() {
 
   const selectedConversation = conversations.find((item) => item.id === selectedId) ?? conversations[0];
 
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const layoutWrapper = containerRef.current?.closest(".overflow-y-auto");
+    const originalLayoutOverflow = layoutWrapper instanceof HTMLElement ? layoutWrapper.style.overflowY : "";
+    if (layoutWrapper instanceof HTMLElement) {
+      layoutWrapper.style.overflowY = "hidden";
+    }
+
+    const mainElement = containerRef.current?.closest("main");
+    const originalMainHeight = mainElement instanceof HTMLElement ? mainElement.style.height : "";
+    const originalMainDisplay = mainElement instanceof HTMLElement ? mainElement.style.display : "";
+    const originalMainFlexDirection = mainElement instanceof HTMLElement ? mainElement.style.flexDirection : "";
+    const originalMainMinHeight = mainElement instanceof HTMLElement ? mainElement.style.minHeight : "";
+
+    if (mainElement instanceof HTMLElement) {
+      mainElement.style.height = "100%";
+      mainElement.style.display = "flex";
+      mainElement.style.flexDirection = "column";
+      mainElement.style.minHeight = "0";
+    }
+
+    return () => {
+      if (layoutWrapper instanceof HTMLElement) {
+        layoutWrapper.style.overflowY = originalLayoutOverflow;
+      }
+      if (mainElement instanceof HTMLElement) {
+        mainElement.style.height = originalMainHeight;
+        mainElement.style.display = originalMainDisplay;
+        mainElement.style.flexDirection = originalMainFlexDirection;
+        mainElement.style.minHeight = originalMainMinHeight;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [selectedConversation.messages]);
+
   const handleSelect = (id: string) => {
     setSelectedId(id);
     setConversations((current) => current.map((item) => (item.id === id && item.status === "unread" ? { ...item, status: "active" } : item)));
@@ -160,7 +200,7 @@ export default function DoctorChat() {
   };
 
   return (
-    <div className="min-w-0 overflow-hidden">
+    <div className="h-full flex flex-col min-h-0 min-w-0 overflow-hidden" ref={containerRef}>
       <PageHeader
         title="Tin nhắn"
         description="Trao đổi với bệnh nhân, chuyên gia và đồng nghiệp theo từng cuộc trò chuyện."
@@ -185,10 +225,10 @@ export default function DoctorChat() {
         </div>
       )}
 
-      <div className="grid h-[calc(100vh-230px)] min-h-[420px] lg:h-[calc(100vh-190px)] lg:min-h-[500px] min-w-0 gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
+      <div className="grid flex-1 min-h-0 min-w-0 gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
         <SectionCard
           title="Cuộc trò chuyện"
-          className={cn("h-full flex flex-col min-w-0 overflow-hidden", showChatOnMobile ? "hidden lg:flex" : "flex")}
+          className={cn("h-full flex flex-col min-h-0 min-w-0 overflow-hidden", showChatOnMobile ? "hidden lg:flex" : "flex")}
         >
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-2xl bg-[#F2F7FB] p-1">
             {(Object.keys(filterLabels) as ConversationFilter[]).map((item) => (
@@ -267,7 +307,7 @@ export default function DoctorChat() {
               </ActionButton>
             </div>
           }
-          className={cn("h-full flex min-w-0 flex-col", showChatOnMobile ? "flex" : "hidden lg:flex")}
+          className={cn("h-full flex flex-col min-h-0 min-w-0 overflow-hidden", showChatOnMobile ? "flex" : "hidden lg:flex")}
         >
           <div className="flex-1 min-h-0 space-y-4 overflow-y-auto rounded-2xl bg-[#F7FAFC] p-5 custom-scrollbar">
             {selectedConversation.messages.map((message, index) => (
@@ -283,6 +323,7 @@ export default function DoctorChat() {
                 </div>
               </div>
             ))}
+            <div ref={chatEndRef} />
           </div>
 
           <div className="mt-4 border-t border-[#E2E8F0] bg-white pt-4">
