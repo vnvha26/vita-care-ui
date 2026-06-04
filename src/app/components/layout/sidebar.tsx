@@ -65,15 +65,25 @@ const patientNav: NavItem[] = [
   { title: "Hồ sơ cá nhân", href: "/patient/profile", icon: Settings },
 ];
 
+const consultantNav: NavItem[] = [
+  { title: "Tư vấn mới", href: "/consultant/consultation", icon: Bot },
+  { title: "Lịch sử tư vấn", href: "/consultant/history", icon: FileText },
+  { title: "Hồ sơ sức khỏe", href: "/consultant/health-profile", icon: HeartPulse },
+  { title: "Theo dõi triệu chứng", href: "/consultant/symptom-tracking", icon: Activity },
+  { title: "Đặt lịch khám", href: "/consultant/appointment", icon: Calendar },
+  { title: "Cài đặt", href: "/consultant/health-profile", icon: Settings },
+];
+
 const roleNavMap = {
   doctor: doctorNav,
   expert: expertNav,
   manager: managerNav,
   patient: patientNav,
+  consultant: consultantNav,
 };
 
 interface SidebarProps {
-  role: "doctor" | "expert" | "manager" | "patient";
+  role: "doctor" | "expert" | "manager" | "patient" | "consultant";
 }
 
 export function Sidebar({ role }: SidebarProps) {
@@ -86,6 +96,7 @@ export function Sidebar({ role }: SidebarProps) {
     expert: "Chuyên gia",
     manager: "Quản lý",
     patient: "Bệnh nhân",
+    consultant: "Người cần tư vấn",
   };
 
   return (
