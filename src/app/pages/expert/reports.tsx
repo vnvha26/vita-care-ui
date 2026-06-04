@@ -1,4 +1,5 @@
 import { BarChart3, CheckCircle2, Clock, Download, LineChart, Star, TrendingUp } from "lucide-react";
+import { toast } from "sonner";
 import { ActionButton, DataRow, PageHeader, SectionCard, StatCard, StatusBadge } from "../../components/layout/role-page";
 
 const monthlyCases = [
@@ -25,8 +26,8 @@ export default function ExpertReports() {
         description="Theo dõi chất lượng phản hồi AI, tốc độ kiểm duyệt và xu hướng các ca cần chuyên gia đánh giá."
         actions={
           <>
-            <ActionButton variant="secondary">Tháng 6, 2026</ActionButton>
-            <ActionButton icon={<Download className="h-4 w-4" />}>Xuất báo cáo</ActionButton>
+            <ActionButton variant="secondary" onClick={() => toast.info("Đang chuyển tháng báo cáo")}>Tháng 6, 2026</ActionButton>
+            <ActionButton icon={<Download className="h-4 w-4" />} onClick={() => toast.success("Đang tải báo cáo...")}>Xuất báo cáo</ActionButton>
           </>
         }
       />
