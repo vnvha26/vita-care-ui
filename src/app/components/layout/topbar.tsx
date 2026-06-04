@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { Bell, Search, AlertCircle, MessageCircle, X, Send, Bot, Check, CalendarPlus, ClipboardCheck, MessageSquareWarning, TrendingUp } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { toast } from "sonner";
+import { getLatestTemporaryPatientAppointment, type PatientAppointment } from "../../lib/patient-appointments";
 import { getLatestTemporaryPatientConversation, getPatientConversations, type PatientChatMessage, type PatientConversation } from "../../lib/patient-conversations";
 
 interface TopbarProps {
@@ -83,6 +84,20 @@ const buildDoctorConsultNotification = (conversation: PatientConversation | null
   };
 };
 
+const buildAppointmentNotification = (appointment: PatientAppointment | null) => {
+  if (!appointment) return null;
+
+  return {
+    id: `booking-${appointment.id}`,
+    icon: CalendarPlus,
+    iconBg: "bg-blue-100",
+    iconColor: "text-blue-600",
+    title: "Yêu cầu đặt lịch đã được gửi",
+    body: `${appointment.doctor} · ${appointment.specialty} · ${appointment.date}, ${appointment.time}. Trạng thái: ${appointment.status}.`,
+    time: "Vừa xong",
+  };
+};
+
 const patientNotifications = [
   {
     id: "p-n2",
@@ -156,6 +171,7 @@ const expertNotifications = [
 ];
 
 export function Topbar({ role, userName, userRole, notifications = 0 }: TopbarProps) {
+  useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessengerDrop, setShowMessengerDrop] = useState(false);
   const [activeMiniChat, setActiveMiniChat] = useState<any>(null);
@@ -190,10 +206,14 @@ export function Topbar({ role, userName, userRole, notifications = 0 }: TopbarPr
   const profileHref = roleProfileMap[role];
   const patientConversationList = role === "patient" ? getPatientConversations() : [];
   const temporaryDoctorConsult = role === "patient" ? getLatestTemporaryPatientConversation() : null;
+  const latestTemporaryAppointment = role === "patient" ? getLatestTemporaryPatientAppointment() : null;
   const temporaryDoctorNotification = buildDoctorConsultNotification(temporaryDoctorConsult);
-  const patientNotificationList = temporaryDoctorNotification
-    ? [temporaryDoctorNotification, ...patientNotifications]
-    : patientNotifications;
+  const temporaryAppointmentNotification = buildAppointmentNotification(latestTemporaryAppointment);
+  const patientNotificationList = [
+    ...(temporaryAppointmentNotification ? [temporaryAppointmentNotification] : []),
+    ...(temporaryDoctorNotification ? [temporaryDoctorNotification] : []),
+    ...patientNotifications,
+  ];
   const messengerContacts = role === "patient" ? mapPatientTopbarContacts(patientConversationList) : roleContactsMap[role];
   const unreadMessageCount = messengerContacts.reduce((total, contact) => total + contact.unread, 0);
   const notificationBadgeCount = role === "patient"
