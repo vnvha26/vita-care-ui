@@ -45,7 +45,9 @@ function RoleSwitcher() {
       <div className="text-center space-y-6">
         <div>
           <h1 className="text-4xl font-bold text-gray-900">NHÓM 4</h1>
-          <p className="text-gray-500 mt-2">Hệ thống quản lý phòng khám đa vai trò</p>
+          <p className="text-gray-500 mt-2">
+            Hệ thống quản lý phòng khám đa vai trò
+          </p>
         </div>
         <div className="grid gap-4 md:grid-cols-5 max-w-7xl">
           <a
@@ -53,7 +55,9 @@ function RoleSwitcher() {
             className="block p-8 rounded-xl border-2 border-gray-200 bg-white hover:border-pink-500 hover:shadow-lg transition-all"
           >
             <div className="text-5xl mb-4">👤</div>
-            <h2 className="text-xl font-semibold text-gray-900">Người cần tư vấn</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Người cần tư vấn
+            </h2>
             <p className="text-sm text-gray-500 mt-2">Chưa đăng nhập</p>
           </a>
           <a
@@ -112,14 +116,13 @@ export const router = createBrowserRouter([
     element: <PatientRegister />,
   },
   {
-    path: "/patient/doctors",
-    element: <PatientDoctors />,
-  },
-  {
     path: "/patient",
-    element: <Layout role="patient" userName="Nguyễn Văn An" userRole="Bệnh nhân" />,
+    element: (
+      <Layout role="patient" userName="Nguyễn Văn An" userRole="Bệnh nhân" />
+    ),
     children: [
       { path: "dashboard", element: <PatientDashboard /> },
+      { path: "doctors", element: <PatientDoctors /> },
       { path: "appointments", element: <PatientAppointments /> },
       { path: "book", element: <PatientBook /> },
       { path: "medical-records", element: <PatientMedicalRecords /> },
@@ -129,7 +132,9 @@ export const router = createBrowserRouter([
   },
   {
     path: "/doctor",
-    element: <Layout role="doctor" userName="BS. Nguyễn Văn A" userRole="Bác sĩ" />,
+    element: (
+      <Layout role="doctor" userName="BS. Nguyễn Văn A" userRole="Bác sĩ" />
+    ),
     children: [
       { index: true, element: <DoctorDashboard /> },
       { path: "patients", element: <DoctorPatients /> },
@@ -142,7 +147,13 @@ export const router = createBrowserRouter([
   },
   {
     path: "/expert",
-    element: <Layout role="expert" userName="TS. Nguyễn Thị Lan" userRole="Chuyên gia" />,
+    element: (
+      <Layout
+        role="expert"
+        userName="TS. Nguyễn Thị Lan"
+        userRole="Chuyên gia"
+      />
+    ),
     children: [
       { index: true, element: <ExpertDashboard /> },
       { path: "cases", element: <ExpertCases /> },
@@ -154,7 +165,13 @@ export const router = createBrowserRouter([
   },
   {
     path: "/manager",
-    element: <Layout role="manager" userName="Nguyễn Quản Lý" userRole="Quản lý hệ thống" />,
+    element: (
+      <Layout
+        role="manager"
+        userName="Nguyễn Quản Lý"
+        userRole="Quản lý hệ thống"
+      />
+    ),
     children: [
       { index: true, element: <ManagerChatbot /> },
       { path: "clinic-profile", element: <ClinicDetail /> },
