@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createBrowserRouter, Link } from "react-router";
-import { Bot, Send, ShieldCheck } from "lucide-react";
+import { Bot, Send, ShieldCheck, ChevronDown } from "lucide-react";
 import { LoginModal } from "./components/auth/login-modal";
 import { Layout } from "./components/layout/layout";
 
@@ -54,6 +54,11 @@ function LandingPage() {
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatSectionRef = useRef<HTMLDivElement>(null);
+
+  const scrollToChat = () => {
+    chatSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const quickReplies = [
     "Tôi bị đau đầu kéo dài",
@@ -99,47 +104,74 @@ function LandingPage() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#dfe9ff] font-sans text-slate-700">
-      <header className="relative z-20 shrink-0 border-t-4 border-slate-900 border-b border-slate-200/80 bg-white/78 shadow-[0_2px_14px_rgba(42,64,104,0.12)] backdrop-blur-xl">
-        <div className="mx-auto flex h-[72px] max-w-[1480px] items-center justify-between px-6 sm:px-10">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#EAF3FF] text-[#2F80ED] shadow-sm">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-[26px] font-extrabold leading-none tracking-tight text-[#2761f1]">{BRAND_NAME}</h1>
-            </div>
-          </Link>
-
-          <div className="flex items-center gap-4">
-            <div className="hidden items-center gap-2 md:flex">
-              {certifications.map((cert) => (
-                <div key={cert.name} className="flex items-center gap-1.5 rounded-full border border-slate-200/60 bg-white/60 px-3 py-1 text-xs font-semibold text-slate-500 backdrop-blur">
-                  ✓ {cert.name}
-                </div>
-              ))}
-            </div>
-            <button type="button" onClick={() => setShowLogin(true)} className="rounded-[14px] bg-gradient-to-r from-[#2563eb] to-[#4f35f5] px-5 py-2.5 text-sm font-extrabold text-white shadow-[0_10px_24px_rgba(61,79,226,0.22)] transition hover:translate-y-[-1px]">
-              Đăng nhập / Đăng ký
-            </button>
-          </div>
-        </div>
-      </header>
-
       <main className="relative flex flex-1 flex-col overflow-y-auto bg-[radial-gradient(circle_at_8%_12%,rgba(121,177,255,0.36)_0,transparent_34%),radial-gradient(circle_at_84%_58%,rgba(107,87,255,0.24)_0,transparent_39%),linear-gradient(135deg,#dfeeff_0%,#eef4ff_40%,#dbe3ff_100%)]">
-        <section className="mx-auto flex w-full max-w-[900px] flex-col px-5 pb-10 pt-10 sm:px-8">
+        <section className="mx-auto flex w-full max-w-[940px] flex-col px-5 pb-12 pt-16 sm:px-8">
+          
+          {/* Brand Logo Floating */}
+          <div className="flex justify-center mb-8">
+            <div className="flex items-center gap-2.5 rounded-full border border-white/60 bg-white/40 px-5 py-2 backdrop-blur shadow-sm">
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-[#2563eb] to-[#27C3A2] text-white">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+              <span className="font-extrabold text-sm tracking-tight text-slate-800">{BRAND_NAME}</span>
+              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+          </div>
 
-          {/* Big headline */}
-          <div className="mb-8 text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-700 md:text-[36px]">
-              Trợ lý sức khỏe AI — tư vấn ngay trong 30 giây
-            </h2>
-            <p className="mx-auto mt-3 max-w-[560px] text-base text-slate-500">
-              Mô tả triệu chứng của bạn, AI sẽ phân tích và đưa ra khuyến nghị phù hợp. Nếu cần, kết nối bác sĩ chuyên khoa ngay.
+          {/* Hero Content Area */}
+          <div className="mb-12 text-center">
+            {/* Main Headline */}
+            <h1 className="text-4xl font-black tracking-tight text-slate-850 md:text-[52px] leading-[1.15]">
+              Trợ lý sức khỏe AI
+              <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 bg-clip-text text-transparent">
+                tư vấn chính xác trong 10 giây
+              </span>
+            </h1>
+            
+            {/* Description */}
+            <p className="mx-auto mt-6 max-w-[620px] text-[17px] leading-relaxed text-slate-600 font-medium">
+              Giải pháp tầm soát triệu chứng ban đầu ứng dụng trí tuệ nhân tạo thế hệ mới. Tuyệt đối bảo mật, kết nối bác sĩ chuyên khoa ngay lập tức.
             </p>
+
+            {/* Trust Badges */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <div className="flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-emerald-50/70 px-4 py-1.5 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
+                <span className="text-sm">🛡️</span> Đạt chuẩn ISO 27001
+              </div>
+              <div className="flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-blue-50/70 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm backdrop-blur">
+                <span className="text-sm">🏥</span> Bộ Y Tế chứng nhận cấp phép
+              </div>
+              <div className="flex items-center gap-1.5 rounded-full border border-indigo-200/80 bg-indigo-50/70 px-4 py-1.5 text-xs font-bold text-indigo-700 shadow-sm backdrop-blur">
+                <span className="text-sm">🔒</span> Mã hóa E2E & Bảo mật SSL
+              </div>
+              <div className="flex items-center gap-1.5 rounded-full border border-purple-200/80 bg-purple-50/70 px-4 py-1.5 text-xs font-bold text-purple-700 shadow-sm backdrop-blur">
+                <span className="text-sm">📋</span> Tiêu chuẩn bảo mật HIPAA
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={scrollToChat}
+                className="group relative flex h-14 w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#2563eb] to-[#27C3A2] px-8 text-base font-extrabold text-white shadow-[0_12px_30px_rgba(37,99,235,0.24)] transition-all hover:scale-[1.02] hover:shadow-[0_16px_36px_rgba(37,99,235,0.32)] active:scale-95 cursor-pointer animate-pulse-subtle"
+              >
+                Tư vấn ngay
+                <ChevronDown className="h-5 w-5 animate-bounce group-hover:translate-y-0.5 transition-transform" />
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setShowLogin(true)}
+                className="flex h-14 w-full sm:w-auto items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-8 text-base font-extrabold text-slate-800 shadow-sm hover:bg-white hover:text-blue-600 transition-all hover:border-blue-200 cursor-pointer"
+              >
+                Đăng nhập / Đăng ký
+              </button>
+            </div>
           </div>
 
           {/* Interactive AI Chat - the hero element */}
-          <div className="mb-8 rounded-[24px] border border-white/60 bg-white/80 shadow-[0_24px_60px_rgba(63,78,111,0.14)] backdrop-blur">
+          <div ref={chatSectionRef} className="mb-8 rounded-[24px] border border-white/60 bg-white/80 shadow-[0_24px_60px_rgba(63,78,111,0.14)] backdrop-blur scroll-mt-6">
             {/* Chat header */}
             <div className="flex items-center gap-3 border-b border-slate-200/60 px-6 py-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] to-[#27C3A2] text-white shadow-md">
