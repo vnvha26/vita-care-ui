@@ -1,4 +1,5 @@
 import { Award, Mail, Phone, Save, ShieldCheck, UserRound } from "lucide-react";
+import { toast } from "sonner";
 import { ActionButton, DataRow, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 
 const fields = [
@@ -16,7 +17,7 @@ export default function ExpertProfile() {
       <PageHeader
         title="Hồ sơ cá nhân"
         description="Quản lý thông tin chuyên môn, phạm vi kiểm duyệt và kênh liên hệ của chuyên gia."
-        actions={<ActionButton icon={<Save className="h-4 w-4" />}>Lưu thay đổi</ActionButton>}
+        actions={<ActionButton icon={<Save className="h-4 w-4" />} onClick={() => toast.success("Đã lưu thay đổi thành công")}>Lưu thay đổi</ActionButton>}
       />
 
       <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">

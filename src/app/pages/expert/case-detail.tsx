@@ -1,4 +1,5 @@
 import { ClipboardCheck, FileText, Send, UserRound } from "lucide-react";
+import { toast } from "sonner";
 import { ActionButton, DataRow, SectionCard, StatusBadge } from "../../components/layout/role-page";
 
 export default function ExpertCaseDetail() {
@@ -71,8 +72,8 @@ export default function ExpertCaseDetail() {
                 </select>
               </label>
               <div className="flex flex-wrap gap-3">
-                <ActionButton variant="secondary">Lưu nháp</ActionButton>
-                <ActionButton icon={<Send className="h-4 w-4" />}>Gửi phản hồi</ActionButton>
+                <ActionButton variant="secondary" onClick={() => toast.info("Đã lưu nháp phản hồi")}>Lưu nháp</ActionButton>
+                <ActionButton icon={<Send className="h-4 w-4" />} onClick={() => toast.success("Phản hồi chuyên môn đã được gửi")}>Gửi phản hồi</ActionButton>
               </div>
             </div>
           </SectionCard>

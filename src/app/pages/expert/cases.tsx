@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { ClipboardCheck, Filter, Search } from "lucide-react";
+import { toast } from "sonner";
 import { ActionButton, DataRow, SectionCard, StatusBadge } from "../../components/layout/role-page";
 
 const expertCases = [
@@ -36,6 +38,10 @@ const expertCases = [
 ];
 
 export default function ExpertCases() {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("Chờ đánh giá");
+  const [priorityFilter, setPriorityFilter] = useState("Tất cả mức độ");
+
   return (
     <div className="space-y-5">
       <section className="rounded-[24px] bg-gradient-to-r from-[#EAF3FF] to-[#E8FFF9] p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
@@ -49,14 +55,14 @@ export default function ExpertCases() {
         <div className="grid gap-3 lg:grid-cols-[1fr_auto_auto]">
           <label className="relative">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
-            <input className="h-12 w-full rounded-full border border-[#E2E8F0] pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#2F80ED]" placeholder="Tìm theo tên bệnh nhân, triệu chứng, mã ca..." />
+            <input className="h-12 w-full rounded-full border border-[#E2E8F0] pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#2F80ED]" placeholder="Tìm theo tên bệnh nhân, triệu chứng, mã ca..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </label>
-          <select className="h-12 rounded-full border border-[#E2E8F0] px-4 text-sm font-bold text-[#64748B] outline-none">
+          <select className="h-12 rounded-full border border-[#E2E8F0] px-4 text-sm font-bold text-[#64748B] outline-none" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option>Chờ đánh giá</option>
             <option>Đang đánh giá</option>
             <option>Đã hoàn thành</option>
           </select>
-          <select className="h-12 rounded-full border border-[#E2E8F0] px-4 text-sm font-bold text-[#64748B] outline-none">
+          <select className="h-12 rounded-full border border-[#E2E8F0] px-4 text-sm font-bold text-[#64748B] outline-none" value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
             <option>Tất cả mức độ</option>
             <option>Cao</option>
             <option>Trung bình</option>
@@ -65,7 +71,7 @@ export default function ExpertCases() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Danh sách ca cần kiểm duyệt" actions={<ActionButton variant="secondary" icon={<Filter className="h-4 w-4" />}>Lọc nâng cao</ActionButton>}>
+      <SectionCard title="Danh sách ca cần kiểm duyệt" actions={<ActionButton variant="secondary" icon={<Filter className="h-4 w-4" />} onClick={() => toast.info("Tính năng lọc nâng cao đang được phát triển")}>Lọc nâng cao</ActionButton>}>
         <div className="space-y-3">
           {expertCases.map((item) => (
             <DataRow
