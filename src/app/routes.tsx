@@ -43,6 +43,7 @@ import PatientMedicalRecords from "./pages/patient/medical-records";
 import PatientNotifications from "./pages/patient/notifications";
 import PatientProfile from "./pages/patient/profile";
 import PatientRegister from "./pages/patient/register";
+import PatientChat from "./pages/patient/chat";
 
 const BRAND_NAME = "VitaCare AI";
 
@@ -395,6 +396,7 @@ export const router = createBrowserRouter([
       { index: true, element: <PatientDashboard /> },
       { path: "dashboard", element: <PatientDashboard /> },
       { path: "consultation", element: <PatientConsultation /> },
+      { path: "chat", element: <PatientChat /> },
       { path: "doctors", element: <PatientDoctors /> },
       { path: "appointments", element: <PatientAppointments /> },
       { path: "book", element: <PatientBook /> },
