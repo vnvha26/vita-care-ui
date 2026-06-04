@@ -50,7 +50,12 @@ function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState([
+  const [chatMessages, setChatMessages] = useState<Array<{
+    from: "ai" | "user";
+    text: string;
+    clinics?: Array<{ id: string; name: string; specialty: string; rating: string; image: string }>;
+    showLoginBtn?: boolean;
+  }>>([
     { from: "ai", text: "Xin chào! Tôi là trợ lý sức khỏe AI của VitaCare. Bạn đang gặp vấn đề gì? Hãy mô tả triệu chứng hoặc chọn bên dưới nhé." },
   ]);
   const [isTyping, setIsTyping] = useState(false);
@@ -87,16 +92,50 @@ function LandingPage() {
     }
   }, [chatMessages]);
 
+  const mockClinics = [
+    { id: "c1", name: "Phòng khám Đa khoa Quốc tế VitaCare", specialty: "Đa khoa, Nội nhi", rating: "4.9 ⭐ (120 đánh giá)", image: "🏥" },
+    { id: "c2", name: "Phòng khám Chuyên khoa Tim mạch Hà Nội", specialty: "Tim mạch, Nội tiết", rating: "4.8 ⭐ (85 đánh giá)", image: "❤️" },
+    { id: "c3", name: "Nha khoa Thẩm mỹ Công nghệ cao Paris", specialty: "Răng Hàm Mặt", rating: "4.7 ⭐ (96 đánh giá)", image: "🦷" },
+  ];
+
   const sendMessage = (text: string) => {
     if (!text.trim()) return;
     setChatMessages((prev) => [...prev, { from: "user", text: text.trim() }]);
     setChatInput("");
     setIsTyping(true);
     setTimeout(() => {
-      const reply = aiResponses[Math.floor(Math.random() * aiResponses.length)];
-      setChatMessages((prev) => [...prev, { from: "ai", text: reply }]);
+      const normalizedText = text.toLowerCase();
+      if (normalizedText.includes("phòng khám") || normalizedText.includes("phong kham")) {
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            from: "ai",
+            text: "Dưới đây là danh sách các phòng khám nổi bật liên kết với hệ thống của chúng tôi. Bạn có thể bấm đặt lịch trực tiếp:",
+            clinics: mockClinics,
+          },
+        ]);
+      } else {
+        const reply = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+        setChatMessages((prev) => [...prev, { from: "ai", text: reply }]);
+      }
       setIsTyping(false);
     }, 600 + Math.random() * 400);
+  };
+
+  const handleBookClinic = (clinicName: string) => {
+    setChatMessages((prev) => [...prev, { from: "user", text: `Tôi muốn đặt lịch khám tại ${clinicName}` }]);
+    setIsTyping(true);
+    setTimeout(() => {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          from: "ai",
+          text: "Để đặt lịch khám trực tuyến tại phòng khám này, quý khách vui lòng đăng nhập vào tài khoản bệnh nhân của VitaCare.",
+          showLoginBtn: true,
+        },
+      ]);
+      setIsTyping(false);
+    }, 800);
   };
 
   const certifications = [
@@ -207,12 +246,46 @@ function LandingPage() {
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto overscroll-contain pt-[84px] pb-[88px] px-6 py-6 space-y-4 min-h-0 custom-scrollbar">
                 {chatMessages.map((msg, i) => (
                   <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[82%] rounded-[22px] px-5 py-3.5 text-sm leading-relaxed shadow-sm ${
+                    <div className={`max-w-[85%] rounded-[22px] px-5 py-3.5 text-sm leading-relaxed shadow-sm ${
                       msg.from === "user"
                         ? "rounded-br-none bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white font-semibold"
                         : "rounded-bl-none bg-white/80 border border-white/50 text-slate-700 font-medium backdrop-blur-sm"
                     }`}>
-                      {msg.text}
+                      <p>{msg.text}</p>
+
+                      {/* Structured Clinics Demo */}
+                      {msg.clinics && (
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 max-w-full">
+                          {msg.clinics.map((clinic) => (
+                            <div key={clinic.id} className="flex flex-col justify-between rounded-2xl border border-slate-200/50 bg-slate-50/50 p-4 shadow-sm backdrop-blur-sm">
+                              <div>
+                                <div className="text-2xl mb-2">{clinic.image}</div>
+                                <h4 className="font-extrabold text-slate-800 text-xs line-clamp-2">{clinic.name}</h4>
+                                <p className="text-[10px] text-slate-500 font-bold mt-1">{clinic.specialty}</p>
+                                <p className="text-[10px] text-slate-400 mt-1 font-semibold">{clinic.rating}</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleBookClinic(clinic.name)}
+                                className="mt-3 flex h-8 w-full items-center justify-center rounded-xl bg-blue-600 text-[10px] font-extrabold text-white shadow-sm hover:bg-blue-700 hover:shadow transition-colors cursor-pointer"
+                              >
+                                Đặt lịch ngay
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Login CTA button inside chat bubble */}
+                      {msg.showLoginBtn && (
+                        <button
+                          type="button"
+                          onClick={() => setShowLogin(true)}
+                          className="mt-3 flex h-9 w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 text-xs font-extrabold text-white shadow-md hover:scale-[1.01] hover:shadow-lg transition cursor-pointer"
+                        >
+                          Đăng nhập ngay
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
