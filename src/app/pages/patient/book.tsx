@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 import { CalendarDays, CheckCircle2, Clock, Hospital, Search, Stethoscope, UserRound } from "lucide-react";
+import { toast } from "sonner";
 import { ActionButton, SectionCard, StatusBadge } from "../../components/layout/role-page";
+import { addTemporaryPatientAppointment, type PatientAppointment } from "../../lib/patient-appointments";
 
 const specialties = [
   {
@@ -22,6 +25,18 @@ const specialties = [
     description: "Ưu tiên khi có đau ngực, hồi hộp, tăng huyết áp.",
   },
   {
+    id: "respiratory",
+    name: "Hô hấp",
+    keywords: "ho khó thở hen viêm mũi dị ứng hô hấp",
+    description: "Dành cho ho kéo dài, khó thở, hen phế quản hoặc viêm mũi dị ứng.",
+  },
+  {
+    id: "neurology",
+    name: "Thần kinh",
+    keywords: "đau đầu chóng mặt mất ngủ tê bì thần kinh",
+    description: "Dành cho đau đầu, chóng mặt, mất ngủ hoặc tê bì tay chân.",
+  },
+  {
     id: "dermatology",
     name: "Da liễu",
     keywords: "dị ứng ngứa phát ban mẩn đỏ da",
@@ -34,40 +49,59 @@ const clinics = [
     id: "vc-central",
     name: "VitaCare Trung tâm",
     address: "Q.1, TP.HCM",
-    specialties: ["general", "digestive", "cardiology"],
+    specialties: ["general", "respiratory"],
+  },
+  {
+    id: "tw1",
+    name: "Phòng khám Đa khoa TW1",
+    address: "Q.3, TP.HCM",
+    specialties: ["digestive"],
+  },
+  {
+    id: "tw2",
+    name: "Phòng khám Đa khoa TW2",
+    address: "Q.5, TP.HCM",
+    specialties: ["neurology"],
+  },
+  {
+    id: "tw3",
+    name: "Phòng khám Đa khoa TW3",
+    address: "Q.10, TP.HCM",
+    specialties: ["dermatology"],
   },
   {
     id: "vc-family",
     name: "VitaCare Gia đình",
     address: "Q.7, TP.HCM",
-    specialties: ["general", "dermatology"],
+    specialties: [],
   },
   {
     id: "vc-digital",
     name: "VitaCare Online",
     address: "Khám từ xa",
-    specialties: ["general", "digestive", "dermatology"],
+    specialties: ["cardiology"],
   },
 ];
 
 const doctors = [
-  { id: "d1", name: "Nguyễn Văn B", specialty: "general", clinic: "vc-central", price: "350.000 VND", rating: "4.8" },
-  { id: "d2", name: "Nguyễn Văn E", specialty: "digestive", clinic: "vc-central", price: "380.000 VND", rating: "4.7" },
-  { id: "d3", name: "Nguyễn Văn F", specialty: "cardiology", clinic: "vc-central", price: "450.000 VND", rating: "4.9" },
-  { id: "d4", name: "Nguyễn Văn G", specialty: "dermatology", clinic: "vc-family", price: "320.000 VND", rating: "4.6" },
-  { id: "d5", name: "Nguyễn Văn H", specialty: "general", clinic: "vc-digital", price: "250.000 VND", rating: "4.8" },
+  { id: "d1", name: "Nguyễn Văn B", specialty: "general", clinic: "vc-central", price: "250.000 VND", rating: "4.8" },
+  { id: "d2", name: "Trần Thị B", specialty: "digestive", clinic: "tw1", price: "220.000 VND", rating: "4.9" },
+  { id: "d3", name: "Lê Văn C", specialty: "neurology", clinic: "tw2", price: "300.000 VND", rating: "4.7" },
+  { id: "d4", name: "Phạm Minh D", specialty: "cardiology", clinic: "vc-digital", price: "280.000 VND", rating: "4.6" },
+  { id: "d5", name: "Hoàng Anh E", specialty: "respiratory", clinic: "vc-central", price: "240.000 VND", rating: "4.8" },
+  { id: "d6", name: "Đỗ Thị Hương F", specialty: "dermatology", clinic: "tw3", price: "210.000 VND", rating: "4.7" },
 ];
 
 const timeSlots = ["08:30", "09:30", "10:30", "14:00", "15:30", "16:30"];
-
 export default function PatientBook() {
+  const navigate = useNavigate();
   const [symptom, setSymptom] = useState("");
   const [specialtyQuery, setSpecialtyQuery] = useState("");
   const [clinicQuery, setClinicQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState(specialties[0]);
   const [selectedClinic, setSelectedClinic] = useState(clinics[0]);
   const [selectedDoctorId, setSelectedDoctorId] = useState("d1");
-  const [selectedDate, setSelectedDate] = useState("2026-06-04");
+  const [selectedDate, setSelectedDate] = useState("2026-06-12");
   const [selectedTime, setSelectedTime] = useState("09:30");
   const [visitType, setVisitType] = useState<"clinic" | "online">("clinic");
 
@@ -111,6 +145,33 @@ export default function PatientBook() {
     setClinicQuery(clinic.name);
     const nextDoctor = doctors.find((doctor) => doctor.specialty === selectedSpecialty.id && doctor.clinic === clinic.id);
     if (nextDoctor) setSelectedDoctorId(nextDoctor.id);
+  };
+
+  const formatDate = (value: string) => {
+    const [year, month, day] = value.split("-");
+    if (!year || !month || !day) return value;
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleSubmitRequest = () => {
+    const request: PatientAppointment = {
+      id: `booking-${Date.now()}`,
+      title: visitType === "clinic" ? "Khám chuyên khoa" : "Tư vấn online",
+      date: formatDate(selectedDate),
+      time: selectedTime,
+      doctor: selectedDoctor.name.startsWith("BS.") ? selectedDoctor.name : `BS. ${selectedDoctor.name}`,
+      specialty: selectedSpecialty.name,
+      clinic: selectedClinic.name,
+      address: visitType === "clinic" ? selectedClinic.address : "Cuộc gọi video trong ứng dụng",
+      status: "Chờ xác nhận",
+      reason: symptom.trim() || `Đặt lịch khám ${selectedSpecialty.name.toLowerCase()}.`,
+      note: "Yêu cầu đã được gửi tới phòng khám. Hệ thống sẽ cập nhật khi lịch được xác nhận.",
+      price: selectedDoctor.price,
+    };
+
+    addTemporaryPatientAppointment(request);
+    toast.success("Đã gửi yêu cầu đặt lịch. Lịch mới đang chờ xác nhận.");
+    navigate("/patient/appointments", { state: { appointment: request } });
   };
 
   return (
@@ -318,7 +379,7 @@ export default function PatientBook() {
                 </div>
               </div>
             </div>
-            <ActionButton className="mt-5 w-full" icon={<CheckCircle2 className="h-4 w-4" />}>
+            <ActionButton className="mt-5 w-full" icon={<CheckCircle2 className="h-4 w-4" />} onClick={handleSubmitRequest}>
               Gửi yêu cầu đặt lịch
             </ActionButton>
           </SectionCard>

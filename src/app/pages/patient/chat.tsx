@@ -1,6 +1,8 @@
 import { useMemo, useState, useEffect, useRef } from "react";
+import { useLocation, useSearchParams } from "react-router";
 import { Archive, Inbox, MessageCircle, Search, Send, UserRound, Building2, Stethoscope, ChevronLeft } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
+import { getPatientConversations, patientConversations, type PatientConversation } from "../../lib/patient-conversations";
 import { cn } from "../../lib/utils";
 
 type ConversationStatus = "active" | "unread" | "archived";
@@ -92,9 +94,24 @@ const filterLabels: Record<ConversationFilter, string> = {
 };
 
 export default function PatientChat() {
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const temporaryConversation = (location.state as { conversation?: PatientConversation } | null)?.conversation;
+  const initialPatientConversations = useMemo(() => {
+    const conversations = getPatientConversations();
+    if (!temporaryConversation?.id) return conversations;
+    return [temporaryConversation, ...conversations.filter((item) => item.id !== temporaryConversation.id)];
+  }, [temporaryConversation]);
+  const requestedConversationId = searchParams.get("conversation");
   const [filter, setFilter] = useState<ConversationFilter>("all");
-  const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
-  const [selectedId, setSelectedId] = useState<string>(initialConversations[0].id);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [conversations, setConversations] = useState<PatientConversation[]>(initialPatientConversations);
+  const [selectedId, setSelectedId] = useState<string>(() => {
+    if (requestedConversationId && initialPatientConversations.some((item) => item.id === requestedConversationId)) {
+      return requestedConversationId;
+    }
+    return initialPatientConversations[0].id;
+  });
   const [draft, setDraft] = useState("");
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -133,10 +150,44 @@ export default function PatientChat() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!requestedConversationId) return;
+
+    const incomingConversation = initialPatientConversations.find((item) => item.id === requestedConversationId);
+    if (!incomingConversation) return;
+
+    setConversations((current) => {
+      const merged = current.some((item) => item.id === incomingConversation.id)
+        ? current
+        : [incomingConversation, ...current];
+
+      return merged.map((item) =>
+        item.id === incomingConversation.id && item.status === "unread"
+          ? { ...item, status: "active" }
+          : item
+      );
+    });
+    setSelectedId(incomingConversation.id);
+    setFilter("all");
+    setShowChatOnMobile(true);
+  }, [initialPatientConversations, requestedConversationId]);
+
   const filteredConversations = useMemo(() => {
-    if (filter === "all") return conversations.filter((item) => item.status !== "archived");
-    return conversations.filter((item) => item.status === filter);
-  }, [conversations, filter]);
+    const visibleByStatus =
+      filter === "all"
+        ? conversations.filter((item) => item.status !== "archived")
+        : conversations.filter((item) => item.status === filter);
+    const keyword = searchQuery.trim().toLowerCase();
+
+    if (!keyword) return visibleByStatus;
+
+    return visibleByStatus.filter((item) =>
+      [item.name, item.roleName, item.preview, item.status, item.role]
+        .join(" ")
+        .toLowerCase()
+        .includes(keyword)
+    );
+  }, [conversations, filter, searchQuery]);
 
   const selectedConversation = conversations.find((item) => item.id === selectedId) ?? conversations[0];
 
@@ -238,6 +289,8 @@ export default function PatientChat() {
           <div className="mb-4 flex h-11 items-center gap-2 rounded-2xl border border-[#E2E8F0] px-3 text-[#64748B]">
             <Search className="h-4 w-4" />
             <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
               className="min-w-0 flex-1 bg-transparent text-sm outline-none"
               placeholder="Tìm kiếm bác sĩ hoặc phòng khám..."
             />
@@ -285,6 +338,11 @@ export default function PatientChat() {
                 </div>
               </button>
             ))}
+            {filteredConversations.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-[#CFE3FF] bg-[#F7FAFC] p-5 text-center text-sm font-bold text-[#64748B]">
+                Không tìm thấy cuộc trò chuyện phù hợp.
+              </div>
+            )}
           </div>
         </SectionCard>
 

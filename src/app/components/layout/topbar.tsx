@@ -5,17 +5,121 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { toast } from "sonner";
+import { getLatestTemporaryPatientConversation, getPatientConversations, type PatientChatMessage, type PatientConversation } from "../../lib/patient-conversations";
 
 interface TopbarProps {
+  role: "doctor" | "expert" | "manager" | "patient";
   userName: string;
   userRole: string;
   notifications?: number;
 }
 
-const mockContacts = [
-  { id: "1", name: "Nguyễn Khám Bệnh", lastMessage: "Dạo này nắng nóng tia cực tím cao quá...", time: "10:32", unread: 2, online: true },
-  { id: "2", name: "Trần Hay Hỏi", lastMessage: "Bác sĩ ơi đợt dịch sốt xuất huyết này căng quá...", time: "09:15", unread: 0, online: false },
-  { id: "3", name: "Lê Googler", lastMessage: "Em tra thông tin y tế trên mạng thấy...", time: "Hôm qua", unread: 0, online: true },
+const roleChatMap: Record<TopbarProps["role"], string> = {
+  patient: "/patient/chat",
+  doctor: "/doctor/chat",
+  manager: "/manager/chat",
+  expert: "/expert/chat",
+};
+
+const roleProfileMap: Partial<Record<TopbarProps["role"], string>> = {
+  patient: "/patient/profile",
+  doctor: "/doctor/profile",
+  expert: "/expert/profile",
+};
+
+type MockContact = {
+  id: string;
+  name: string;
+  lastMessage: string;
+  time: string;
+  unread: number;
+  online: boolean;
+  roleName?: string;
+  messages?: PatientChatMessage[];
+};
+
+const mapPatientTopbarContacts = (conversations: PatientConversation[]): MockContact[] => conversations
+  .filter((conversation) => conversation.status !== "archived")
+  .map((conversation) => ({
+    id: conversation.id,
+    name: conversation.name,
+    lastMessage: conversation.preview,
+    time: conversation.lastAt,
+    unread: conversation.status === "unread" ? 1 : 0,
+    online: true,
+    roleName: conversation.roleName,
+    messages: conversation.messages,
+  }));
+
+const roleContactsMap: Omit<Record<TopbarProps["role"], MockContact[]>, "patient"> = {
+  doctor: [
+    { id: "d1", name: "Nguyễn Khám Bệnh", lastMessage: "Dạo này nắng nóng tia cực tím cao quá...", time: "10:32", unread: 2, online: true },
+    { id: "d2", name: "Trần Hay Hỏi", lastMessage: "Bác sĩ ơi đợt dịch sốt xuất huyết này căng quá...", time: "09:15", unread: 0, online: false },
+    { id: "d3", name: "Lê Googler", lastMessage: "Em tra thông tin y tế trên mạng thấy...", time: "Hôm qua", unread: 0, online: true },
+  ],
+  manager: [
+    { id: "m1", name: "Nguyễn Khám Bệnh", lastMessage: "Tôi muốn đổi lịch khám sang ca sáng.", time: "10:32", unread: 2, online: true },
+    { id: "m2", name: "BS. Trần Thị B", lastMessage: "Lịch chiều nay còn trống 2 khung giờ.", time: "09:15", unread: 0, online: false },
+    { id: "m3", name: "VitaCare CSKH", lastMessage: "Có yêu cầu hỗ trợ đặt lịch mới.", time: "Hôm qua", unread: 0, online: true },
+  ],
+  expert: [
+    { id: "e1", name: "Hội đồng kiểm duyệt AI", lastMessage: "Có ca đánh giá mới cần phản hồi.", time: "11:05", unread: 1, online: true },
+    { id: "e2", name: "Bộ phận dữ liệu", lastMessage: "Báo cáo hội thoại chất lượng thấp đã sẵn sàng.", time: "09:40", unread: 0, online: false },
+    { id: "e3", name: "VitaCare AI Ops", lastMessage: "Cập nhật bộ tri thức tuần này.", time: "Hôm qua", unread: 0, online: true },
+  ],
+};
+
+const buildDoctorConsultNotification = (conversation: PatientConversation | null) => {
+  if (!conversation || conversation.role !== "doctor") return null;
+
+  return {
+    id: `temp-${conversation.id}`,
+    icon: MessageCircle,
+    iconBg: "bg-blue-100",
+    iconColor: "text-blue-600",
+    title: "Phiên tư vấn bác sĩ đã sẵn sàng",
+    body: `${conversation.name} đã mở cuộc trò chuyện tư vấn chuyên sâu. Bạn có thể nhắn tin ngay.`,
+    time: "Vừa xong",
+  };
+};
+
+const patientNotifications = [
+  {
+    id: "p-n2",
+    icon: MessageCircle,
+    iconBg: "bg-emerald-100",
+    iconColor: "text-emerald-600",
+    title: "Tin nhắn mới từ phòng khám",
+    body: "Phòng khám Đa khoa Quốc tế VitaCare hỏi bạn muốn khám ca sáng hay ca chiều.",
+    time: "25 phút trước",
+  },
+  {
+    id: "p-n3",
+    icon: ClipboardCheck,
+    iconBg: "bg-violet-100",
+    iconColor: "text-violet-600",
+    title: "Hồ sơ khám mới được cập nhật",
+    body: "Phiếu khám MR001 đã có chẩn đoán, đơn thuốc và lời dặn của bác sĩ.",
+    time: "Hôm nay, 14:56",
+  },
+  {
+    id: "p-n4",
+    icon: Bot,
+    iconBg: "bg-cyan-100",
+    iconColor: "text-cyan-600",
+    title: "AI đã lưu phiên tư vấn",
+    body: "Triệu chứng đau họng và mệt mỏi nhẹ đã được ghi nhận để theo dõi tiếp.",
+    time: "2 giờ trước",
+  },
+  {
+    id: "p-n5",
+    icon: Bell,
+    iconBg: "bg-amber-100",
+    iconColor: "text-amber-600",
+    title: "Nhắc cập nhật dữ liệu sức khỏe",
+    body: "Bạn nên bổ sung chiều cao, cân nặng, dị ứng và thuốc đang dùng trong hồ sơ cá nhân.",
+    time: "Hôm qua",
+  },
 ];
 
 const expertNotifications = [
@@ -51,7 +155,7 @@ const expertNotifications = [
   },
 ];
 
-export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
+export function Topbar({ role, userName, userRole, notifications = 0 }: TopbarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessengerDrop, setShowMessengerDrop] = useState(false);
   const [activeMiniChat, setActiveMiniChat] = useState<any>(null);
@@ -83,17 +187,32 @@ export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
     setShowMessengerDrop(false);
   };
 
+  const profileHref = roleProfileMap[role];
+  const patientConversationList = role === "patient" ? getPatientConversations() : [];
+  const temporaryDoctorConsult = role === "patient" ? getLatestTemporaryPatientConversation() : null;
+  const temporaryDoctorNotification = buildDoctorConsultNotification(temporaryDoctorConsult);
+  const patientNotificationList = temporaryDoctorNotification
+    ? [temporaryDoctorNotification, ...patientNotifications]
+    : patientNotifications;
+  const messengerContacts = role === "patient" ? mapPatientTopbarContacts(patientConversationList) : roleContactsMap[role];
+  const unreadMessageCount = messengerContacts.reduce((total, contact) => total + contact.unread, 0);
+  const notificationBadgeCount = role === "patient"
+    ? patientNotificationList.length
+    : notifications + (userRole === "Quản lý hệ thống" ? 1 : 0);
+
   return (
     <>
       <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/20 bg-white/40 backdrop-blur-md shadow-sm px-6">
       <div className="flex flex-1 items-center gap-4">
-        <div className="relative w-96">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <Input
-            placeholder="Tìm kiếm bệnh nhân, hồ sơ..."
-            className="pl-10"
-          />
-        </div>
+        {role !== "patient" && (
+          <div className="relative w-96">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder="Tìm kiếm bệnh nhân, hồ sơ..."
+              className="pl-10"
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-4">
@@ -105,22 +224,24 @@ export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
             className={`relative rounded-full p-2 transition-colors ${showMessengerDrop ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100 text-gray-600'}`}
           >
             <MessageCircle className="h-5 w-5" />
-            <Badge 
-              variant="destructive" 
-              className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] bg-blue-600 text-white border-2 border-white"
-            >
-              2
-            </Badge>
+            {unreadMessageCount > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] bg-blue-600 text-white border-2 border-white"
+              >
+                {unreadMessageCount}
+              </Badge>
+            )}
           </button>
 
           {showMessengerDrop && (
             <div className="absolute right-0 mt-2 w-80 bg-white/90 backdrop-blur-2xl rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/60 overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in duration-200">
               <div className="px-4 py-3 border-b border-white/40 bg-white/50 flex justify-between items-center">
                 <span className="font-semibold text-gray-900">Tin nhắn</span>
-                <Link to="/manager/chat" className="text-xs text-blue-600 hover:underline" onClick={() => setShowMessengerDrop(false)}>Xem tất cả trong Messenger</Link>
+                <Link to={roleChatMap[role]} className="text-xs text-blue-600 hover:underline" onClick={() => setShowMessengerDrop(false)}>Xem tất cả trong Messenger</Link>
               </div>
               <div className="max-h-[350px] overflow-y-auto">
-                {mockContacts.map(contact => (
+                {messengerContacts.map(contact => (
                   <div 
                     key={contact.id}
                     onClick={() => handleOpenMiniChat(contact)}
@@ -159,12 +280,12 @@ export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
             className="relative rounded-lg p-2 hover:bg-gray-100 transition-colors"
           >
             <Bell className="h-5 w-5 text-gray-600" />
-            {(notifications > 0 || userRole === "Quản lý hệ thống") && (
+            {notificationBadgeCount > 0 && (
               <Badge 
                 variant="destructive" 
                 className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] bg-red-500 text-white border-2 border-white"
               >
-                {notifications + (userRole === "Quản lý hệ thống" ? 1 : 0)}
+                {notificationBadgeCount}
               </Badge>
             )}
           </button>
@@ -211,7 +332,26 @@ export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
                     </div>
                   </div>
                 ))}
-                {userRole !== "Chuyên gia y tế" && userRole !== "Quản lý hệ thống" && (
+                {role === "patient" && patientNotificationList.map((notif) => (
+                  <div
+                    key={notif.id}
+                    className="flex gap-3 border-b border-white/40 p-4 transition-colors last:border-0 hover:bg-white/60"
+                    onClick={() => {
+                      toast.success(notif.title, { description: notif.body });
+                      setShowNotifications(false);
+                    }}
+                  >
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.iconBg}`}>
+                      <notif.icon className={`h-5 w-5 ${notif.iconColor}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{notif.title}</p>
+                      <p className="mt-1 line-clamp-2 text-xs text-gray-500">{notif.body}</p>
+                      <p className="mt-2 text-[10px] text-gray-400">{notif.time}</p>
+                    </div>
+                  </div>
+                ))}
+                {role !== "patient" && userRole !== "Chuyên gia y tế" && userRole !== "Quản lý hệ thống" && (
                   <div className="flex flex-col items-center justify-center py-10 text-center">
                     <Bell className="h-10 w-10 text-gray-300 mb-3" />
                     <p className="text-sm font-medium text-gray-500">Không có thông báo mới</p>
@@ -223,15 +363,27 @@ export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="text-sm font-medium text-gray-900">{userName}</p>
-            <p className="text-xs text-gray-500">{userRole}</p>
+        {profileHref ? (
+          <Link to={profileHref} title="Hồ sơ cá nhân" aria-label="Mở hồ sơ cá nhân" className="flex items-center gap-3 rounded-2xl px-2 py-1 transition-colors hover:bg-white/70">
+            <Avatar>
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm font-medium text-gray-900">{userName}</p>
+              <p className="text-xs text-gray-500">{userRole}</p>
+            </div>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm font-medium text-gray-900">{userName}</p>
+              <p className="text-xs text-gray-500">{userRole}</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       </div>
       
@@ -250,7 +402,9 @@ export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
               </div>
               <div className="text-white">
                 <h4 className="font-semibold text-sm leading-tight">{activeMiniChat.name}</h4>
-                <p className="text-[10px] opacity-80">{activeMiniChat.online ? "Đang hoạt động" : "Ngoại tuyến"}</p>
+                <p className="text-[10px] opacity-80">
+                  {role === "patient" && activeMiniChat.roleName ? activeMiniChat.roleName : activeMiniChat.online ? "Đang hoạt động" : "Ngoại tuyến"}
+                </p>
               </div>
             </div>
             <button 
@@ -262,6 +416,28 @@ export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
           </div>
           
           <div className="h-96 bg-gray-50/40 p-3 overflow-y-auto flex flex-col gap-3 scrollbar-thin">
+            {role === "patient" && activeMiniChat.messages ? (
+              <>
+                <div className="text-center text-[10px] text-gray-400 my-1">{activeMiniChat.time}</div>
+                {activeMiniChat.messages.map((message: PatientChatMessage, index: number) => (
+                  <div key={`${message.time}-${index}`} className={message.sender === "patient" ? "self-end max-w-[85%]" : "self-start max-w-[85%]"}>
+                    <div
+                      className={
+                        message.sender === "patient"
+                          ? "bg-blue-600 text-white p-2.5 rounded-2xl rounded-tr-sm text-[13px] shadow-sm leading-relaxed"
+                          : "bg-white/80 backdrop-blur-sm border border-white/60 p-2.5 rounded-2xl rounded-tl-sm text-[13px] text-gray-800 shadow-sm leading-relaxed"
+                      }
+                    >
+                      {message.text}
+                      <div className={message.sender === "patient" ? "mt-2 text-right text-[10px] text-white/70" : "mt-2 text-right text-[10px] text-gray-400"}>
+                        {message.time}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
             <div className="text-center text-[10px] text-gray-400 my-1">10:30 Hôm nay</div>
             <div className="self-start max-w-[85%]">
               <div className="bg-white/80 backdrop-blur-sm border border-white/60 p-2.5 rounded-2xl rounded-tl-sm text-[13px] text-gray-800 shadow-sm leading-relaxed">
@@ -304,6 +480,8 @@ export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
                 </button>
               </div>
             </div>
+              </>
+            )}
 
           </div>
           
