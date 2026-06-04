@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import { Layout } from "./components/layout/layout";
+
 import DoctorDashboard from "./pages/doctor/dashboard";
 import DoctorPatients from "./pages/doctor/patients";
 import PatientDetail from "./pages/doctor/patient-detail";
@@ -7,19 +8,17 @@ import DoctorExamination from "./pages/doctor/examination";
 import DoctorChat from "./pages/doctor/chat";
 import DoctorFeedback from "./pages/doctor/feedback";
 import DoctorProfile from "./pages/doctor/profile";
+
 import ExpertDashboard from "./pages/expert/dashboard";
 import ExpertCases from "./pages/expert/cases";
 import ExpertCaseDetail from "./pages/expert/case-detail";
 import ExpertChat from "./pages/expert/chat";
 import ExpertReports from "./pages/expert/reports";
 import ExpertProfile from "./pages/expert/profile";
+
 import ManagerChatbot from "./pages/manager/chatbot";
-import ManagerClinics from "./pages/manager/clinics";
 import ClinicDetail from "./pages/manager/clinic-detail";
 import ClinicForm from "./pages/manager/clinic-form";
-import ManagerSpecialties from "./pages/manager/specialties";
-import SpecialtyDetail from "./pages/manager/specialty-detail";
-import SpecialtyForm from "./pages/manager/specialty-form";
 import ManagerDoctors from "./pages/manager/doctors";
 import DoctorForm from "./pages/manager/doctor-form";
 import DoctorDetail from "./pages/manager/doctor-detail";
@@ -28,6 +27,7 @@ import ManagerAppointments from "./pages/manager/manager-appointments";
 import ManagerSchedule from "./pages/manager/manager-schedule";
 import ManagerAIData from "./pages/manager/ai-data";
 import ManagerReports from "./pages/manager/reports";
+
 import PatientHome from "./pages/patient/home";
 import PatientLogin from "./pages/patient/login";
 import PatientRegister from "./pages/patient/register";
@@ -39,54 +39,66 @@ import PatientMedicalRecords from "./pages/patient/medical-records";
 import PatientNotifications from "./pages/patient/notifications";
 import PatientProfile from "./pages/patient/profile";
 
+import ConsultantLogin from "./pages/consultant/login";
+import ConsultantConsultation from "./pages/consultant/consultation";
+import ConsultantHistory from "./pages/consultant/history";
+import ConsultantHealthProfile from "./pages/consultant/health-profile";
+import ConsultantSymptomTracking from "./pages/consultant/symptom-tracking";
+import ConsultantAppointment from "./pages/consultant/appointment";
+
 function RoleSwitcher() {
   return (
     <div className="flex h-screen items-center justify-center bg-gray-50">
-      <div className="text-center space-y-6">
+      <div className="space-y-6 text-center">
         <div>
           <h1 className="text-4xl font-bold text-gray-900">NHÓM 4</h1>
-          <p className="text-gray-500 mt-2">Hệ thống quản lý phòng khám đa vai trò</p>
+          <p className="mt-2 text-gray-500">Hệ thống quản lý phòng khám đa vai trò</p>
         </div>
-        <div className="grid gap-4 md:grid-cols-5 max-w-7xl">
+
+        <div className="grid max-w-7xl gap-4 md:grid-cols-5">
           <a
-            href="/patient/home"
-            className="block p-8 rounded-xl border-2 border-gray-200 bg-white hover:border-pink-500 hover:shadow-lg transition-all"
+            href="/consultant/login"
+            className="block rounded-xl border-2 border-gray-200 bg-white p-8 transition-all hover:border-pink-500 hover:shadow-lg"
           >
-            <div className="text-5xl mb-4">👤</div>
+            <div className="mb-4 text-5xl">👤</div>
             <h2 className="text-xl font-semibold text-gray-900">Người cần tư vấn</h2>
-            <p className="text-sm text-gray-500 mt-2">Chưa đăng nhập</p>
+            <p className="mt-2 text-sm text-gray-500">Tư vấn sức khỏe ban đầu</p>
           </a>
+
           <a
             href="/patient/dashboard"
-            className="block p-8 rounded-xl border-2 border-gray-200 bg-white hover:border-pink-500 hover:shadow-lg transition-all"
+            className="block rounded-xl border-2 border-gray-200 bg-white p-8 transition-all hover:border-pink-500 hover:shadow-lg"
           >
-            <div className="text-5xl mb-4">🧑‍🦱</div>
+            <div className="mb-4 text-5xl">🧑‍🦱</div>
             <h2 className="text-xl font-semibold text-gray-900">Bệnh nhân</h2>
-            <p className="text-sm text-gray-500 mt-2">Đã đăng nhập</p>
+            <p className="mt-2 text-sm text-gray-500">Đã đăng nhập</p>
           </a>
+
           <a
             href="/doctor"
-            className="block p-8 rounded-xl border-2 border-gray-200 bg-white hover:border-blue-500 hover:shadow-lg transition-all"
+            className="block rounded-xl border-2 border-gray-200 bg-white p-8 transition-all hover:border-blue-500 hover:shadow-lg"
           >
-            <div className="text-5xl mb-4">👨‍⚕️</div>
+            <div className="mb-4 text-5xl">👨‍⚕️</div>
             <h2 className="text-xl font-semibold text-gray-900">Bác sĩ</h2>
-            <p className="text-sm text-gray-500 mt-2">Quản lý bệnh nhân</p>
+            <p className="mt-2 text-sm text-gray-500">Quản lý bệnh nhân</p>
           </a>
+
           <a
             href="/expert"
-            className="block p-8 rounded-xl border-2 border-gray-200 bg-white hover:border-green-500 hover:shadow-lg transition-all"
+            className="block rounded-xl border-2 border-gray-200 bg-white p-8 transition-all hover:border-green-500 hover:shadow-lg"
           >
-            <div className="text-5xl mb-4">👨‍🏫</div>
+            <div className="mb-4 text-5xl">👨‍🏫</div>
             <h2 className="text-xl font-semibold text-gray-900">Chuyên gia</h2>
-            <p className="text-sm text-gray-500 mt-2">Tư vấn chuyên môn</p>
+            <p className="mt-2 text-sm text-gray-500">Tư vấn chuyên môn</p>
           </a>
+
           <a
             href="/manager"
-            className="block p-8 rounded-xl border-2 border-gray-200 bg-white hover:border-purple-500 hover:shadow-lg transition-all"
+            className="block rounded-xl border-2 border-gray-200 bg-white p-8 transition-all hover:border-purple-500 hover:shadow-lg"
           >
-            <div className="text-5xl mb-4">👨‍💼</div>
+            <div className="mb-4 text-5xl">👨‍💼</div>
             <h2 className="text-xl font-semibold text-gray-900">Quản lý</h2>
-            <p className="text-sm text-gray-500 mt-2">Quản trị hệ thống</p>
+            <p className="mt-2 text-sm text-gray-500">Quản trị hệ thống</p>
           </a>
         </div>
       </div>
@@ -99,6 +111,30 @@ export const router = createBrowserRouter([
     path: "/",
     element: <RoleSwitcher />,
   },
+
+  {
+    path: "/consultant/login",
+    element: <ConsultantLogin />,
+  },
+  {
+    path: "/consultant",
+    element: (
+      <Layout
+        role="consultant"
+        userName="Nguyễn Văn Tuấn"
+        userRole="Người cần tư vấn"
+      />
+    ),
+    children: [
+      { index: true, element: <ConsultantConsultation /> },
+      { path: "consultation", element: <ConsultantConsultation /> },
+      { path: "history", element: <ConsultantHistory /> },
+      { path: "health-profile", element: <ConsultantHealthProfile /> },
+      { path: "symptom-tracking", element: <ConsultantSymptomTracking /> },
+      { path: "appointment", element: <ConsultantAppointment /> },
+    ],
+  },
+
   {
     path: "/patient/home",
     element: <PatientHome />,
@@ -117,7 +153,13 @@ export const router = createBrowserRouter([
   },
   {
     path: "/patient",
-    element: <Layout role="patient" userName="Nguyễn Văn An" userRole="Bệnh nhân" />,
+    element: (
+      <Layout
+        role="patient"
+        userName="Nguyễn Văn An"
+        userRole="Bệnh nhân"
+      />
+    ),
     children: [
       { path: "dashboard", element: <PatientDashboard /> },
       { path: "appointments", element: <PatientAppointments /> },
@@ -127,9 +169,16 @@ export const router = createBrowserRouter([
       { path: "profile", element: <PatientProfile /> },
     ],
   },
+
   {
     path: "/doctor",
-    element: <Layout role="doctor" userName="BS. Nguyễn Văn A" userRole="Bác sĩ" />,
+    element: (
+      <Layout
+        role="doctor"
+        userName="BS. Nguyễn Văn A"
+        userRole="Bác sĩ"
+      />
+    ),
     children: [
       { index: true, element: <DoctorDashboard /> },
       { path: "patients", element: <DoctorPatients /> },
@@ -140,9 +189,16 @@ export const router = createBrowserRouter([
       { path: "profile", element: <DoctorProfile /> },
     ],
   },
+
   {
     path: "/expert",
-    element: <Layout role="expert" userName="TS. Nguyễn Thị Lan" userRole="Chuyên gia" />,
+    element: (
+      <Layout
+        role="expert"
+        userName="TS. Nguyễn Thị Lan"
+        userRole="Chuyên gia"
+      />
+    ),
     children: [
       { index: true, element: <ExpertDashboard /> },
       { path: "cases", element: <ExpertCases /> },
@@ -152,9 +208,16 @@ export const router = createBrowserRouter([
       { path: "profile", element: <ExpertProfile /> },
     ],
   },
+
   {
     path: "/manager",
-    element: <Layout role="manager" userName="Nguyễn Quản Lý" userRole="Quản lý hệ thống" />,
+    element: (
+      <Layout
+        role="manager"
+        userName="Nguyễn Quản Lý"
+        userRole="Quản lý hệ thống"
+      />
+    ),
     children: [
       { index: true, element: <ManagerChatbot /> },
       { path: "clinic-profile", element: <ClinicDetail /> },
