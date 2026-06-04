@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Archive, Inbox, MessageCircle, Search, Send, UserRound, Building2, Stethoscope } from "lucide-react";
+import { Archive, Inbox, MessageCircle, Search, Send, UserRound, Building2, Stethoscope, ChevronLeft } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 import { cn } from "../../lib/utils";
 
@@ -96,6 +96,7 @@ export default function PatientChat() {
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [selectedId, setSelectedId] = useState<string>(initialConversations[0].id);
   const [draft, setDraft] = useState("");
+  const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const filteredConversations = useMemo(() => {
@@ -116,6 +117,7 @@ export default function PatientChat() {
         item.id === id && item.status === "unread" ? { ...item, status: "active" } : item
       )
     );
+    setShowChatOnMobile(true);
   };
 
   const handleSend = () => {
@@ -177,9 +179,12 @@ export default function PatientChat() {
         description="Nhắn tin trò chuyện với các bác sĩ chuyên khoa hoặc các phòng khám liên kết."
       />
 
-      <div className="grid min-h-[600px] min-w-0 gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+      <div className="grid min-h-[600px] min-w-0 gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
         {/* Left column - Conversations list */}
-        <SectionCard title="Cuộc trò chuyện" className="min-w-0 overflow-hidden">
+        <SectionCard
+          title="Cuộc trò chuyện"
+          className={cn("min-w-0 overflow-hidden", showChatOnMobile ? "hidden lg:block" : "block")}
+        >
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-2xl bg-[#F2F7FB] p-1">
             {(Object.keys(filterLabels) as ConversationFilter[]).map((item) => (
               <button
@@ -254,15 +259,25 @@ export default function PatientChat() {
           title={selectedConversation.name}
           description={selectedConversation.roleName}
           actions={
-            <ActionButton
-              variant="secondary"
-              icon={<Archive className="h-4 w-4" />}
-              onClick={toggleArchive}
-            >
-              {selectedConversation.status === "archived" ? "Bỏ lưu trữ" : "Lưu trữ"}
-            </ActionButton>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowChatOnMobile(false)}
+                className="inline-flex lg:hidden items-center justify-center rounded-full border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-bold text-[#1E293B] hover:bg-[#F2F7FB] cursor-pointer"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Quay lại
+              </button>
+              <ActionButton
+                variant="secondary"
+                icon={<Archive className="h-4 w-4" />}
+                onClick={toggleArchive}
+              >
+                {selectedConversation.status === "archived" ? "Bỏ lưu trữ" : "Lưu trữ"}
+              </ActionButton>
+            </div>
           }
-          className="flex min-w-0 flex-col"
+          className={cn("flex min-w-0 flex-col", showChatOnMobile ? "block" : "hidden lg:block")}
         >
           <div className="min-h-[380px] flex-1 space-y-4 overflow-y-auto rounded-2xl bg-[#F7FAFC] p-5 custom-scrollbar">
             {selectedConversation.messages.map((message, index) => (
