@@ -8,10 +8,12 @@ import GuestChat from "./pages/guest/chat";
 import DoctorChat from "./pages/doctor/chat";
 import DoctorDashboard from "./pages/doctor/dashboard";
 import DoctorExamination from "./pages/doctor/examination";
-import DoctorFeedback from "./pages/doctor/feedback";
 import PatientDetail from "./pages/doctor/patient-detail";
 import DoctorPatients from "./pages/doctor/patients";
 import DoctorProfile from "./pages/doctor/profile";
+import DoctorAppointments from "./pages/doctor/appointments";
+import DoctorOperational from "./pages/doctor/operational";
+import DoctorTelemedicine from "./pages/doctor/telemedicine";
 import ExpertCaseDetail from "./pages/expert/case-detail";
 import ExpertCases from "./pages/expert/cases";
 import ExpertChat from "./pages/expert/chat";
@@ -410,12 +412,13 @@ export const router = createBrowserRouter([
     element: <Layout role="doctor" userName="Nguyễn Văn B" userRole="Bác sĩ" />,
     children: [
       { index: true, element: <DoctorDashboard /> },
+      { path: "appointments", element: <DoctorAppointments /> },
       { path: "patients", element: <DoctorPatients /> },
       { path: "patients/:id", element: <PatientDetail /> },
       { path: "examination", element: <DoctorExamination /> },
-      { path: "appointments", element: <DoctorExamination /> },
+      { path: "operational", element: <DoctorOperational /> },
+      { path: "telemedicine", element: <DoctorTelemedicine /> },
       { path: "chat", element: <DoctorChat /> },
-      { path: "feedback", element: <DoctorFeedback /> },
       { path: "profile", element: <DoctorProfile /> },
     ],
   },
