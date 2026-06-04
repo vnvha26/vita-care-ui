@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { ClipboardList, FileText, FlaskConical, MessageCircle, Pill, Stethoscope } from "lucide-react";
+import { ClipboardList, FileText, MessageCircle, Pill, Search, Stethoscope } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 
 type MedicalRecord = {
@@ -97,7 +97,8 @@ const records: MedicalRecord[] = [
 ];
 
 export default function PatientMedicalRecords() {
-  const [selectedId, setSelectedId] = useState(records[0].id);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
   const [consultations] = useState<ConsultationSession[]>(() => {
     try {
       const saved = JSON.parse(window.localStorage.getItem("patient-consultation-history") ?? "[]") as ConsultationSession[];
@@ -106,7 +107,26 @@ export default function PatientMedicalRecords() {
       return defaultConsultations;
     }
   });
-  const selectedRecord = records.find((record) => record.id === selectedId) ?? records[0];
+
+  const filteredRecords = records.filter((record) => {
+    const keyword = query.trim().toLowerCase();
+    if (!keyword) return true;
+
+    return [
+      record.title,
+      record.date,
+      record.doctor,
+      record.diagnosis,
+      record.summary,
+      record.status,
+      ...record.symptoms,
+      ...record.prescriptions,
+      ...record.tests.map((test) => `${test.name} ${test.result}`),
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(keyword);
+  });
 
   return (
     <div className="space-y-6">
@@ -115,33 +135,56 @@ export default function PatientMedicalRecords() {
         description="Xem lại chẩn đoán, đơn thuốc, ghi chú của bác sĩ và kết quả xét nghiệm."
       />
 
-      <SectionCard title="Lịch sử khám">
+      <SectionCard
+        title="Lịch sử khám"
+        actions={
+          <div className="flex h-11 min-w-[280px] items-center gap-2 rounded-2xl border border-[#E2E8F0] px-3 text-[#64748B]">
+            <Search className="h-4 w-4" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+              placeholder="Tìm chẩn đoán, bác sĩ, thuốc..."
+            />
+          </div>
+        }
+      >
         <div className="space-y-3">
-          {records.map((record) => (
+          {filteredRecords.map((record) => (
             <div
               key={record.id}
-              className={`flex flex-col gap-4 rounded-[18px] border p-4 transition sm:flex-row sm:items-center ${
-                selectedId === record.id ? "border-[#CFE3FF] bg-[#EAF3FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F2F7FB]"
+              className={`rounded-[18px] border p-4 transition ${
+                expandedId === record.id ? "border-[#CFE3FF] bg-[#EAF3FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F2F7FB]"
               }`}
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[#2F80ED] ring-1 ring-[#CFE3FF]">
-                <FileText className="h-5 w-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-extrabold text-[#1E293B]">{record.title}</h3>
-                  <StatusBadge tone={getStatusTone(record.status)}>{record.status}</StatusBadge>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[#2F80ED] ring-1 ring-[#CFE3FF]">
+                  <FileText className="h-5 w-5" />
                 </div>
-                <p className="mt-1 text-sm font-bold text-[#2D4A86]">
-                  {record.date} · {record.doctor}
-                </p>
-                <p className="mt-1 text-sm leading-6 text-[#64748B]">{record.summary}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-extrabold text-[#1E293B]">{record.title}</h3>
+                    <StatusBadge tone={getStatusTone(record.status)}>{record.status}</StatusBadge>
+                  </div>
+                  <p className="mt-1 text-sm font-bold text-[#2D4A86]">
+                    {record.date} · {record.doctor}
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-[#64748B]">{record.summary}</p>
+                </div>
+                <ActionButton variant="secondary" onClick={() => setExpandedId((current) => (current === record.id ? null : record.id))}>
+                  {expandedId === record.id ? "Ẩn chi tiết" : "Chi tiết"}
+                </ActionButton>
               </div>
-              <ActionButton variant="secondary" onClick={() => setSelectedId(record.id)}>
-                Chi tiết
-              </ActionButton>
+
+              {expandedId === record.id && <RecordDetail record={record} />}
             </div>
           ))}
+
+          {filteredRecords.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-[#CFE3FF] bg-[#F7FAFC] p-6 text-center text-sm font-bold text-[#64748B]">
+              Không tìm thấy lịch sử khám phù hợp.
+            </div>
+          )}
         </div>
       </SectionCard>
 
@@ -168,45 +211,49 @@ export default function PatientMedicalRecords() {
           ))}
         </div>
       </SectionCard>
+    </div>
+  );
+}
 
-      <SectionCard title="Chi tiết hồ sơ khám">
-        <div className="grid gap-4 md:grid-cols-3">
-          <Info icon={<ClipboardList className="h-5 w-5" />} label="Mã phiếu" value={selectedRecord.title} />
-          <Info icon={<Stethoscope className="h-5 w-5" />} label="Chẩn đoán" value={selectedRecord.diagnosis} />
-          <Info icon={<FileText className="h-5 w-5" />} label="Bác sĩ" value={`${selectedRecord.doctor} · ${selectedRecord.date}`} />
-        </div>
+function RecordDetail({ record }: { record: MedicalRecord }) {
+  return (
+    <div className="mt-4 rounded-2xl border border-[#CFE3FF] bg-white p-4">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Info icon={<ClipboardList className="h-5 w-5" />} label="Mã phiếu" value={record.title} />
+        <Info icon={<Stethoscope className="h-5 w-5" />} label="Chẩn đoán" value={record.diagnosis} />
+        <Info icon={<FileText className="h-5 w-5" />} label="Bác sĩ" value={`${record.doctor} · ${record.date}`} />
+      </div>
 
-        <div className="mt-5 grid gap-5 xl:grid-cols-2">
-          <DetailList title="Triệu chứng ghi nhận" icon={<ClipboardList className="h-5 w-5" />} items={selectedRecord.symptoms} />
-          <DetailList title="Đơn thuốc" icon={<Pill className="h-5 w-5" />} items={selectedRecord.prescriptions} />
-        </div>
+      <div className="mt-5 grid gap-5 xl:grid-cols-2">
+        <DetailList title="Triệu chứng ghi nhận" icon={<ClipboardList className="h-5 w-5" />} items={record.symptoms} />
+        <DetailList title="Đơn thuốc" icon={<Pill className="h-5 w-5" />} items={record.prescriptions} />
+      </div>
 
-        <div className="mt-5 overflow-hidden rounded-2xl border border-[#E2E8F0]">
-          <table className="w-full min-w-[640px] border-collapse text-left text-sm">
-            <thead className="bg-[#F7FAFC] text-[#1E293B]">
-              <tr>
-                <th className="border-b border-[#E2E8F0] px-4 py-3 font-extrabold">STT</th>
-                <th className="border-b border-[#E2E8F0] px-4 py-3 font-extrabold">Loại xét nghiệm</th>
-                <th className="border-b border-[#E2E8F0] px-4 py-3 font-extrabold">Kết quả</th>
+      <div className="mt-5 overflow-hidden rounded-2xl border border-[#E2E8F0]">
+        <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+          <thead className="bg-[#F7FAFC] text-[#1E293B]">
+            <tr>
+              <th className="border-b border-[#E2E8F0] px-4 py-3 font-extrabold">STT</th>
+              <th className="border-b border-[#E2E8F0] px-4 py-3 font-extrabold">Loại xét nghiệm</th>
+              <th className="border-b border-[#E2E8F0] px-4 py-3 font-extrabold">Kết quả</th>
+            </tr>
+          </thead>
+          <tbody>
+            {record.tests.map((test, index) => (
+              <tr key={test.name} className="border-b border-[#E2E8F0] last:border-b-0">
+                <td className="px-4 py-3 font-medium text-[#475569]">{index + 1}</td>
+                <td className="px-4 py-3 font-medium text-[#475569]">{test.name}</td>
+                <td className="px-4 py-3 font-extrabold text-[#2D4A86]">{test.result}</td>
               </tr>
-            </thead>
-            <tbody>
-              {selectedRecord.tests.map((test, index) => (
-                <tr key={test.name} className="border-b border-[#E2E8F0] last:border-b-0">
-                  <td className="px-4 py-3 font-medium text-[#475569]">{index + 1}</td>
-                  <td className="px-4 py-3 font-medium text-[#475569]">{test.name}</td>
-                  <td className="px-4 py-3 font-extrabold text-[#2D4A86]">{test.result}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-        <div className="mt-5 rounded-2xl border border-[#CFE3FF] bg-[#F7FAFC] p-4">
-          <p className="text-sm font-extrabold text-[#1E293B]">Lời dặn của bác sĩ</p>
-          <p className="mt-2 text-sm font-medium leading-6 text-[#64748B]">{selectedRecord.advice}</p>
-        </div>
-      </SectionCard>
+      <div className="mt-5 rounded-2xl border border-[#CFE3FF] bg-[#F7FAFC] p-4">
+        <p className="text-sm font-extrabold text-[#1E293B]">Lời dặn của bác sĩ</p>
+        <p className="mt-2 text-sm font-medium leading-6 text-[#64748B]">{record.advice}</p>
+      </div>
     </div>
   );
 }
