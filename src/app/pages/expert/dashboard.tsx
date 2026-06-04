@@ -28,12 +28,18 @@ export default function ExpertDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold text-gray-900">Dashboard Chuyên gia</h1>
-        <p className="text-gray-500 mt-1">Tổng quan ca đánh giá và hoạt động</p>
+      <div className="rounded-3xl border border-emerald-100 bg-gradient-to-r from-white via-emerald-50 to-teal-50 p-6 shadow-sm">
+        <div className="flex flex-col gap-2">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
+            <ClipboardList className="h-3.5 w-3.5" />
+            Trung tâm tư vấn chuyên gia
+          </div>
+          <h1 className="text-3xl font-semibold text-gray-900">Dashboard Chuyên gia</h1>
+          <p className="max-w-3xl text-gray-600">Theo dõi ca đánh giá, hàng chờ tư vấn và nhịp trao đổi với bác sĩ/người dùng trong một giao diện tổng quan.</p>
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">
@@ -93,6 +99,66 @@ export default function ExpertDashboard() {
             <p className="text-xs text-gray-500 mt-2">
               Mỗi ca đánh giá
             </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="border-emerald-100 bg-emerald-50/50">
+          <CardHeader>
+            <CardTitle>Người dùng chờ tư vấn</CardTitle>
+            <CardDescription>Người cần khám bệnh và người cần tư vấn</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-3">
+              <div>
+                <p className="font-medium text-gray-900">Nguyễn Văn An</p>
+                <p className="text-sm text-gray-500">Giải thích kết quả xét nghiệm</p>
+              </div>
+              <Badge variant="danger">Cao</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-3">
+              <div>
+                <p className="font-medium text-gray-900">Lê Minh Châu</p>
+                <p className="text-sm text-gray-500">Cần xác nhận bước tái khám</p>
+              </div>
+              <Badge variant="warning">Đang chờ</Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-emerald-100 bg-white">
+          <CardHeader>
+            <CardTitle>Trao đổi với bác sĩ</CardTitle>
+            <CardDescription>Ca cần phản hồi chuyên môn</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
+              <div>
+                <p className="font-medium text-gray-900">BS. Nguyễn Văn A</p>
+                <p className="text-sm text-gray-500">Đề nghị rà soát liều insulin</p>
+              </div>
+              <Badge variant="active">Online</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
+              <div>
+                <p className="font-medium text-gray-900">BS. Trần Văn B</p>
+                <p className="text-sm text-gray-500">Nhờ xem lại hướng xử lý</p>
+              </div>
+              <Badge variant="secondary">Hôm qua</Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-emerald-100 bg-white">
+          <CardHeader>
+            <CardTitle>Hành động nhanh</CardTitle>
+            <CardDescription>Nhảy vào tác vụ chính trong một lần bấm</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button className="w-full justify-start">Mở chat tư vấn</Button>
+            <Button variant="outline" className="w-full justify-start">Xem hàng chờ yêu cầu</Button>
+            <Button variant="outline" className="w-full justify-start">Chốt ca đã hoàn tất</Button>
           </CardContent>
         </Card>
       </div>
