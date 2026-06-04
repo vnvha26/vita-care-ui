@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { Bot, Send, ShieldCheck, Sparkles, ChevronDown, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
@@ -61,13 +61,26 @@ interface ChatMessage {
 }
 
 export default function PatientConsultation() {
+  const [searchParams] = useSearchParams();
+  const initialSymptom = searchParams.get("symptom")?.trim() ?? "";
   const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    {
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
+    const welcomeMessage: ChatMessage = {
       from: "ai",
       text: "Xin chào Nguyễn Văn A! Tôi là trợ lý sức khỏe AI của VitaCare. Tôi có thể hỗ trợ giải đáp các thắc mắc về sức khỏe của bạn hoặc gợi ý danh sách phòng khám liên kết phù hợp. Bạn đang gặp triệu chứng gì hay cần tìm thông tin gì hôm nay?",
-    },
-  ]);
+    };
+
+    if (!initialSymptom) return [welcomeMessage];
+
+    return [
+      welcomeMessage,
+      { from: "user", text: initialSymptom },
+      {
+        from: "ai",
+        text: "Tôi đã nhận triệu chứng bạn nhập từ dashboard. Bạn vui lòng cho biết triệu chứng bắt đầu từ khi nào, mức độ nặng nhẹ ra sao, và có kèm sốt cao, khó thở hoặc đau ngực không?",
+      },
+    ];
+  });
   const [isTyping, setIsTyping] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -175,7 +188,7 @@ export default function PatientConsultation() {
             <Bot className="h-5 w-5 animate-pulse" />
           </div>
           <div>
-            <p className="font-black text-slate-800 text-base">Trợ lý sức khỏe AI</p>
+            <p className="font-black text-slate-800 text-base">Trợ lý AI</p>
             <p className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
               AI tư vấn trực tuyến 24/7
