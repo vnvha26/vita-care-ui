@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Activity, CalendarDays, FileText, Search, UserRound } from "lucide-react";
+import { toast } from "sonner";
 import { ActionButton, DataRow, PageHeader, SectionCard, StatCard, StatusBadge } from "../../components/layout/role-page";
 
 const patients = [
@@ -29,12 +31,15 @@ const patients = [
 ];
 
 export default function ExpertPatients() {
+  const [search, setSearch] = useState("");
+  const [riskFilter, setRiskFilter] = useState("Tất cả mức rủi ro");
+
   return (
     <div>
       <PageHeader
         title="Quản lý bệnh nhân"
         description="Xem dữ liệu bệnh nhân liên quan đến ca AI cần kiểm duyệt, không thay thế hồ sơ bệnh án của bác sĩ."
-        actions={<ActionButton variant="secondary">Chỉ xem dữ liệu kiểm duyệt</ActionButton>}
+        actions={<ActionButton variant="secondary" onClick={() => toast.info("Đang hiển thị dữ liệu kiểm duyệt")}>Chỉ xem dữ liệu kiểm duyệt</ActionButton>}
       />
 
       <div className="grid gap-5 md:grid-cols-3">
@@ -50,9 +55,11 @@ export default function ExpertPatients() {
             <input
               className="h-12 w-full rounded-2xl border border-[#E2E8F0] bg-[#F7FAFC] pl-11 pr-4 text-sm outline-none focus:border-[#2F80ED]"
               placeholder="Tìm bệnh nhân, mã ca, triệu chứng..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </label>
-          <select className="h-12 rounded-2xl border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-[#1E293B]">
+          <select className="h-12 rounded-2xl border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-[#1E293B]" value={riskFilter} onChange={(e) => setRiskFilter(e.target.value)}>
             <option>Tất cả mức rủi ro</option>
             <option>Ưu tiên</option>
             <option>Cần theo dõi</option>
@@ -71,7 +78,7 @@ export default function ExpertPatients() {
                 description={`${patient.age}. Triệu chứng gần nhất: ${patient.condition}. Cập nhật: ${patient.last}.`}
                 icon={<UserRound className="h-5 w-5" />}
                 meta={<StatusBadge tone={patient.risk === "Ưu tiên" ? "rose" : patient.risk === "Cần theo dõi" ? "amber" : "green"}>{patient.risk}</StatusBadge>}
-                actions={<ActionButton variant="secondary">Xem hồ sơ</ActionButton>}
+                actions={<ActionButton variant="secondary" onClick={() => toast.info(`Đang xem hồ sơ ${patient.id}`)}>Xem hồ sơ</ActionButton>}
               />
             ))}
           </div>

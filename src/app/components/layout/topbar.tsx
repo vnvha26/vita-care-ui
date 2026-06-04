@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { Bell, Search, AlertCircle, MessageCircle, X, Send, Bot, Check, CalendarPlus } from "lucide-react";
+import { Bell, Search, AlertCircle, MessageCircle, X, Send, Bot, Check, CalendarPlus, ClipboardCheck, MessageSquareWarning, TrendingUp } from "lucide-react";
 import { Link } from "react-router";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
+import { toast } from "sonner";
 
 interface TopbarProps {
   userName: string;
@@ -15,6 +16,39 @@ const mockContacts = [
   { id: "1", name: "Nguyễn Khám Bệnh", lastMessage: "Dạo này nắng nóng tia cực tím cao quá...", time: "10:32", unread: 2, online: true },
   { id: "2", name: "Trần Hay Hỏi", lastMessage: "Bác sĩ ơi đợt dịch sốt xuất huyết này căng quá...", time: "09:15", unread: 0, online: false },
   { id: "3", name: "Lê Googler", lastMessage: "Em tra thông tin y tế trên mạng thấy...", time: "Hôm qua", unread: 0, online: true },
+];
+
+const expertNotifications = [
+  {
+    id: "n1",
+    icon: ClipboardCheck,
+    iconBg: "bg-amber-100",
+    iconColor: "text-amber-600",
+    title: "Ca mới cần kiểm duyệt",
+    body: "CASE-004 của Nguyễn Văn E — đau ngực, khó thở — được chuyển sang hàng chờ.",
+    time: "5 phút trước",
+    urgent: true,
+  },
+  {
+    id: "n2",
+    icon: MessageSquareWarning,
+    iconBg: "bg-rose-100",
+    iconColor: "text-rose-600",
+    title: "Hội thoại bị đánh giá thấp",
+    body: "CONV-003 nhận 1 sao từ người dùng. Cần chuyên gia phân tích lại.",
+    time: "28 phút trước",
+    urgent: true,
+  },
+  {
+    id: "n3",
+    icon: TrendingUp,
+    iconBg: "bg-green-100",
+    iconColor: "text-green-600",
+    title: "Báo cáo tuần sẵn sàng",
+    body: "Báo cáo chất lượng AI tuần 23 đã được tạo. Xem ngay để theo dõi xu hướng.",
+    time: "2 giờ trước",
+    urgent: false,
+  },
 ];
 
 export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
@@ -136,14 +170,14 @@ export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 bg-white/90 backdrop-blur-2xl rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/60 overflow-hidden z-50">
+            <div className="absolute right-0 mt-2 w-96 bg-white/90 backdrop-blur-2xl rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/60 overflow-hidden z-50">
               <div className="px-4 py-3 border-b border-white/40 bg-white/50 flex justify-between items-center">
                 <span className="font-semibold text-gray-900">Thông báo</span>
-                <span className="text-xs text-blue-600 cursor-pointer hover:underline">Đánh dấu đã đọc</span>
+                <button onClick={() => { toast.success("Đã đánh dấu tất cả là đã đọc"); setShowNotifications(false); }} className="text-xs text-blue-600 hover:underline">Đánh dấu đã đọc</button>
               </div>
-              <div className="max-h-[300px] overflow-y-auto">
+              <div className="max-h-[400px] overflow-y-auto">
                 {userRole === "Quản lý hệ thống" && (
-                  <Link 
+                  <Link
                     to="/manager/clinic-registration"
                     onClick={() => setShowNotifications(false)}
                     className="flex gap-3 p-4 hover:bg-white/60 transition-colors border-l-4 border-red-500 bg-red-50/30"
@@ -157,6 +191,32 @@ export function Topbar({ userName, userRole, notifications = 0 }: TopbarProps) {
                       <p className="text-[10px] text-gray-400 mt-2">Vừa xong</p>
                     </div>
                   </Link>
+                )}
+                {userRole === "Chuyên gia y tế" && expertNotifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    className={`flex gap-3 p-4 hover:bg-white/60 transition-colors border-b border-white/40 last:border-0 cursor-pointer ${notif.urgent ? "border-l-4 border-amber-500" : ""}`}
+                    onClick={() => {
+                      toast.success(notif.title, { description: notif.body });
+                      setShowNotifications(false);
+                    }}
+                  >
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.iconBg}`}>
+                      <notif.icon className={`h-5 w-5 ${notif.iconColor}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{notif.title}</p>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">{notif.body}</p>
+                      <p className="text-[10px] text-gray-400 mt-2">{notif.time}</p>
+                    </div>
+                  </div>
+                ))}
+                {userRole !== "Chuyên gia y tế" && userRole !== "Quản lý hệ thống" && (
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <Bell className="h-10 w-10 text-gray-300 mb-3" />
+                    <p className="text-sm font-medium text-gray-500">Không có thông báo mới</p>
+                    <p className="text-xs text-gray-400 mt-1">Bạn sẽ nhận thông báo khi có cập nhật</p>
+                  </div>
                 )}
               </div>
             </div>
