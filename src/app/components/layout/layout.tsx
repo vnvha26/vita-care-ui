@@ -10,12 +10,12 @@ interface LayoutProps {
 
 export function Layout({ role, userName, userRole }: LayoutProps) {
   return (
-    <div className="flex min-h-screen bg-[#F7FAFC] font-sans text-[#1E293B]">
+    <div className="flex h-screen overflow-hidden bg-[#F7FAFC] font-sans text-[#1E293B]">
       <Sidebar role={role} userName={userName} />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden p-5">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
         <Topbar role={role} userName={userName} userRole={userRole} notifications={5} />
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden pt-5">
+        <main className="min-h-0 min-w-0 flex-1 p-5">
           <Outlet />
         </main>
       </div>
