@@ -1,638 +1,203 @@
 import { useState } from "react";
-import { Database, Upload, Download, RefreshCw, CheckCircle2, Brain, FileText, Eye } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { UploadCloud, FileText, FileSearch, CheckCircle2, Trash2, RefreshCw, MessageSquare, Send, Bot, Database, Sparkles } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 
-const appointmentData = {
-  totalRecords: 1245,
-  lastUpdated: "2026-05-07 10:30",
-  status: "synced",
-  categories: [
-    { name: "Lịch hẹn định kỳ", count: 456, accuracy: 94 },
-    { name: "Khám cấp cứu", count: 189, accuracy: 88 },
-    { name: "Tái khám", count: 600, accuracy: 96 },
-  ],
-};
-
-const recommendationData = {
-  totalRecords: 2890,
-  lastUpdated: "2026-05-07 09:15",
-  status: "synced",
-  categories: [
-    { name: "Khuyến nghị thuốc", count: 1234, accuracy: 92 },
-    { name: "Khuyến nghị xét nghiệm", count: 876, accuracy: 89 },
-    { name: "Khuyến nghị chế độ", count: 780, accuracy: 95 },
-  ],
-};
-
-const aiSpecialties = [
-  {
-    id: "SP001",
-    name: "Tim mạch",
-    enabled: true,
-    confidence: 95,
-    symptoms: ["Đau ngực", "Khó thở", "Tim đập nhanh", "Huyết áp cao"],
-    caseCount: 234,
-    description: "AI có thể gợi ý chuyên khoa tim mạch dựa trên triệu chứng về đau ngực, rối loạn nhịp tim, và các vấn đề huyết áp"
-  },
-  {
-    id: "SP002",
-    name: "Tiểu đường - Nội tiết",
-    enabled: true,
-    confidence: 92,
-    symptoms: ["Đái nhiều", "Khát nước", "Mệt mỏi", "Sụt cân"],
-    caseCount: 189,
-    description: "Gợi ý dựa trên các triệu chứng liên quan đến đường huyết, cân nặng bất thường, và rối loạn chuyển hóa"
-  },
-  {
-    id: "SP003",
-    name: "Hô hấp",
-    enabled: true,
-    confidence: 88,
-    symptoms: ["Ho", "Khó thở", "Đau họng", "Sốt"],
-    caseCount: 167,
-    description: "Phát hiện các vấn đề về đường hô hấp, hen suyễn, viêm phổi dựa trên triệu chứng hô hấp"
-  },
-  {
-    id: "SP004",
-    name: "Tiêu hóa",
-    enabled: true,
-    confidence: 85,
-    symptoms: ["Đau bụng", "Tiêu chảy", "Buồn nôn", "Khó tiêu"],
-    caseCount: 143,
-    description: "Nhận diện các bệnh lý tiêu hóa từ triệu chứng đau bụng, rối loạn tiêu hóa"
-  },
-  {
-    id: "SP005",
-    name: "Thần kinh",
-    enabled: true,
-    confidence: 90,
-    symptoms: ["Đau đầu", "Chóng mặt", "Tê liệt", "Mất ngủ"],
-    caseCount: 98,
-    description: "Phát hiện các rối loạn thần kinh, đau đầu mãn tính, và vấn đề về giấc ngủ"
-  },
-  {
-    id: "SP006",
-    name: "Da liễu",
-    enabled: false,
-    confidence: 78,
-    symptoms: ["Ngứa", "Phát ban", "Mụn", "Nấm"],
-    caseCount: 76,
-    description: "Chưa đủ dữ liệu để đưa ra gợi ý chính xác - cần thêm ca bệnh"
-  },
-];
-
-const pastCases = [
-  {
-    id: "PC001",
-    patientAge: 45,
-    gender: "Nam",
-    symptoms: "Đau ngực, khó thở, tim đập nhanh",
-    aiSuggestion: "Tim mạch",
-    actualDiagnosis: "Tim mạch",
-    doctorConfirmed: true,
-    outcome: "Chẩn đoán chính xác - Hẹp động mạch vành",
-    confidence: 96,
-    date: "2026-04-15"
-  },
-  {
-    id: "PC002",
-    patientAge: 52,
-    gender: "Nữ",
-    symptoms: "Đái nhiều, khát nước, mệt mỏi",
-    aiSuggestion: "Tiểu đường - Nội tiết",
-    actualDiagnosis: "Tiểu đường - Nội tiết",
-    doctorConfirmed: true,
-    outcome: "Chẩn đoán chính xác - Tiểu đường type 2",
-    confidence: 94,
-    date: "2026-04-20"
-  },
-  {
-    id: "PC003",
-    patientAge: 28,
-    gender: "Nữ",
-    symptoms: "Ho, khó thở, đau họng",
-    aiSuggestion: "Hô hấp",
-    actualDiagnosis: "Hô hấp",
-    doctorConfirmed: true,
-    outcome: "Chẩn đoán chính xác - Viêm phế quản",
-    confidence: 89,
-    date: "2026-05-02"
-  },
-  {
-    id: "PC004",
-    patientAge: 38,
-    gender: "Nam",
-    symptoms: "Đau bụng, tiêu chảy, buồn nôn",
-    aiSuggestion: "Tiêu hóa",
-    actualDiagnosis: "Tiêu hóa",
-    doctorConfirmed: true,
-    outcome: "Chẩn đoán chính xác - Viêm dạ dày cấp",
-    confidence: 87,
-    date: "2026-05-05"
-  },
-  {
-    id: "PC005",
-    patientAge: 34,
-    gender: "Nữ",
-    symptoms: "Đau đầu mãn tính, chóng mặt",
-    aiSuggestion: "Thần kinh",
-    actualDiagnosis: "Thần kinh",
-    doctorConfirmed: true,
-    outcome: "Chẩn đoán chính xác - Đau nửa đầu",
-    confidence: 91,
-    date: "2026-05-06"
-  },
-  {
-    id: "PC006",
-    patientAge: 29,
-    gender: "Nam",
-    symptoms: "Ngứa, phát ban, mụn",
-    aiSuggestion: "Da liễu",
-    actualDiagnosis: "Dị ứng - Miễn dịch",
-    doctorConfirmed: false,
-    outcome: "Gợi ý sai - Thực tế là dị ứng thực phẩm",
-    confidence: 72,
-    date: "2026-04-28"
-  },
+const initialDocs = [
+  { id: "1", name: "Lich_su_kham_Da_Lieu_2025.csv", size: "15.4 MB", status: "learned", date: "15/05/2026" },
+  { id: "2", name: "Du_lieu_Tieu_hoa_Q1_2026.xlsx", size: "8.1 MB", status: "learned", date: "14/05/2026" },
+  { id: "3", name: "Ho_so_benh_an_Ho_Hap.csv", size: "12.5 MB", status: "learning", date: "Vừa xong" },
 ];
 
 export default function ManagerAIData() {
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [documents, setDocuments] = useState(initialDocs);
+  const [isDragging, setIsDragging] = useState(false);
+  const [chatMessage, setChatMessage] = useState("");
+  
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+  
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+  
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    // Simulate adding a file
+    const newDoc = {
+      id: Date.now().toString(),
+      name: "Ho_so_kham_Tim_Mach_2025.csv",
+      size: "10.2 MB",
+      status: "learning",
+      date: "Vừa xong"
+    };
+    setDocuments([newDoc, ...documents]);
+    
+    // Simulate learning process completion
+    setTimeout(() => {
+      setDocuments(prev => prev.map(d => d.id === newDoc.id ? { ...d, status: "learned" } : d));
+    }, 3000);
+  };
 
-  const handleSync = () => {
-    setIsSyncing(true);
-    setTimeout(() => setIsSyncing(false), 2000);
+  const removeDoc = (id: string) => {
+    setDocuments(documents.filter(d => d.id !== id));
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="flex h-[calc(100vh-100px)] gap-6 animate-in fade-in duration-500 pb-2">
+      
+      {/* Left Column: Data Management */}
+      <div className="flex-1 flex flex-col gap-6">
         <div>
-          <h1 className="text-3xl font-semibold text-gray-900">Quản lý dữ liệu AI</h1>
-          <p className="text-gray-500 mt-1">Quản lý dữ liệu cho tính năng đặt lịch và khuyến nghị của AI</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dữ liệu lịch sử khám bệnh</h1>
+          <p className="text-gray-500 mt-1">Tải lên lịch sử ca khám thực tế để AI học hỏi cách tư vấn khách hàng</p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={handleSync} disabled={isSyncing}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
-            {isSyncing ? "Đang đồng bộ..." : "Đồng bộ"}
-          </Button>
-          <Button>
-            <Upload className="h-4 w-4 mr-2" />
-            Tải lên dữ liệu
+
+        {/* Upload Zone */}
+        <div 
+          className={`relative rounded-3xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-10 text-center ${
+            isDragging 
+              ? "border-blue-500 bg-blue-50/50 scale-[1.01]" 
+              : "border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300"
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className="h-16 w-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
+            <UploadCloud className="h-8 w-8" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900">Kéo thả file dữ liệu vào đây</h3>
+          <p className="text-sm text-gray-500 mt-1 mb-6 max-w-sm">Hỗ trợ các định dạng: CSV, XLSX. Chứa thông tin triệu chứng và kết luận của bác sĩ.</p>
+          <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-8">
+            <FileSearch className="h-4 w-4 mr-2" />
+            Chọn file từ máy tính
           </Button>
         </div>
-      </div>
 
-      <div className="grid gap-6 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Tổng dữ liệu</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold text-gray-900">4,135</div>
-            <p className="text-xs text-gray-500 mt-1">bản ghi</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Độ chính xác TB</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold text-green-600">92.3%</div>
-            <p className="text-xs text-gray-500 mt-1">Mô hình AI</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Cập nhật cuối</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-semibold text-gray-900">Hôm nay</div>
-            <p className="text-xs text-gray-500 mt-1">10:30 AM</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Trạng thái</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <span className="font-semibold text-green-600">Đã đồng bộ</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="specialties">
-        <TabsList>
-          <TabsTrigger value="specialties">Chuyên khoa AI gợi ý</TabsTrigger>
-          <TabsTrigger value="pastcases">Ca bệnh lịch sử</TabsTrigger>
-          <TabsTrigger value="appointments">Dữ liệu đặt lịch</TabsTrigger>
-          <TabsTrigger value="recommendations">Dữ liệu khuyến nghị</TabsTrigger>
-          <TabsTrigger value="training">Huấn luyện mô hình</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="specialties" className="space-y-6 mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="h-5 w-5 text-blue-600" />
-                    Chuyên khoa AI có thể gợi ý
-                  </CardTitle>
-                  <CardDescription>Quản lý các chuyên khoa mà AI có thể đề xuất cho người dùng</CardDescription>
-                </div>
-                <Button variant="outline">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Cập nhật mô hình
-                </Button>
+        {/* Documents List */}
+        <div className="flex-1 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+              <Database className="h-5 w-5 text-blue-600" />
+              Tập dữ liệu AI đã huấn luyện
+            </h3>
+            <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full">
+              {documents.length} tập dữ liệu
+            </span>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2">
+            {documents.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                <FileText className="h-12 w-12 mb-3 opacity-20" />
+                <p>Chưa có tài liệu nào</p>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {aiSpecialties.map((specialty) => (
-                  <Card key={specialty.id} className={!specialty.enabled ? "opacity-60" : ""}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-lg text-gray-900">{specialty.name}</h3>
-                            <Badge variant={specialty.enabled ? "active" : "inactive"}>
-                              {specialty.enabled ? "Đang hoạt động" : "Tắt"}
-                            </Badge>
-                            <Badge variant={specialty.confidence >= 90 ? "success" : specialty.confidence >= 80 ? "warning" : "danger"}>
-                              {specialty.confidence}% độ tin cậy
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">{specialty.description}</p>
-
-                          <div className="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                              <p className="text-xs text-gray-500 mb-2">Triệu chứng nhận diện:</p>
-                              <div className="flex flex-wrap gap-1">
-                                {specialty.symptoms.map((symptom, idx) => (
-                                  <Badge key={idx} variant="secondary" className="text-xs">
-                                    {symptom}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 mb-2">Dữ liệu huấn luyện:</p>
-                              <p className="text-sm font-medium text-gray-900">{specialty.caseCount} ca bệnh</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2 ml-4">
-                          <Button
-                            variant={specialty.enabled ? "outline" : "default"}
-                            size="sm"
-                          >
-                            {specialty.enabled ? "Tắt" : "Bật"}
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4 mr-1" />
-                            Chi tiết
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 pt-4 border-t">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs text-gray-500">Độ chính xác gợi ý:</span>
-                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${
-                                specialty.confidence >= 90 ? "bg-green-600" :
-                                specialty.confidence >= 80 ? "bg-yellow-600" : "bg-red-600"
-                              }`}
-                              style={{ width: `${specialty.confidence}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs font-medium text-gray-700">{specialty.confidence}%</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="pastcases" className="space-y-6 mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-green-600" />
-                    Ca bệnh lịch sử
-                  </CardTitle>
-                  <CardDescription>Mô tả các ca bệnh đã được AI phân tích và xác nhận</CardDescription>
-                </div>
-                <Button variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Xuất báo cáo
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-6 grid grid-cols-3 gap-4">
-                <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-                  <p className="text-sm text-gray-600 mb-1">Tổng ca đã phân tích</p>
-                  <p className="text-2xl font-semibold text-green-700">{pastCases.length}</p>
-                </div>
-                <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                  <p className="text-sm text-gray-600 mb-1">Gợi ý chính xác</p>
-                  <p className="text-2xl font-semibold text-blue-700">
-                    {pastCases.filter(c => c.doctorConfirmed).length}
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
-                  <p className="text-sm text-gray-600 mb-1">Độ chính xác TB</p>
-                  <p className="text-2xl font-semibold text-purple-700">
-                    {((pastCases.filter(c => c.doctorConfirmed).length / pastCases.length) * 100).toFixed(1)}%
-                  </p>
-                </div>
-              </div>
-
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Mã ca</TableHead>
-                    <TableHead>BN</TableHead>
-                    <TableHead>Triệu chứng</TableHead>
-                    <TableHead>AI gợi ý</TableHead>
-                    <TableHead>Chẩn đoán thực tế</TableHead>
-                    <TableHead>Độ tin cậy</TableHead>
-                    <TableHead>Kết quả</TableHead>
-                    <TableHead>Ngày</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pastCases.map((case_) => (
-                    <TableRow key={case_.id}>
-                      <TableCell className="font-medium">{case_.id}</TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <p className="text-gray-900">{case_.gender}, {case_.patientAge}t</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <p className="text-sm text-gray-700 max-w-xs">{case_.symptoms}</p>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="default">{case_.aiSuggestion}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={case_.doctorConfirmed ? "success" : "warning"}>
-                          {case_.actualDiagnosis}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full ${
-                                case_.confidence >= 90 ? "bg-green-600" :
-                                case_.confidence >= 80 ? "bg-yellow-600" : "bg-red-600"
-                              }`}
-                              style={{ width: `${case_.confidence}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs font-medium">{case_.confidence}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={case_.doctorConfirmed ? "success" : "danger"}>
-                          {case_.doctorConfirmed ? "✓ Chính xác" : "✗ Sai"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs text-gray-500">{case_.date}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              <div className="mt-6 space-y-4">
-                <h4 className="font-medium text-gray-900">Chi tiết ca bệnh nổi bật:</h4>
-                {pastCases.slice(0, 3).map((case_) => (
-                  <div key={case_.id} className="p-4 rounded-lg border">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="font-medium text-gray-900">{case_.id} - {case_.gender}, {case_.patientAge} tuổi</p>
-                        <p className="text-sm text-gray-500">{case_.date}</p>
-                      </div>
-                      <Badge variant={case_.doctorConfirmed ? "success" : "danger"}>
-                        {case_.doctorConfirmed ? "✓ Chính xác" : "✗ Sai"}
-                      </Badge>
+            ) : (
+              documents.map(doc => (
+                <div key={doc.id} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-2xl transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                      <FileText className="h-6 w-6" />
                     </div>
-                    <p className="text-sm text-gray-700 mb-2"><strong>Triệu chứng:</strong> {case_.symptoms}</p>
-                    <p className="text-sm text-gray-700 mb-2">
-                      <strong>AI đề xuất:</strong> {case_.aiSuggestion} ({case_.confidence}% độ tin cậy)
-                    </p>
-                    <p className="text-sm text-gray-700"><strong>Kết quả:</strong> {case_.outcome}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200">
-                <h4 className="font-medium text-yellow-900 mb-2">Phân tích ca sai</h4>
-                <p className="text-sm text-yellow-800">
-                  Ca bệnh PC006 cho thấy AI nhầm lẫn giữa Da liễu và Dị ứng - Miễn dịch.
-                  Cần bổ sung thêm dữ liệu về các triệu chứng dị ứng để cải thiện độ chính xác.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="appointments" className="space-y-6 mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Dữ liệu đặt lịch hẹn</CardTitle>
-                  <CardDescription>Dữ liệu để AI gợi ý lịch hẹn phù hợp</CardDescription>
-                </div>
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Xuất dữ liệu
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div>
-                    <p className="text-sm text-gray-500">Tổng số bản ghi</p>
-                    <p className="text-2xl font-semibold text-gray-900">{appointmentData.totalRecords}</p>
-                  </div>
-                  <Badge variant="success">Đã xác thực</Badge>
-                </div>
-
-                <div className="space-y-3">
-                  {appointmentData.categories.map((cat, index) => (
-                    <div key={index} className="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="font-medium text-gray-900">{cat.name}</p>
-                        <Badge variant="default">{cat.count} mẫu</Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-blue-600 rounded-full"
-                            style={{ width: `${cat.accuracy}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-medium text-gray-700">{cat.accuracy}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <Button variant="outline" className="flex-1">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Thêm dữ liệu mới
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Làm mới
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="recommendations" className="space-y-6 mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Dữ liệu khuyến nghị</CardTitle>
-                  <CardDescription>Dữ liệu để AI đưa ra khuyến nghị điều trị</CardDescription>
-                </div>
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Xuất dữ liệu
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div>
-                    <p className="text-sm text-gray-500">Tổng số bản ghi</p>
-                    <p className="text-2xl font-semibold text-gray-900">{recommendationData.totalRecords}</p>
-                  </div>
-                  <Badge variant="success">Đã xác thực</Badge>
-                </div>
-
-                <div className="space-y-3">
-                  {recommendationData.categories.map((cat, index) => (
-                    <div key={index} className="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="font-medium text-gray-900">{cat.name}</p>
-                        <Badge variant="default">{cat.count} mẫu</Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-green-600 rounded-full"
-                            style={{ width: `${cat.accuracy}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-medium text-gray-700">{cat.accuracy}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <Button variant="outline" className="flex-1">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Thêm dữ liệu mới
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Làm mới
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="training" className="space-y-6 mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Huấn luyện mô hình AI</CardTitle>
-              <CardDescription>Quản lý quá trình huấn luyện và cập nhật mô hình</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="p-4 rounded-lg border">
-                  <p className="text-sm text-gray-500 mb-1">Phiên bản hiện tại</p>
-                  <p className="text-xl font-semibold text-gray-900">v2.3.1</p>
-                  <p className="text-xs text-gray-400 mt-1">Cập nhật: 2026-04-15</p>
-                </div>
-                <div className="p-4 rounded-lg border">
-                  <p className="text-sm text-gray-500 mb-1">Huấn luyện gần nhất</p>
-                  <p className="text-xl font-semibold text-gray-900">15 ngày trước</p>
-                  <p className="text-xs text-gray-400 mt-1">Độ chính xác: 92.3%</p>
-                </div>
-              </div>
-
-              <div className="p-6 rounded-lg bg-blue-50 border border-blue-200">
-                <h4 className="font-medium text-blue-900 mb-2">Lịch huấn luyện tự động</h4>
-                <p className="text-sm text-blue-700 mb-4">
-                  Mô hình được huấn luyện lại tự động mỗi 30 ngày hoặc khi có 500+ dữ liệu mới
-                </p>
-                <div className="flex items-center gap-3">
-                  <Button>Huấn luyện ngay</Button>
-                  <Button variant="outline">Cấu hình lịch</Button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="font-medium text-gray-900">Lịch sử huấn luyện</h4>
-                {[
-                  { version: "v2.3.1", date: "2026-04-15", accuracy: 92.3, status: "success" },
-                  { version: "v2.3.0", date: "2026-03-12", accuracy: 91.8, status: "success" },
-                  { version: "v2.2.9", date: "2026-02-08", accuracy: 90.5, status: "success" },
-                ].map((train, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
                     <div>
-                      <p className="font-medium text-gray-900">{train.version}</p>
-                      <p className="text-sm text-gray-500">{train.date}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">{train.accuracy}%</p>
-                      <Badge variant="success" className="mt-1">Thành công</Badge>
+                      <h4 className="font-semibold text-gray-900 text-sm">{doc.name}</h4>
+                      <div className="flex items-center gap-3 mt-1 text-xs font-medium text-gray-500">
+                        <span>{doc.size}</span>
+                        <span>•</span>
+                        <span>{doc.date}</span>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                  <div className="flex items-center gap-4">
+                    {doc.status === "learning" ? (
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100">
+                        <RefreshCw className="h-3 w-3 animate-spin" /> Đang học...
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-lg border border-green-100">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Đã ghi nhớ
+                      </span>
+                    )}
+                    <button 
+                      onClick={() => removeDoc(doc.id)}
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Right Column: Try it out Sandbox */}
+      <div className="w-[400px] shrink-0 bg-white rounded-3xl border border-gray-100 shadow-sm flex flex-col overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent h-40 pointer-events-none"></div>
+        
+        <div className="p-5 border-b border-gray-100 flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <h3 className="font-bold text-gray-900">Sandbox Kiểm thử</h3>
+          </div>
+          <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/30">
+          <div className="bg-white border border-gray-100 p-4 rounded-2xl rounded-tl-sm shadow-sm">
+            <div className="flex items-center gap-2 text-blue-600 mb-2">
+              <Bot className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase tracking-wider">Hệ thống AI</span>
+            </div>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              Xin chào! Tôi đã nạp xong các lịch sử ca khám. Hãy thử đặt câu hỏi như một khách hàng nhé.
+            </p>
+          </div>
+          
+          <div className="flex justify-end">
+            <div className="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-sm text-sm shadow-sm max-w-[85%]">
+              Dạo này tôi ăn đồ chua hay bị ợ hơi và nóng rát ở ngực, thỉnh thoảng có buồn nôn. Cho hỏi tôi bị gì vậy?
+            </div>
+          </div>
+          
+          <div className="bg-white border border-gray-100 p-4 rounded-2xl rounded-tl-sm shadow-sm">
+            <div className="flex items-center gap-2 text-blue-600 mb-2">
+              <Bot className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase tracking-wider">Hệ thống AI</span>
+            </div>
+            <div className="text-sm text-gray-700 leading-relaxed space-y-2">
+              <p>Dựa trên <span className="font-bold">482 ca khám tương tự</span> trong tập dữ liệu <span className="text-blue-600 bg-blue-50 px-1 rounded font-medium">Du_lieu_Tieu_hoa_Q1_2026.xlsx</span>, các triệu chứng của bạn rất giống với hội chứng <b>Trào ngược dạ dày thực quản (GERD)</b>.</p>
+              <p>Hướng xử lý mà các bác sĩ thường tư vấn:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>Tạm ngưng đồ ăn chua cay, nhiều dầu mỡ.</li>
+                <li>Không nằm ngay sau khi ăn.</li>
+                <li>Bạn nên đến phòng khám để nội soi dạ dày nhằm kiểm tra mức độ viêm loét nhé.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-white border-t border-gray-100 z-10">
+          <div className="flex items-center gap-3">
+            <input 
+              type="text" 
+              placeholder="Hỏi AI về tài liệu..." 
+              value={chatMessage}
+              onChange={(e) => setChatMessage(e.target.value)}
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+            />
+            <button className="p-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors">
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }

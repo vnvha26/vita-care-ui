@@ -8,11 +8,11 @@ import { Badge } from "../../components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 
 const doctors = [
-  { id: "D001", name: "BS. Nguyễn Văn A", specialty: "Tim mạch", clinic: "PK Đa khoa TW1", patients: 45, rating: 4.8, status: "active" },
-  { id: "D002", name: "BS. Trần Văn B", specialty: "Nội tổng hợp", clinic: "PK Đa khoa TW2", patients: 38, rating: 4.6, status: "active" },
-  { id: "D003", name: "BS. Lê Thị C", specialty: "Tiểu đường", clinic: "PK Tim mạch", patients: 52, rating: 4.9, status: "active" },
-  { id: "D004", name: "BS. Phạm Đức D", specialty: "Hô hấp", clinic: "PK Nội TH", patients: 29, rating: 4.5, status: "active" },
-  { id: "D005", name: "BS. Hoàng Thị E", specialty: "Thần kinh", clinic: "PK Đa khoa TW1", patients: 31, rating: 4.7, status: "inactive" },
+  { id: "D001", name: "BS. Nguyễn Văn A", specialty: "Tim mạch", patients: 45, rating: 4.8, status: "active" },
+  { id: "D002", name: "BS. Trần Văn B", specialty: "Nội tổng hợp", patients: 38, rating: 4.6, status: "active" },
+  { id: "D003", name: "BS. Lê Thị C", specialty: "Tiểu đường", patients: 52, rating: 4.9, status: "active" },
+  { id: "D004", name: "BS. Phạm Đức D", specialty: "Hô hấp", patients: 29, rating: 4.5, status: "active" },
+  { id: "D005", name: "BS. Hoàng Thị E", specialty: "Thần kinh", patients: 31, rating: 4.7, status: "inactive" },
 ];
 
 export default function ManagerDoctors() {
@@ -109,7 +109,6 @@ export default function ManagerDoctors() {
                 <TableHead>Mã BS</TableHead>
                 <TableHead>Họ và tên</TableHead>
                 <TableHead>Chuyên khoa</TableHead>
-                <TableHead>Phòng khám</TableHead>
                 <TableHead>Bệnh nhân</TableHead>
                 <TableHead>Đánh giá</TableHead>
                 <TableHead>Trạng thái</TableHead>
@@ -124,7 +123,6 @@ export default function ManagerDoctors() {
                     <p className="font-medium text-gray-900">{doctor.name}</p>
                   </TableCell>
                   <TableCell>{doctor.specialty}</TableCell>
-                  <TableCell>{doctor.clinic}</TableCell>
                   <TableCell>
                     <Badge variant="default">{doctor.patients}</Badge>
                   </TableCell>
