@@ -9,12 +9,12 @@ import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 
 const specialties = [
-  { id: "SP001", name: "Tim mạch", doctorCount: 8, patientCount: 234, status: "active", description: "Chuyên khoa về tim và hệ tuần hoàn máu." },
-  { id: "SP002", name: "Nội tổng hợp", doctorCount: 12, patientCount: 456, status: "active", description: "Chuyên khoa nội khoa tổng quát." },
-  { id: "SP003", name: "Tiểu đường", doctorCount: 6, patientCount: 189, status: "active", description: "Chuyên điều trị bệnh tiểu đường và rối loạn nội tiết." },
-  { id: "SP004", name: "Hô hấp", doctorCount: 5, patientCount: 167, status: "active", description: "Chuyên khoa về bệnh lý đường hô hấp." },
-  { id: "SP005", name: "Thần kinh", doctorCount: 4, patientCount: 98, status: "active", description: "Chuyên điều trị các bệnh lý hệ thần kinh." },
-  { id: "SP006", name: "Da liễu", doctorCount: 3, patientCount: 76, status: "inactive", description: "Chuyên điều trị các bệnh về da, tóc và móng." },
+  { id: "SP001", name: "Tim m?ch", doctorCount: 8, patientCount: 234, status: "active", description: "Chuy�n khoa v? tim v� h? tu?n ho�n m�u." },
+  { id: "SP002", name: "N?i t?ng h?p", doctorCount: 12, patientCount: 456, status: "active", description: "Chuy�n khoa n?i khoa t?ng qu�t." },
+  { id: "SP003", name: "Ti?u du?ng", doctorCount: 6, patientCount: 189, status: "active", description: "Chuy�n di?u tr? b?nh ti?u du?ng v� r?i lo?n n?i ti?t." },
+  { id: "SP004", name: "H� h?p", doctorCount: 5, patientCount: 167, status: "active", description: "Chuy�n khoa v? b?nh l� du?ng h� h?p." },
+  { id: "SP005", name: "Th?n kinh", doctorCount: 4, patientCount: 98, status: "active", description: "Chuy�n di?u tr? c�c b?nh l� h? th?n kinh." },
+  { id: "SP006", name: "Da li?u", doctorCount: 3, patientCount: 76, status: "inactive", description: "Chuy�n di?u tr? c�c b?nh v? da, t�c v� m�ng." },
 ];
 
 export default function SpecialtyForm() {
@@ -52,10 +52,10 @@ export default function SpecialtyForm() {
         </Button>
         <div>
           <h1 className="text-3xl font-semibold text-gray-900">
-            {isEdit ? "Chỉnh sửa chuyên khoa" : "Thêm chuyên khoa mới"}
+            {isEdit ? "Ch?nh s?a chuy�n khoa" : "Th�m chuy�n khoa m?i"}
           </h1>
           <p className="text-gray-500 mt-1">
-            {isEdit ? `Cập nhật thông tin: ${existing?.name}` : "Điền thông tin chuyên khoa mới"}
+            {isEdit ? `C?p nh?t th�ng tin: ${existing?.name}` : "�i?n th�ng tin chuy�n khoa m?i"}
           </p>
         </div>
       </div>
@@ -66,15 +66,15 @@ export default function SpecialtyForm() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Stethoscope className="h-5 w-5 text-blue-600" />
-                Thông tin chuyên khoa
+                Th�ng tin chuy�n khoa
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Tên chuyên khoa *</Label>
+                <Label htmlFor="name">T�n chuy�n khoa *</Label>
                 <Input
                   id="name"
-                  placeholder="VD: Nội tim mạch"
+                  placeholder="VD: N?i tim m?ch"
                   value={form.name}
                   onChange={(e) => set("name", e.target.value)}
                   required
@@ -82,7 +82,7 @@ export default function SpecialtyForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="code">Mã chuyên khoa *</Label>
+                <Label htmlFor="code">M� chuy�n khoa *</Label>
                 <Input
                   id="code"
                   placeholder="VD: SP007"
@@ -93,24 +93,24 @@ export default function SpecialtyForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Trạng thái</Label>
+                <Label htmlFor="status">Tr?ng th�i</Label>
                 <Select value={form.status} onValueChange={(v) => set("status", v)}>
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Hoạt động</SelectItem>
-                    <SelectItem value="inactive">Ngưng hoạt động</SelectItem>
+                    <SelectItem value="active">Ho?t d?ng</SelectItem>
+                    <SelectItem value="inactive">Ngung ho?t d?ng</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Mô tả *</Label>
+                <Label htmlFor="description">M� t? *</Label>
                 <Textarea
                   id="description"
                   rows={4}
-                  placeholder="Mô tả về chuyên khoa, phạm vi điều trị..."
+                  placeholder="M� t? v? chuy�n khoa, ph?m vi di?u tr?..."
                   value={form.description}
                   onChange={(e) => set("description", e.target.value)}
                   required
@@ -121,11 +121,11 @@ export default function SpecialtyForm() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Cấu hình chuyên khoa</CardTitle>
+              <CardTitle>C?u h�nh chuy�n khoa</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="avgDuration">Thời gian khám TB (phút)</Label>
+                <Label htmlFor="avgDuration">Th?i gian kh�m TB (ph�t)</Label>
                 <Input
                   id="avgDuration"
                   type="number"
@@ -137,46 +137,46 @@ export default function SpecialtyForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="certification">Yêu cầu chứng chỉ hành nghề</Label>
+                <Label htmlFor="certification">Y�u c?u ch?ng ch? h�nh ngh?</Label>
                 <Select value={form.requireCertification} onValueChange={(v) => set("requireCertification", v)}>
                   <SelectTrigger id="certification">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="true">Có</SelectItem>
-                    <SelectItem value="false">Không</SelectItem>
+                    <SelectItem value="true">C�</SelectItem>
+                    <SelectItem value="false">Kh�ng</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Nhóm chuyên khoa</Label>
+                <Label>Nh�m chuy�n khoa</Label>
                 <Select defaultValue="noi">
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="noi">Nội khoa</SelectItem>
-                    <SelectItem value="ngoai">Ngoại khoa</SelectItem>
-                    <SelectItem value="san">Sản phụ khoa</SelectItem>
+                    <SelectItem value="noi">N?i khoa</SelectItem>
+                    <SelectItem value="ngoai">Ngo?i khoa</SelectItem>
+                    <SelectItem value="san">S?n ph? khoa</SelectItem>
                     <SelectItem value="nhi">Nhi khoa</SelectItem>
-                    <SelectItem value="mat">Mắt</SelectItem>
-                    <SelectItem value="rang">Răng hàm mặt</SelectItem>
-                    <SelectItem value="tai">Tai mũi họng</SelectItem>
-                    <SelectItem value="other">Khác</SelectItem>
+                    <SelectItem value="mat">M?t</SelectItem>
+                    <SelectItem value="rang">Rang h�m m?t</SelectItem>
+                    <SelectItem value="tai">Tai mui h?ng</SelectItem>
+                    <SelectItem value="other">Kh�c</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Phí khám ban đầu (VNĐ)</Label>
+                <Label>Ph� kh�m ban d?u (VN�)</Label>
                 <Input type="number" placeholder="VD: 200000" defaultValue="200000" />
               </div>
 
               <div className="p-4 rounded-lg bg-blue-50 border border-blue-100">
-                <p className="text-sm text-blue-700 font-medium">Lưu ý</p>
+                <p className="text-sm text-blue-700 font-medium">Luu �</p>
                 <p className="text-sm text-blue-600 mt-1">
-                  Sau khi tạo chuyên khoa, bạn có thể phân bổ bác sĩ và thiết lập lịch khám trong trang chi tiết.
+                  Sau khi t?o chuy�n khoa, b?n c� th? ph�n b? b�c si v� thi?t l?p l?ch kh�m trong trang chi ti?t.
                 </p>
               </div>
             </CardContent>
@@ -189,11 +189,11 @@ export default function SpecialtyForm() {
             variant="outline"
             onClick={() => navigate(isEdit ? `/manager/specialties/${id}` : "/manager/specialties")}
           >
-            Hủy
+            H?y
           </Button>
           <Button type="submit">
             <Save className="h-4 w-4 mr-2" />
-            {isEdit ? "Lưu thay đổi" : "Tạo chuyên khoa"}
+            {isEdit ? "Luu thay d?i" : "T?o chuy�n khoa"}
           </Button>
         </div>
       </form>

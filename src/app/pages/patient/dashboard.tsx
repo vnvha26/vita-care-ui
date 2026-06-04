@@ -1,152 +1,96 @@
 import { Link } from "react-router";
-import { mockAppointments, mockNotifications } from "../../lib/mock-data";
+import { ArrowRight, Bot, CalendarClock, HeartPulse, Search } from "lucide-react";
+import { ActionButton, DataRow, SectionCard, StatCard, StatusBadge } from "../../components/layout/role-page";
+
+const diseases = [
+  ["Sốt xuất huyết", "Sốt cao đột ngột, đau đầu, phát ban, chảy máu cam.", "85 ca tuần qua", "Cao", "rose"],
+  ["Viêm họng", "Đau rát họng, ho khan, khó nuốt.", "210 ca tuần qua", "Trung bình", "amber"],
+  ["Cúm mùa", "Sốt, ho, đau họng, mệt mỏi toàn thân.", "310 ca tuần qua", "Thấp", "slate"],
+] as const;
 
 export default function PatientDashboard() {
-  const upcomingAppointments = mockAppointments.filter((a) => a.status === "pending");
-  const unreadNotifications = mockNotifications.filter((n) => !n.read);
-
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Tổng quan</h1>
-        <p className="text-gray-600 mt-1">Chào mừng trở lại, Nguyễn Văn An</p>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <div className="text-3xl mb-3">📅</div>
-          <div className="text-3xl font-bold">{upcomingAppointments.length}</div>
-          <div className="text-blue-100 mt-1">Lịch hẹn sắp tới</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
-          <div className="text-3xl mb-3">📋</div>
-          <div className="text-3xl font-bold">12</div>
-          <div className="text-green-100 mt-1">Hồ sơ khám bệnh</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-          <div className="text-3xl mb-3">🔔</div>
-          <div className="text-3xl font-bold">{unreadNotifications.length}</div>
-          <div className="text-orange-100 mt-1">Thông báo mới</div>
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Lịch hẹn sắp tới</h2>
-            <Link
-              to="/patient/appointments"
-              className="text-sm text-blue-600 hover:text-blue-700"
-            >
-              Xem tất cả →
+    <div className="space-y-5">
+      <section className="grid gap-5 xl:grid-cols-[1fr_360px]">
+        <div className="rounded-[24px] bg-gradient-to-r from-[#EAF3FF] to-[#E8FFF9] p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
+          <div className="flex items-start justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-extrabold">Chào Nguyễn Văn A</h1>
+              <p className="mt-2 text-sm font-medium text-[#64748B]">Hôm nay bạn cảm thấy thế nào?</p>
+              <p className="mt-3 text-sm italic text-[#64748B]">“Sức khỏe là lựa chọn, không phải sự ngẫu nhiên.”</p>
+            </div>
+            <HeartPulse className="h-14 w-14 shrink-0 text-[#2F80ED]" />
+          </div>
+          <div className="mt-6 flex max-w-2xl gap-3">
+            <input className="h-12 flex-1 rounded-full border border-white bg-white/80 px-5 text-sm outline-none focus:ring-2 focus:ring-[#2F80ED]" placeholder="Nhập triệu chứng nhanh..." />
+            <Link to="/patient/consultation">
+              <ActionButton icon={<Search className="h-4 w-4" />}>Hỏi AI ngay</ActionButton>
             </Link>
           </div>
-          <div className="space-y-4">
-            {upcomingAppointments.slice(0, 3).map((appointment) => (
-              <div
-                key={appointment.id}
-                className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{appointment.patientName}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{appointment.type}</p>
-                  </div>
-                  <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">
-                    Chờ khám
-                  </span>
-                </div>
-                <div className="mt-3 flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <span>📅</span>
-                    <span>{appointment.date}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span>🕐</span>
-                    <span>{appointment.time}</span>
-                  </div>
-                </div>
-                <Link
-                  to={`/patient/appointments/${appointment.id}`}
-                  className="mt-3 inline-block text-sm text-blue-600 hover:text-blue-700"
-                >
-                  Xem chi tiết →
-                </Link>
-              </div>
-            ))}
-            {upcomingAppointments.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <div className="text-4xl mb-2">📅</div>
-                <p>Chưa có lịch hẹn nào</p>
-                <Link
-                  to="/patient/book"
-                  className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Đặt lịch khám
-                </Link>
-              </div>
-            )}
-          </div>
         </div>
+        <StatCard label="Điểm theo dõi sức khỏe" value="82/100" helper="Ổn định, nên cập nhật triệu chứng nếu có thay đổi." tone="green" icon={<HeartPulse className="h-5 w-5" />} />
+      </section>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Thông báo</h2>
-            <Link
-              to="/patient/notifications"
-              className="text-sm text-blue-600 hover:text-blue-700"
-            >
-              Xem tất cả →
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {mockNotifications.slice(0, 4).map((notification) => (
-              <div
-                key={notification.id}
-                className={`border border-gray-200 rounded-lg p-4 ${
-                  !notification.read ? "bg-blue-50 border-blue-200" : ""
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="text-2xl">
-                    {notification.type === "appointment" && "📅"}
-                    {notification.type === "medication" && "💊"}
-                    {notification.type === "result" && "📋"}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{notification.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{notification.content}</p>
-                    <div className="mt-2 text-xs text-gray-500">
-                      {notification.date} • {notification.time}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold mb-2">Cần tư vấn sức khỏe?</h2>
-            <p className="text-blue-100">
-              Đặt lịch khám ngay để được bác sĩ tư vấn chuyên môn
+      <section className="grid gap-5 xl:grid-cols-[1fr_430px]">
+        <div className="space-y-5">
+          <section className="rounded-[24px] bg-gradient-to-r from-[#2F80ED] to-[#1C64D1] p-6 text-white shadow-[0_14px_40px_rgba(47,128,237,0.18)]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20">
+              <Bot className="h-6 w-6" />
+            </div>
+            <h2 className="mt-5 text-2xl font-extrabold">Trợ lý sức khỏe AI</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/85">
+              Bạn đang gặp các triệu chứng bất thường? Hãy trò chuyện với AI để nhận phân tích ban đầu và gợi ý bước tiếp theo.
             </p>
-          </div>
-          <div className="flex gap-3">
-            <Link
-              to="/patient/book"
-              className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-medium"
-            >
-              📅 Đặt lịch ngay
-            </Link>
-          </div>
+            <div className="mt-8 flex justify-end">
+              <Link to="/patient/consultation" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#1C64D1] hover:bg-[#EAF3FF]">
+                Bắt đầu tư vấn ngay
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </section>
+
+          <SectionCard title="Hoạt động gần đây">
+            <div className="space-y-3">
+              <DataRow title="Tư vấn sức khỏe" description="Triệu chứng: sốt cao, đau đầu, mệt mỏi, đau họng." icon={<Bot className="h-5 w-5" />} />
+              <DataRow title="Đặt lịch khám" description="Nguyễn Văn B - Chuyên khoa Nội tổng quát" icon={<CalendarClock className="h-5 w-5" />} meta={<StatusBadge tone="green">Chờ xác nhận</StatusBadge>} />
+            </div>
+          </SectionCard>
         </div>
-      </div>
+
+        <div className="space-y-5">
+          <SectionCard title="Dữ liệu y tế: Dịch bệnh & bệnh hay gặp">
+            <div className="space-y-3">
+              {diseases.map(([name, description, trend, level, tone]) => (
+                <div key={name} className="rounded-[18px] border border-[#E2E8F0] bg-[#F7FAFC] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-extrabold">{name}</h3>
+                      <p className="mt-1 text-sm text-[#64748B]">{description}</p>
+                      <p className="mt-2 text-xs font-bold text-[#1C64D1]">{trend}</p>
+                    </div>
+                    <StatusBadge tone={tone}>{level}</StatusBadge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Lịch hẹn sắp tới">
+            <div className="rounded-[20px] bg-[#EAF3FF] p-5">
+              <h3 className="font-extrabold">Nguyễn Văn B</h3>
+              <p className="text-sm text-[#64748B]">Nội tổng quát</p>
+              <div className="mt-4 space-y-2 text-sm">
+                <p>Thời gian: 09:00 - 10:00</p>
+                <p>Phí khám: 350.000 VND</p>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <StatusBadge tone="green">Chờ xác nhận</StatusBadge>
+                <ActionButton>Chi tiết hẹn</ActionButton>
+              </div>
+            </div>
+          </SectionCard>
+        </div>
+      </section>
     </div>
   );
 }

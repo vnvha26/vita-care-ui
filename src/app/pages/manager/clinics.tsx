@@ -20,19 +20,19 @@ export default function ManagerClinics() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-gray-900">Quản lý phòng khám</h1>
-          <p className="text-gray-500 mt-1">Quản lý thông tin cơ bản, chi nhánh và hình ảnh</p>
+          <h1 className="text-3xl font-semibold text-gray-900">Qu?n l� ph�ng kh�m</h1>
+          <p className="text-gray-500 mt-1">Qu?n l� th�ng tin co b?n, chi nh�nh v� h�nh ?nh</p>
         </div>
         <Button onClick={() => navigate("/manager/clinics/new")}>
           <Plus className="h-4 w-4 mr-2" />
-          Thêm phòng khám
+          Th�m ph�ng kh�m
         </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Tổng phòng khám</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">T?ng ph�ng kh�m</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-semibold text-gray-900">{mockClinics.length}</div>
@@ -40,7 +40,7 @@ export default function ManagerClinics() {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Đang hoạt động</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">�ang ho?t d?ng</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-semibold text-green-600">
@@ -50,7 +50,7 @@ export default function ManagerClinics() {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Tổng bác sĩ</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">T?ng b�c si</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-semibold text-blue-600">
@@ -62,16 +62,16 @@ export default function ManagerClinics() {
 
       <Tabs defaultValue="basic">
         <TabsList>
-          <TabsTrigger value="basic">Thông tin cơ bản</TabsTrigger>
-          <TabsTrigger value="branches">Chi nhánh</TabsTrigger>
-          <TabsTrigger value="images">Hình ảnh</TabsTrigger>
+          <TabsTrigger value="basic">Th�ng tin co b?n</TabsTrigger>
+          <TabsTrigger value="branches">Chi nh�nh</TabsTrigger>
+          <TabsTrigger value="images">H�nh ?nh</TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic" className="space-y-6 mt-6">
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
-              placeholder="Tìm kiếm phòng khám..."
+              placeholder="T�m ki?m ph�ng kh�m..."
               className="pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -97,7 +97,7 @@ export default function ManagerClinics() {
                       </CardDescription>
                     </div>
                     <Badge variant={clinic.status === "active" ? "active" : "inactive"}>
-                      {clinic.status === "active" ? "Hoạt động" : "Ngưng"}
+                      {clinic.status === "active" ? "Ho?t d?ng" : "Ngung"}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -105,11 +105,11 @@ export default function ManagerClinics() {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="text-center p-3 rounded-lg bg-blue-50">
                       <p className="text-2xl font-semibold text-blue-600">{clinic.doctorCount}</p>
-                      <p className="text-sm text-gray-500 mt-1">Bác sĩ</p>
+                      <p className="text-sm text-gray-500 mt-1">B�c si</p>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-green-50">
                       <p className="text-2xl font-semibold text-green-600">{clinic.patientCount}</p>
-                      <p className="text-sm text-gray-500 mt-1">Bệnh nhân</p>
+                      <p className="text-sm text-gray-500 mt-1">B?nh nh�n</p>
                     </div>
                   </div>
                   <div className="space-y-3">
@@ -118,17 +118,17 @@ export default function ManagerClinics() {
                       <p className="font-medium text-gray-900">contact@{clinic.id.toLowerCase()}.com</p>
                     </div>
                     <div>
-                      <label className="text-sm text-gray-500">Giờ hoạt động</label>
+                      <label className="text-sm text-gray-500">Gi? ho?t d?ng</label>
                       <p className="font-medium text-gray-900">8:00 - 20:00 (T2-CN)</p>
                     </div>
                   </div>
                   <div className="flex gap-2 mt-4">
                     <Button variant="outline" className="flex-1" onClick={() => navigate(`/manager/clinics/${clinic.id}/edit`)}>
                       <Edit className="h-4 w-4 mr-2" />
-                      Chỉnh sửa
+                      Ch?nh s?a
                     </Button>
                     <Button variant="outline" className="flex-1" onClick={() => navigate(`/manager/clinics/${clinic.id}`)}>
-                      Chi tiết
+                      Chi ti?t
                     </Button>
                   </div>
                 </CardContent>
@@ -142,12 +142,12 @@ export default function ManagerClinics() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Quản lý chi nhánh</CardTitle>
-                  <CardDescription>Các chi nhánh của hệ thống phòng khám</CardDescription>
+                  <CardTitle>Qu?n l� chi nh�nh</CardTitle>
+                  <CardDescription>C�c chi nh�nh c?a h? th?ng ph�ng kh�m</CardDescription>
                 </div>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  Thêm chi nhánh
+                  Th�m chi nh�nh
                 </Button>
               </div>
             </CardHeader>
@@ -166,7 +166,7 @@ export default function ManagerClinics() {
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge variant={clinic.status === "active" ? "active" : "inactive"}>
-                        {clinic.status === "active" ? "Hoạt động" : "Ngưng"}
+                        {clinic.status === "active" ? "Ho?t d?ng" : "Ngung"}
                       </Badge>
                       <Button variant="ghost" size="sm">
                         <Edit className="h-4 w-4" />
@@ -182,15 +182,15 @@ export default function ManagerClinics() {
         <TabsContent value="images" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Quản lý hình ảnh</CardTitle>
-              <CardDescription>Hình ảnh phòng khám và cơ sở vật chất</CardDescription>
+              <CardTitle>Qu?n l� h�nh ?nh</CardTitle>
+              <CardDescription>H�nh ?nh ph�ng kh�m v� co s? v?t ch?t</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-6 md:grid-cols-3">
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer">
                   <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Tải lên hình ảnh mới</p>
-                  <p className="text-xs text-gray-400 mt-1">JPG, PNG (tối đa 5MB)</p>
+                  <p className="text-sm text-gray-600">T?i l�n h�nh ?nh m?i</p>
+                  <p className="text-xs text-gray-400 mt-1">JPG, PNG (t?i da 5MB)</p>
                 </div>
 
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -201,10 +201,10 @@ export default function ManagerClinics() {
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
                       <div className="flex gap-2">
                         <Button size="sm" variant="secondary">Xem</Button>
-                        <Button size="sm" variant="secondary">Xóa</Button>
+                        <Button size="sm" variant="secondary">X�a</Button>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 mt-2">Phòng khám TW{i}</p>
+                    <p className="text-sm text-gray-600 mt-2">Ph�ng kh�m TW{i}</p>
                   </div>
                 ))}
               </div>

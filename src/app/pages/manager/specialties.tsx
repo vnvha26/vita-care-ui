@@ -8,12 +8,12 @@ import { Badge } from "../../components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 
 const specialties = [
-  { id: "SP001", name: "Tim mạch", doctorCount: 8, patientCount: 234, status: "active" },
-  { id: "SP002", name: "Nội tổng hợp", doctorCount: 12, patientCount: 456, status: "active" },
-  { id: "SP003", name: "Tiểu đường", doctorCount: 6, patientCount: 189, status: "active" },
-  { id: "SP004", name: "Hô hấp", doctorCount: 5, patientCount: 167, status: "active" },
-  { id: "SP005", name: "Thần kinh", doctorCount: 4, patientCount: 98, status: "active" },
-  { id: "SP006", name: "Da liễu", doctorCount: 3, patientCount: 76, status: "inactive" },
+  { id: "SP001", name: "Tim m?ch", doctorCount: 8, patientCount: 234, status: "active" },
+  { id: "SP002", name: "N?i t?ng h?p", doctorCount: 12, patientCount: 456, status: "active" },
+  { id: "SP003", name: "Ti?u du?ng", doctorCount: 6, patientCount: 189, status: "active" },
+  { id: "SP004", name: "H� h?p", doctorCount: 5, patientCount: 167, status: "active" },
+  { id: "SP005", name: "Th?n kinh", doctorCount: 4, patientCount: 98, status: "active" },
+  { id: "SP006", name: "Da li?u", doctorCount: 3, patientCount: 76, status: "inactive" },
 ];
 
 export default function ManagerSpecialties() {
@@ -28,19 +28,19 @@ export default function ManagerSpecialties() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-gray-900">Quản lý chuyên khoa</h1>
-          <p className="text-gray-500 mt-1">Quản lý các chuyên khoa trong hệ thống</p>
+          <h1 className="text-3xl font-semibold text-gray-900">Qu?n l� chuy�n khoa</h1>
+          <p className="text-gray-500 mt-1">Qu?n l� c�c chuy�n khoa trong h? th?ng</p>
         </div>
         <Button onClick={() => navigate("/manager/specialties/new")}>
           <Plus className="h-4 w-4 mr-2" />
-          Thêm chuyên khoa
+          Th�m chuy�n khoa
         </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Tổng chuyên khoa</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">T?ng chuy�n khoa</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-semibold text-gray-900">{specialties.length}</div>
@@ -48,7 +48,7 @@ export default function ManagerSpecialties() {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Đang hoạt động</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">�ang ho?t d?ng</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-semibold text-green-600">
@@ -58,7 +58,7 @@ export default function ManagerSpecialties() {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Tổng bác sĩ</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">T?ng b�c si</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-semibold text-blue-600">
@@ -68,7 +68,7 @@ export default function ManagerSpecialties() {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Tổng bệnh nhân</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">T?ng b?nh nh�n</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-semibold text-purple-600">
@@ -82,13 +82,13 @@ export default function ManagerSpecialties() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Danh sách chuyên khoa</CardTitle>
-              <CardDescription>Quản lý và cấu hình chuyên khoa</CardDescription>
+              <CardTitle>Danh s�ch chuy�n khoa</CardTitle>
+              <CardDescription>Qu?n l� v� c?u h�nh chuy�n khoa</CardDescription>
             </div>
             <div className="relative w-80">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
-                placeholder="Tìm kiếm chuyên khoa..."
+                placeholder="T�m ki?m chuy�n khoa..."
                 className="pl-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -100,11 +100,11 @@ export default function ManagerSpecialties() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Mã CK</TableHead>
-                <TableHead>Tên chuyên khoa</TableHead>
-                <TableHead>Số bác sĩ</TableHead>
-                <TableHead>Số bệnh nhân</TableHead>
-                <TableHead>Trạng thái</TableHead>
+                <TableHead>M� CK</TableHead>
+                <TableHead>T�n chuy�n khoa</TableHead>
+                <TableHead>S? b�c si</TableHead>
+                <TableHead>S? b?nh nh�n</TableHead>
+                <TableHead>Tr?ng th�i</TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
@@ -123,7 +123,7 @@ export default function ManagerSpecialties() {
                   </TableCell>
                   <TableCell>
                     <Badge variant={specialty.status === "active" ? "active" : "inactive"}>
-                      {specialty.status === "active" ? "Hoạt động" : "Ngưng hoạt động"}
+                      {specialty.status === "active" ? "Ho?t d?ng" : "Ngung ho?t d?ng"}
                     </Badge>
                   </TableCell>
                   <TableCell>
