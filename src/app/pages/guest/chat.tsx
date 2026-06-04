@@ -49,7 +49,6 @@ export default function GuestChat() {
           </div>
           <div>
             <h1 className="text-lg font-extrabold">VitaCare AI</h1>
-            <p className="text-xs font-semibold text-[#64748B]">Khách vãng lai</p>
           </div>
         </Link>
 
@@ -90,7 +89,6 @@ export default function GuestChat() {
             </Link>
             <span className="ml-2 hidden text-sm font-bold text-[#1C64D1] sm:inline">/ Tư vấn sức khỏe</span>
           </div>
-          <div className="rounded-full bg-[#EAF3FF] px-4 py-2 text-sm font-bold text-[#1C64D1]">Khách vãng lai</div>
         </header>
 
         <div className="grid min-h-0 flex-1 gap-5 pt-5 xl:grid-cols-[minmax(0,1fr)_360px]">
