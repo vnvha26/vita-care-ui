@@ -61,7 +61,7 @@ function LandingPage() {
     setShowChat(true);
     setTimeout(() => {
       chatSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
+    }, 180);
   };
 
   const quickReplies = [
@@ -183,10 +183,10 @@ function LandingPage() {
           {showChat && (
             <div
               ref={chatSectionRef}
-              className="mb-8 flex flex-col h-[calc(100vh-48px)] md:h-[calc(100vh-64px)] rounded-[30px] border border-white/60 bg-white/70 shadow-[0_24px_70px_rgba(63,78,111,0.18)] backdrop-blur-xl scroll-mt-6 animate-in fade-in slide-in-from-bottom-12 duration-500 overflow-hidden"
+              className="relative mb-8 flex flex-col h-[calc(100vh-48px)] md:h-[calc(100vh-64px)] rounded-[30px] border border-white/60 bg-white/70 shadow-[0_24px_70px_rgba(63,78,111,0.18)] backdrop-blur-xl scroll-mt-6 animate-in fade-in slide-in-from-bottom-12 duration-500 overflow-hidden"
             >
-              {/* Chat header */}
-              <div className="flex items-center gap-3 border-b border-white/40 bg-white/20 px-6 py-4 shrink-0">
+              {/* Chat header - Glassmorphic overlay */}
+              <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 border-b border-white/30 bg-white/35 backdrop-blur-xl px-6 py-4 shrink-0">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#27C3A2] text-white shadow-md shadow-blue-500/10">
                   <Bot className="h-5 w-5 animate-pulse" />
                 </div>
@@ -203,8 +203,8 @@ function LandingPage() {
                 </div>
               </div>
 
-              {/* Chat messages */}
-              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-4 min-h-0 custom-scrollbar">
+              {/* Chat messages - Scrolls behind header/input */}
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto pt-[84px] pb-[88px] px-6 py-6 space-y-4 min-h-0 custom-scrollbar">
                 {chatMessages.map((msg, i) => (
                   <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[82%] rounded-[22px] px-5 py-3.5 text-sm leading-relaxed shadow-sm ${
@@ -243,14 +243,14 @@ function LandingPage() {
                 )}
               </div>
 
-              {/* Input - Premium Glassmorphism */}
-              <div className="flex items-center gap-3 bg-white/30 backdrop-blur-lg border-t border-white/40 px-6 py-4 shrink-0">
+              {/* Input - Glassmorphic overlay */}
+              <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center gap-3 bg-white/35 backdrop-blur-xl border-t border-white/30 px-6 py-4 shrink-0">
                 <input
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") sendMessage(chatInput); }}
                   placeholder="Mô tả triệu chứng hoặc câu hỏi của bạn tại đây..."
-                  className="h-12 flex-1 rounded-full border border-white/80 bg-white/50 px-5 text-sm font-semibold outline-none placeholder:text-slate-400 backdrop-blur-lg focus:bg-white/80 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 text-slate-800 transition-all duration-300 shadow-inner"
+                  className="h-12 flex-1 rounded-full border border-white/85 bg-white/60 px-5 text-sm font-semibold outline-none placeholder:text-slate-400 backdrop-blur-lg focus:bg-white/90 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 text-slate-800 transition-all duration-300 shadow-inner"
                 />
                 <button
                   type="button"
