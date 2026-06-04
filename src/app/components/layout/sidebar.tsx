@@ -1,10 +1,9 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import {
   LayoutDashboard,
   Users,
-  UserCircle,
   ClipboardList,
-  MessageCircle,
   FileText,
   Settings,
   Activity,
@@ -16,7 +15,10 @@ import {
   Database,
   Search,
   Bell,
-  HeartPulse
+  HeartPulse,
+  MessageCircle,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -38,18 +40,18 @@ const doctorNav: NavItem[] = [
 const expertNav: NavItem[] = [
   { title: "Dashboard", href: "/expert", icon: LayoutDashboard },
   { title: "Danh sách ca đánh giá", href: "/expert/cases", icon: ClipboardList },
-  { title: "Chat & yêu cầu", href: "/expert/chat", icon: MessageCircle },
+  { title: "Chat trao đổi", href: "/expert/chat", icon: MessageCircle },
   { title: "Báo cáo thống kê", href: "/expert/reports", icon: BarChart3 },
   { title: "Hồ sơ cá nhân", href: "/expert/profile", icon: Settings },
 ];
 
 const managerNav: NavItem[] = [
-  { title: "Chatbot Hỗ trợ", href: "/manager", icon: Bot },
-  { title: "Quản lý phòng khám", href: "/manager/clinics", icon: Building2 },
-  { title: "Quản lý chuyên khoa", href: "/manager/specialties", icon: FileText },
-  { title: "Quản lý thông tin bác sĩ", href: "/manager/doctors", icon: Users },
-  { title: "Chat", href: "/manager/chat", icon: MessageCircle },
-  { title: "Quản lý ca bệnh", href: "/manager/cases", icon: ClipboardList },
+  { title: "Trang chủ", href: "/manager", icon: Bot },
+  { title: "Thông tin phòng khám", href: "/manager/clinic-profile", icon: Building2 },
+  { title: "Quản lý bác sĩ", href: "/manager/doctors", icon: Users },
+  { title: "Messenger", href: "/manager/chat", icon: MessageCircle },
+  { title: "Tiếp nhận lịch hẹn", href: "/manager/appointments", icon: ClipboardList },
+  { title: "Giờ làm việc", href: "/manager/schedule", icon: Calendar },
   { title: "Quản lý dữ liệu AI", href: "/manager/ai-data", icon: Database },
   { title: "Báo cáo tổng hợp", href: "/manager/reports", icon: BarChart3 },
 ];
@@ -75,6 +77,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ role }: SidebarProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const navItems = roleNavMap[role];
 
@@ -86,20 +89,34 @@ export function Sidebar({ role }: SidebarProps) {
   };
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-gray-200 bg-white">
-      <div className="flex h-16 items-center border-b border-gray-200 px-6">
+    <div
+      className={cn(
+        "flex h-full flex-col border-r border-white/60 bg-white/60 backdrop-blur-xl transition-all duration-300 relative z-[45]",
+        isCollapsed ? "w-20" : "w-64"
+      )}
+    >
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute -right-3 top-6 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 shadow-sm hover:bg-gray-50"
+      >
+        {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+      </button>
+
+      <div className={cn("flex h-16 items-center border-b border-white/60", isCollapsed ? "justify-center px-0" : "px-6")}>
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600">
             <Activity className="h-5 w-5 text-white" />
           </div>
-          <div>
-            <h1 className="font-semibold text-gray-900">nhóm 4</h1>
-            <p className="text-xs text-gray-500">{roleLabels[role]}</p>
-          </div>
+          {!isCollapsed && (
+            <div className="overflow-hidden whitespace-nowrap">
+              <h1 className="font-semibold text-gray-900">nhóm 4</h1>
+              <p className="text-xs text-gray-500">{roleLabels[role]}</p>
+            </div>
+          )}
         </div>
       </div>
       
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex-1 space-y-1 p-4 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => {
           const isActive = location.pathname === item.href;
           const Icon = item.icon;
@@ -108,15 +125,17 @@ export function Sidebar({ role }: SidebarProps) {
             <Link
               key={item.href}
               to={item.href}
+              title={isCollapsed ? item.title : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg py-2 transition-colors",
+                isCollapsed ? "justify-center px-0" : "px-3",
                 isActive
                   ? "bg-blue-50 text-blue-700"
                   : "text-gray-700 hover:bg-gray-100"
               )}
             >
-              <Icon className={cn("h-5 w-5", isActive ? "text-blue-700" : "text-gray-500")} />
-              {item.title}
+              <Icon className={cn("h-5 w-5 shrink-0", isActive ? "text-blue-700" : "text-gray-500")} />
+              {!isCollapsed && <span className="text-sm font-medium whitespace-nowrap">{item.title}</span>}
             </Link>
           );
         })}

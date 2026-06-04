@@ -21,10 +21,11 @@ import ManagerSpecialties from "./pages/manager/specialties";
 import SpecialtyDetail from "./pages/manager/specialty-detail";
 import SpecialtyForm from "./pages/manager/specialty-form";
 import ManagerDoctors from "./pages/manager/doctors";
-import DoctorDetail from "./pages/manager/doctor-detail";
 import DoctorForm from "./pages/manager/doctor-form";
+import DoctorDetail from "./pages/manager/doctor-detail";
 import ManagerChat from "./pages/manager/manager-chat";
-import ManagerCases from "./pages/manager/manager-cases";
+import ManagerAppointments from "./pages/manager/manager-appointments";
+import ManagerSchedule from "./pages/manager/manager-schedule";
 import ManagerAIData from "./pages/manager/ai-data";
 import ManagerReports from "./pages/manager/reports";
 import PatientHome from "./pages/patient/home";
@@ -156,20 +157,15 @@ export const router = createBrowserRouter([
     element: <Layout role="manager" userName="Nguyễn Quản Lý" userRole="Quản lý hệ thống" />,
     children: [
       { index: true, element: <ManagerChatbot /> },
-      { path: "clinics", element: <ManagerClinics /> },
-      { path: "clinics/new", element: <ClinicForm /> },
-      { path: "clinics/:id", element: <ClinicDetail /> },
-      { path: "clinics/:id/edit", element: <ClinicForm /> },
-      { path: "specialties", element: <ManagerSpecialties /> },
-      { path: "specialties/new", element: <SpecialtyForm /> },
-      { path: "specialties/:id", element: <SpecialtyDetail /> },
-      { path: "specialties/:id/edit", element: <SpecialtyForm /> },
+      { path: "clinic-profile", element: <ClinicDetail /> },
+      { path: "clinic-registration", element: <ClinicForm /> },
       { path: "doctors", element: <ManagerDoctors /> },
       { path: "doctors/new", element: <DoctorForm /> },
       { path: "doctors/:id", element: <DoctorDetail /> },
       { path: "doctors/:id/edit", element: <DoctorForm /> },
+      { path: "appointments", element: <ManagerAppointments /> },
+      { path: "schedule", element: <ManagerSchedule /> },
       { path: "chat", element: <ManagerChat /> },
-      { path: "cases", element: <ManagerCases /> },
       { path: "ai-data", element: <ManagerAIData /> },
       { path: "reports", element: <ManagerReports /> },
     ],
