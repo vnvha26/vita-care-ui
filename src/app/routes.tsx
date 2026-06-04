@@ -241,6 +241,7 @@ export const router = createBrowserRouter([
       { path: "patients", element: <DoctorPatients /> },
       { path: "patients/:id", element: <PatientDetail /> },
       { path: "examination", element: <DoctorExamination /> },
+      { path: "appointments", element: <DoctorExamination /> },
       { path: "chat", element: <DoctorChat /> },
       { path: "feedback", element: <DoctorFeedback /> },
       { path: "profile", element: <DoctorProfile /> },
