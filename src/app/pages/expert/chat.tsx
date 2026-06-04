@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Bot, FileText, MessageCircle, Paperclip, Send, Stethoscope, UserRound, Users } from "lucide-react";
+import { toast } from "sonner";
 import { ActionButton, DataRow, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 
 type ThreadType = "user" | "doctor";
@@ -70,14 +71,23 @@ const messages = [
 
 export default function ExpertChat() {
   const [activeTab, setActiveTab] = useState<ThreadType>("user");
+  const [selectedThread, setSelectedThread] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
   const threads = activeTab === "user" ? userThreads : doctorThreads;
+  const activeThread = threads.find((t) => t.id === selectedThread) ?? threads[0];
+
+  const handleSend = () => {
+    if (!message.trim()) return;
+    toast.success("Phản hồi đã được gửi");
+    setMessage("");
+  };
 
   return (
     <div>
       <PageHeader
         title="Chat & yêu cầu"
         description="Trao đổi với người dùng, bác sĩ và đội vận hành về các ca cần kiểm duyệt phản hồi AI."
-        actions={<ActionButton icon={<MessageCircle className="h-4 w-4" />}>Tạo ghi chú</ActionButton>}
+        actions={<ActionButton icon={<MessageCircle className="h-4 w-4" />} onClick={() => toast.info("Tính năng tạo ghi chú đang được phát triển")}>Tạo ghi chú</ActionButton>}
       />
 
       <div className="grid min-h-[calc(100vh-190px)] gap-5 xl:grid-cols-[320px_minmax(0,1fr)_340px]">
@@ -85,7 +95,7 @@ export default function ExpertChat() {
           <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#F2F7FB] p-1">
             <button
               type="button"
-              onClick={() => setActiveTab("user")}
+              onClick={() => { setActiveTab("user"); setSelectedThread(null); toast.info("Đang xem hội thoại người dùng"); }}
               className={`rounded-xl px-3 py-2 text-sm font-bold transition ${
                 activeTab === "user" ? "bg-white text-[#1C64D1] shadow-sm" : "text-[#64748B]"
               }`}
@@ -94,7 +104,7 @@ export default function ExpertChat() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("doctor")}
+              onClick={() => { setActiveTab("doctor"); setSelectedThread(null); toast.info("Đang xem hội thoại bác sĩ"); }}
               className={`rounded-xl px-3 py-2 text-sm font-bold transition ${
                 activeTab === "doctor" ? "bg-white text-[#1C64D1] shadow-sm" : "text-[#64748B]"
               }`}
@@ -104,39 +114,43 @@ export default function ExpertChat() {
           </div>
 
           <div className="mt-4 space-y-3">
-            {threads.map((thread, index) => (
-              <button
-                key={thread.id}
-                type="button"
-                className={`w-full rounded-[18px] border p-4 text-left transition ${
-                  index === 0 ? "border-[#CFE3FF] bg-[#EAF3FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F2F7FB]"
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#2F80ED]">
-                    {activeTab === "user" ? <UserRound className="h-5 w-5" /> : <Stethoscope className="h-5 w-5" />}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="truncate font-bold text-[#1E293B]">{thread.name}</p>
-                      <span className="text-xs font-semibold text-[#94A3B8]">{thread.time}</span>
+            {threads.map((thread, index) => {
+              const isSelected = selectedThread === thread.id || (selectedThread === null && index === 0);
+              return (
+                <button
+                  key={thread.id}
+                  type="button"
+                  onClick={() => { setSelectedThread(thread.id); toast.info(`Đã chọn hội thoại: ${thread.name}`); }}
+                  className={`w-full rounded-[18px] border p-4 text-left transition ${
+                    isSelected ? "border-[#CFE3FF] bg-[#EAF3FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F2F7FB]"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#2F80ED]">
+                      {activeTab === "user" ? <UserRound className="h-5 w-5" /> : <Stethoscope className="h-5 w-5" />}
                     </div>
-                    <p className="mt-1 truncate text-xs font-semibold text-[#64748B]">{thread.subtitle}</p>
-                    <p className="mt-2 line-clamp-2 text-sm leading-5 text-[#64748B]">{thread.last}</p>
-                    <div className="mt-3">
-                      <StatusBadge tone={index === 0 ? "amber" : "blue"}>{thread.badge}</StatusBadge>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate font-bold text-[#1E293B]">{thread.name}</p>
+                        <span className="text-xs font-semibold text-[#94A3B8]">{thread.time}</span>
+                      </div>
+                      <p className="mt-1 truncate text-xs font-semibold text-[#64748B]">{thread.subtitle}</p>
+                      <p className="mt-2 line-clamp-2 text-sm leading-5 text-[#64748B]">{thread.last}</p>
+                      <div className="mt-3">
+                        <StatusBadge tone={index === 0 ? "amber" : "blue"}>{thread.badge}</StatusBadge>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </SectionCard>
 
         <SectionCard
-          title={activeTab === "user" ? "Nguyễn Văn A" : "BS. Nguyễn Văn B"}
+          title={activeTab === "user" ? activeThread.name : activeThread.name}
           description={activeTab === "user" ? "Hội thoại người dùng cần kiểm duyệt AI" : "Trao đổi chuyên môn với bác sĩ"}
-          actions={<StatusBadge tone="amber">CASE-001</StatusBadge>}
+          actions={<StatusBadge tone="amber">{activeThread.id}</StatusBadge>}
           className="flex min-h-[620px] flex-col"
         >
           <div className="flex-1 space-y-4 overflow-y-auto pr-1">
@@ -160,14 +174,17 @@ export default function ExpertChat() {
           </div>
 
           <div className="mt-5 flex items-center gap-2 rounded-2xl border border-[#E2E8F0] bg-[#F7FAFC] p-2">
-            <button type="button" className="flex h-10 w-10 items-center justify-center rounded-full text-[#64748B] hover:bg-white">
+            <button type="button" onClick={() => toast.info("Tính năng đính kèm đang được phát triển")} className="flex h-10 w-10 items-center justify-center rounded-full text-[#64748B] hover:bg-white">
               <Paperclip className="h-5 w-5" />
             </button>
             <input
               className="h-10 min-w-0 flex-1 bg-transparent px-2 text-sm outline-none placeholder:text-[#94A3B8]"
               placeholder="Nhập phản hồi chuyên môn..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
             />
-            <button type="button" className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2F80ED] text-white">
+            <button type="button" onClick={handleSend} className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2F80ED] text-white hover:bg-[#1C64D1]">
               <Send className="h-4 w-4" />
             </button>
           </div>
@@ -177,10 +194,10 @@ export default function ExpertChat() {
           <SectionCard title="Ca liên quan" description="Thông tin đang được trao đổi.">
             <div className="space-y-3 text-sm">
               <DataRow
-                title="CASE-001"
-                description="Sốt cao, đau họng, mệt mỏi. AI đề xuất theo dõi và đặt lịch nếu kéo dài."
+                title={activeThread.id}
+                description={`${activeThread.subtitle}. ${activeThread.last}`}
                 icon={<FileText className="h-5 w-5" />}
-                meta={<StatusBadge tone="amber">Ưu tiên cao</StatusBadge>}
+                meta={<StatusBadge tone="amber">Đang xem</StatusBadge>}
               />
               <div className="rounded-2xl bg-[#F2F7FB] p-4">
                 <p className="font-bold text-[#1E293B]">Ghi chú chuyên gia</p>
