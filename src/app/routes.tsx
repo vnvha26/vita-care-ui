@@ -204,7 +204,7 @@ function LandingPage() {
               </div>
 
               {/* Chat messages - Scrolls behind header/input */}
-              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto pt-[84px] pb-[88px] px-6 py-6 space-y-4 min-h-0 custom-scrollbar">
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto overscroll-contain pt-[84px] pb-[88px] px-6 py-6 space-y-4 min-h-0 custom-scrollbar">
                 {chatMessages.map((msg, i) => (
                   <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[82%] rounded-[22px] px-5 py-3.5 text-sm leading-relaxed shadow-sm ${
