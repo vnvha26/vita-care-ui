@@ -54,7 +54,7 @@ function LandingPage() {
     { from: "ai", text: "Xin chào! Tôi là trợ lý sức khỏe AI của VitaCare. Bạn đang gặp vấn đề gì? Hãy mô tả triệu chứng hoặc chọn bên dưới nhé." },
   ]);
   const [isTyping, setIsTyping] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const chatSectionRef = useRef<HTMLDivElement>(null);
 
   const scrollToChat = () => {
@@ -79,7 +79,12 @@ function LandingPage() {
   ];
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
   }, [chatMessages]);
 
   const sendMessage = (text: string) => {
@@ -178,7 +183,7 @@ function LandingPage() {
           {showChat && (
             <div
               ref={chatSectionRef}
-              className="mb-8 flex flex-col h-[75vh] md:h-[82vh] max-h-[800px] min-h-[480px] rounded-[30px] border border-white/60 bg-white/70 shadow-[0_24px_70px_rgba(63,78,111,0.18)] backdrop-blur-xl scroll-mt-6 animate-in fade-in slide-in-from-bottom-12 duration-500 overflow-hidden"
+              className="mb-8 flex flex-col h-[calc(100vh-48px)] md:h-[calc(100vh-64px)] rounded-[30px] border border-white/60 bg-white/70 shadow-[0_24px_70px_rgba(63,78,111,0.18)] backdrop-blur-xl scroll-mt-6 animate-in fade-in slide-in-from-bottom-12 duration-500 overflow-hidden"
             >
               {/* Chat header */}
               <div className="flex items-center gap-3 border-b border-white/40 bg-white/20 px-6 py-4 shrink-0">
@@ -199,7 +204,7 @@ function LandingPage() {
               </div>
 
               {/* Chat messages */}
-              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 min-h-0 custom-scrollbar">
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-4 min-h-0 custom-scrollbar">
                 {chatMessages.map((msg, i) => (
                   <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[82%] rounded-[22px] px-5 py-3.5 text-sm leading-relaxed shadow-sm ${
@@ -222,21 +227,20 @@ function LandingPage() {
                     </div>
                   </div>
                 )}
-                <div ref={chatEndRef} />
-              </div>
-
-              {/* Quick replies */}
-              <div className="flex flex-wrap gap-2 px-6 pb-4 shrink-0 bg-white/10">
-                {quickReplies.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => sendMessage(q)}
-                    className="rounded-full border border-white/80 bg-white/60 px-4 py-2.5 text-xs font-bold text-slate-600 backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white hover:text-slate-800 hover:shadow-md cursor-pointer"
-                  >
-                    {q}
-                  </button>
-                ))}
+                {chatMessages.length === 1 && !isTyping && (
+                  <div className="flex flex-wrap gap-2 pl-12 pt-1 animate-in fade-in duration-300">
+                    {quickReplies.map((q) => (
+                      <button
+                        key={q}
+                        type="button"
+                        onClick={() => sendMessage(q)}
+                        className="rounded-full border border-blue-200 bg-blue-50/80 px-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-600 hover:text-white hover:-translate-y-0.5 transition duration-300 shadow-sm cursor-pointer"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Input - Premium Glassmorphism */}
