@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Archive, BellRing, Inbox, MessageCircle, Search, Send, Sparkles, UserRound } from "lucide-react";
+import { Archive, BellRing, ChevronLeft, Inbox, MessageCircle, Search, Send, Sparkles, UserRound } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
 import { cn } from "../../lib/utils";
 
@@ -105,6 +105,7 @@ export default function DoctorChat() {
   const [selectedId, setSelectedId] = useState(initialConversations[0].id);
   const [draft, setDraft] = useState("");
   const [consultAccepted, setConsultAccepted] = useState(false);
+  const [showChatOnMobile, setShowChatOnMobile] = useState(false);
 
   const filteredConversations = useMemo(() => {
     if (filter === "all") return conversations.filter((item) => item.status !== "archived");
@@ -116,6 +117,7 @@ export default function DoctorChat() {
   const handleSelect = (id: string) => {
     setSelectedId(id);
     setConversations((current) => current.map((item) => (item.id === id && item.status === "unread" ? { ...item, status: "active" } : item)));
+    setShowChatOnMobile(true);
   };
 
   const handleSend = () => {
@@ -183,8 +185,11 @@ export default function DoctorChat() {
         </div>
       )}
 
-      <div className="grid min-h-[640px] min-w-0 gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
-        <SectionCard title="Cuộc trò chuyện" className="min-w-0 overflow-hidden">
+      <div className="grid min-h-[640px] min-w-0 gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
+        <SectionCard
+          title="Cuộc trò chuyện"
+          className={cn("min-w-0 overflow-hidden", showChatOnMobile ? "hidden lg:block" : "block")}
+        >
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-2xl bg-[#F2F7FB] p-1">
             {(Object.keys(filterLabels) as ConversationFilter[]).map((item) => (
               <button
@@ -244,15 +249,25 @@ export default function DoctorChat() {
           title={selectedConversation.name}
           description={`${selectedConversation.role}${selectedConversation.patientCode ? ` · ${selectedConversation.patientCode}` : ""}`}
           actions={
-            <ActionButton
-              variant="secondary"
-              icon={selectedConversation.status === "archived" ? <Inbox className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
-              onClick={toggleArchive}
-            >
-              {selectedConversation.status === "archived" ? "Bỏ lưu trữ" : "Lưu trữ"}
-            </ActionButton>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowChatOnMobile(false)}
+                className="inline-flex lg:hidden items-center justify-center rounded-full border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-bold text-[#1E293B] hover:bg-[#F2F7FB] cursor-pointer"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Quay lại
+              </button>
+              <ActionButton
+                variant="secondary"
+                icon={selectedConversation.status === "archived" ? <Inbox className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+                onClick={toggleArchive}
+              >
+                {selectedConversation.status === "archived" ? "Bỏ lưu trữ" : "Lưu trữ"}
+              </ActionButton>
+            </div>
           }
-          className="flex min-w-0 flex-col"
+          className={cn("flex min-w-0 flex-col", showChatOnMobile ? "block" : "hidden lg:block")}
         >
           <div className="min-h-[420px] flex-1 space-y-4 overflow-y-auto rounded-2xl bg-[#F7FAFC] p-5">
             {selectedConversation.messages.map((message, index) => (
