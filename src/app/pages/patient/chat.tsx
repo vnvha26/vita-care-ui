@@ -179,11 +179,11 @@ export default function PatientChat() {
         description="Nhắn tin trò chuyện với các bác sĩ chuyên khoa hoặc các phòng khám liên kết."
       />
 
-      <div className="grid min-h-[600px] min-w-0 gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
+      <div className="grid h-[calc(100vh-230px)] min-h-[420px] lg:h-[calc(100vh-190px)] lg:min-h-[500px] min-w-0 gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
         {/* Left column - Conversations list */}
         <SectionCard
           title="Cuộc trò chuyện"
-          className={cn("min-w-0 overflow-hidden", showChatOnMobile ? "hidden lg:block" : "block")}
+          className={cn("h-full flex flex-col min-w-0 overflow-hidden", showChatOnMobile ? "hidden lg:block" : "block")}
         >
           <div className="mb-4 grid grid-cols-3 gap-1 rounded-2xl bg-[#F2F7FB] p-1">
             {(Object.keys(filterLabels) as ConversationFilter[]).map((item) => (
@@ -209,7 +209,7 @@ export default function PatientChat() {
             />
           </div>
 
-          <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar">
+          <div className="flex-1 space-y-3 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
             {filteredConversations.map((contact) => (
               <button
                 key={contact.id}
@@ -277,9 +277,9 @@ export default function PatientChat() {
               </ActionButton>
             </div>
           }
-          className={cn("flex min-w-0 flex-col", showChatOnMobile ? "block" : "hidden lg:block")}
+          className={cn("h-full flex min-w-0 flex-col", showChatOnMobile ? "block" : "hidden lg:block")}
         >
-          <div className="min-h-[380px] flex-1 space-y-4 overflow-y-auto rounded-2xl bg-[#F7FAFC] p-5 custom-scrollbar">
+          <div className="flex-1 min-h-0 space-y-4 overflow-y-auto rounded-2xl bg-[#F7FAFC] p-5 custom-scrollbar">
             {selectedConversation.messages.map((message, index) => (
               <div
                 key={`${message.time}-${index}`}
