@@ -35,6 +35,7 @@ interface NavItem {
 const patientNav: NavItem[] = [
   { title: "Trang chủ", href: "/patient/dashboard", icon: LayoutDashboard },
   { title: "Tư vấn sức khỏe", href: "/patient/consultation", icon: Bot },
+  { title: "Tin nhắn", href: "/patient/chat", icon: MessageCircle },
   { title: "Lịch khám", href: "/patient/appointments", icon: Calendar },
   { title: "Lịch sử khám", href: "/patient/medical-records", icon: ClipboardList },
   { title: "Dữ liệu y tế", href: "/patient/profile", icon: Database },

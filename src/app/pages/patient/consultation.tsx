@@ -1,419 +1,341 @@
-import { useState } from "react";
-import { Bot, CalendarPlus, FileText, FolderOpen, Image, Mic, Paperclip, Send, Stethoscope } from "lucide-react";
-import { Link, useSearchParams } from "react-router";
+import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router";
+import { Bot, Send, ShieldCheck, Sparkles, ChevronDown, MessageSquare } from "lucide-react";
+import { toast } from "sonner";
 
-type Mode = "ai" | "doctor";
-type MessageRole = "bot" | "doctor" | "user";
-
-type Message = {
-  role: MessageRole;
-  content: string;
-};
-
-type ChatSession = {
+interface Clinic {
   id: string;
   name: string;
-  topic: string;
-  date: string;
-  messages: Message[];
-};
+  specialty: string;
+  rating: string;
+  image: string;
+  address: string;
+  isPremium: boolean;
+}
 
-const quickSymptoms = ["Sốt", "Đau đầu", "Buồn nôn", "Chóng mặt", "Đau họng", "Ho"];
-const attachmentOptions = [
-  { label: "Ảnh", icon: Image },
-  { label: "Tệp", icon: FileText },
-  { label: "Thư mục", icon: FolderOpen },
-];
-
-const legacyAiHistories = [
-  ["AI Health Assistant", "Phân tích ho, đau họng và sốt nhẹ", "Hôm nay"],
-  ["AI Health Assistant", "Tư vấn đau bụng sau ăn", "20/05/2026"],
-];
-
-const initialAiSessions: ChatSession[] = [
+const mockClinics: Clinic[] = [
   {
-    id: "ai-current",
-    name: "AI Health Assistant",
-    topic: "Phi\u00ean t\u01b0 v\u1ea5n nhanh v\u1edbi tr\u1ee3 l\u00fd AI",
-    date: "H\u00f4m nay",
-    messages: [
-      {
-        role: "bot",
-        content: "Ch\u00e0o Nguy\u1ec5n V\u0103n A, t\u00f4i l\u00e0 tr\u1ee3 l\u00fd s\u1ee9c kh\u1ecfe AI. B\u1ea1n \u0111ang g\u1eb7p v\u1ea5n \u0111\u1ec1 g\u00ec v\u1ec1 s\u1ee9c kh\u1ecfe?",
-      },
-    ],
+    id: "c1",
+    name: "Phòng khám Đa khoa Quốc tế VitaCare",
+    specialty: "Đa khoa, Nội nhi",
+    rating: "4.8 ⭐ (85 đánh giá)",
+    image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=400&auto=format&fit=crop&q=60",
+    address: "12 Cầu Giấy, Cầu Giấy, Hà Nội",
+    isPremium: false,
   },
   {
-    id: "ai-old-1",
-    name: "AI Health Assistant",
-    topic: "Ph\u00e2n t\u00edch ho, \u0111au h\u1ecdng v\u00e0 s\u1ed1t nh\u1eb9",
-    date: "25/05/2026",
-    messages: [
-      { role: "user", content: "T\u00f4i b\u1ecb ho khan, \u0111au h\u1ecdng v\u00e0 s\u1ed1t nh\u1eb9 t\u1eeb h\u00f4m qua." },
-      {
-        role: "bot",
-        content: "Tri\u1ec7u ch\u1ee9ng c\u00f3 th\u1ec3 li\u00ean quan vi\u00eam h\u1ecdng ho\u1eb7c nhi\u1ec5m virus nh\u1eb9. B\u1ea1n n\u00ean u\u1ed1ng nhi\u1ec1u n\u01b0\u1edbc, ngh\u1ec9 ng\u01a1i v\u00e0 theo d\u00f5i nhi\u1ec7t \u0111\u1ed9.",
-      },
-      {
-        role: "bot",
-        content: "N\u1ebfu s\u1ed1t tr\u00ean 38.5\u00b0C, kh\u00f3 th\u1edf, \u0111au ng\u1ef1c ho\u1eb7c tri\u1ec7u ch\u1ee9ng k\u00e9o d\u00e0i qu\u00e1 3 ng\u00e0y, b\u1ea1n n\u00ean \u0111\u1eb7t l\u1ecbch kh\u00e1m.",
-      },
-    ],
+    id: "c2",
+    name: "Nha khoa Thẩm mỹ Công nghệ cao Paris",
+    specialty: "Răng Hàm Mặt",
+    rating: "4.7 ⭐ (96 đánh giá)",
+    image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format&fit=crop&q=60",
+    address: "30 Triệu Việt Vương, Hai Bà Trưng, Hà Nội",
+    isPremium: false,
   },
   {
-    id: "ai-old-2",
-    name: "AI Health Assistant",
-    topic: "T\u01b0 v\u1ea5n \u0111au b\u1ee5ng sau \u0103n",
-    date: legacyAiHistories[1][2],
-    messages: [
-      { role: "user", content: "Sau khi \u0103n t\u1ed1i t\u00f4i hay \u0111au \u00e2m \u1ec9 v\u00f9ng b\u1ee5ng tr\u00ean v\u00e0 h\u01a1i bu\u1ed3n n\u00f4n." },
-      {
-        role: "bot",
-        content: "B\u1ea1n n\u00ean theo d\u00f5i m\u00f3n \u0103n g\u00e2y kh\u00f3 ch\u1ecbu, tr\u00e1nh \u0103n qu\u00e1 no v\u00e0 h\u1ea1n ch\u1ebf \u0111\u1ed3 cay, chua, nhi\u1ec1u d\u1ea7u m\u1ee1.",
-      },
-      {
-        role: "bot",
-        content: "N\u1ebfu \u0111au t\u0103ng, n\u00f4n nhi\u1ec1u, \u0111i ngo\u00e0i ph\u00e2n \u0111en ho\u1eb7c s\u00fat c\u00e2n, b\u1ea1n c\u1ea7n kh\u00e1m tr\u1ef1c ti\u1ebfp s\u1edbm.",
-      },
-    ],
+    id: "c3",
+    name: "Bệnh viện Đa khoa Quốc tế Vinmec",
+    specialty: "Đa khoa chuyên sâu (VIP)",
+    rating: "4.95 ⭐ (Premium)",
+    image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&auto=format&fit=crop&q=60",
+    address: "Times City, Minh Khai, Hai Bà Trưng, Hà Nội",
+    isPremium: true,
+  },
+  {
+    id: "c4",
+    name: "Phòng khám Chuyên khoa Da liễu VIP",
+    specialty: "Da liễu, Thẩm mỹ công nghệ cao",
+    rating: "4.92 ⭐ (Premium)",
+    image: "https://images.unsplash.com/photo-1584515906247-4b4c407f368e?w=400&auto=format&fit=crop&q=60",
+    address: "18 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội",
+    isPremium: true,
   },
 ];
 
-const initialDoctorSessions: ChatSession[] = [
-  {
-    id: "doctor-current",
-    name: "BS. Trần Thị B",
-    topic: "Tư vấn đau dạ dày và trào ngược",
-    date: "Hôm nay",
-    messages: [
-      {
-        role: "doctor",
-        content: "Thanh toán đã được xác nhận. Bạn mô tả kỹ triệu chứng, thuốc đang dùng và kết quả khám gần nhất để bác sĩ tư vấn nhé.",
-      },
-      {
-        role: "user",
-        content: "Em hay đau vùng thượng vị sau ăn và bị ợ chua nhiều vào buổi tối.",
-      },
-      {
-        role: "doctor",
-        content: "Triệu chứng khá giống trào ngược dạ dày. Bạn nên tránh ăn sát giờ ngủ, giảm đồ chua cay và theo dõi thêm mức độ đau trong 3 ngày tới.",
-      },
-    ],
-  },
-  {
-    id: "doctor-old-1",
-    name: "BS. Nguyễn Văn A",
-    topic: "Theo dõi huyết áp và nhịp tim",
-    date: "12/05/2026",
-    messages: [
-      {
-        role: "user",
-        content: "Huyết áp buổi sáng của em khoảng 145/90, thỉnh thoảng hơi hồi hộp.",
-      },
-      {
-        role: "doctor",
-        content: "Bạn ghi lại huyết áp sáng và tối trong 7 ngày, hạn chế cà phê và tái khám nếu chỉ số vẫn trên 140/90.",
-      },
-    ],
-  },
-  {
-    id: "doctor-old-2",
-    name: "BS. Lê Minh C",
-    topic: "Tư vấn đau đầu và mất ngủ",
-    date: "02/05/2026",
-    messages: [
-      {
-        role: "user",
-        content: "Em mất ngủ gần một tuần, sáng dậy hay đau đầu.",
-      },
-      {
-        role: "doctor",
-        content: "Bạn thử cố định giờ ngủ, tránh màn hình trước khi ngủ 60 phút. Nếu đau đầu tăng hoặc nôn ói thì cần khám trực tiếp.",
-      },
-    ],
-  },
-];
+interface ChatMessage {
+  from: "ai" | "user";
+  text: string;
+  clinics?: Clinic[];
+  showUpgradeBtn?: boolean;
+  showChatLink?: boolean;
+}
 
 export default function PatientConsultation() {
-  const [searchParams] = useSearchParams();
-  const [mode, setMode] = useState<Mode>(() => (searchParams.get("mode") === "doctor" ? "doctor" : "ai"));
-  const [aiInput, setAiInput] = useState("");
-  const [doctorInput, setDoctorInput] = useState("");
-  const [showAttachMenu, setShowAttachMenu] = useState(false);
-  const [selectedAiSessionId, setSelectedAiSessionId] = useState(initialAiSessions[0].id);
-  const [aiSessions, setAiSessions] = useState<ChatSession[]>(initialAiSessions);
-  const [selectedDoctorSessionId, setSelectedDoctorSessionId] = useState(initialDoctorSessions[0].id);
-  const [doctorSessions, setDoctorSessions] = useState<ChatSession[]>(initialDoctorSessions);
-  const [aiMessages, setAiMessages] = useState<Message[]>([
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
-      role: "bot",
-      content: "Chào Nguyễn Văn A, tôi là trợ lý sức khỏe AI. Bạn đang gặp vấn đề gì về sức khỏe?",
+      from: "ai",
+      text: "Xin chào Nguyễn Văn A! Tôi là trợ lý sức khỏe AI của VitaCare. Tôi có thể hỗ trợ giải đáp các thắc mắc về sức khỏe của bạn hoặc gợi ý danh sách phòng khám liên kết phù hợp. Bạn đang gặp triệu chứng gì hay cần tìm thông tin gì hôm nay?",
     },
   ]);
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  const selectedAiSession = aiSessions.find((session) => session.id === selectedAiSessionId) ?? aiSessions[0];
-  const selectedDoctorSession = doctorSessions.find((session) => session.id === selectedDoctorSessionId) ?? doctorSessions[0];
-  const currentMessages = mode === "ai" ? selectedAiSession.messages : selectedDoctorSession.messages;
-  const currentInput = mode === "ai" ? aiInput : doctorInput;
-  const setCurrentInput = mode === "ai" ? setAiInput : setDoctorInput;
+  const quickReplies = [
+    "Tôi cần tìm phòng khám",
+    "Tôi bị đau đầu và sốt",
+    "Tư vấn đau bụng âm ỉ",
+    "Chế độ ăn cho người dạ dày",
+  ];
 
-  const sendAiMessage = (value = aiInput) => {
-    if (!value.trim()) return;
+  const aiResponses = [
+    "Tôi ghi nhận thông tin. Để hỗ trợ tốt nhất, bạn vui lòng mô tả kỹ hơn: triệu chứng kéo dài bao lâu, có kèm sốt cao, khó thở hay triệu chứng nào khác không?",
+    "Thông tin hữu ích. Triệu chứng này có thể là biểu hiện ban đầu của viêm họng hoặc mệt mỏi thông thường. Bạn nên uống nhiều nước ấm, nghỉ ngơi và theo dõi thêm.",
+    "Dựa trên các triệu chứng bạn mô tả, bạn nên đặt lịch thăm khám trực tiếp để được chẩn đoán chính xác nhất. Tôi có thể gợi ý một số phòng khám uy tín gần bạn, bạn có muốn xem không?",
+  ];
 
-    setAiSessions((sessions) =>
-      sessions.map((session) =>
-        session.id === selectedAiSessionId ? { ...session, messages: [...session.messages, { role: "user", content: value }] } : session
-      )
-    );
-    setAiInput("");
-    const aiAutoReply =
-      "T\u00f4i \u0111\u00e3 ghi nh\u1eadn tri\u1ec7u ch\u1ee9ng. B\u1ea1n c\u00f3 th\u1ec3 cho bi\u1ebft tri\u1ec7u ch\u1ee9ng b\u1eaft \u0111\u1ea7u t\u1eeb khi n\u00e0o, m\u1ee9c \u0111\u1ed9 n\u1eb7ng nh\u1eb9 v\u00e0 c\u00f3 s\u1ed1t cao, kh\u00f3 th\u1edf ho\u1eb7c \u0111au ng\u1ef1c kh\u00f4ng?";
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [chatMessages]);
+
+  const sendMessage = (text: string) => {
+    if (!text.trim()) return;
+    setChatMessages((prev) => [...prev, { from: "user", text: text.trim() }]);
+    setChatInput("");
+    setIsTyping(true);
 
     setTimeout(() => {
-      setAiSessions((sessions) =>
-        sessions.map((session) =>
-          session.id === selectedAiSessionId
-            ? {
-                ...session,
-                messages: [...session.messages, { role: "bot", content: aiAutoReply }],
-              }
-            : session
-        )
-      );
-      setAiMessages((previous) => [
-        ...previous,
-        {
-          role: "bot",
-          content:
-            "Tôi đã ghi nhận triệu chứng. Bạn có thể cho biết triệu chứng bắt đầu từ khi nào, mức độ nặng nhẹ và có sốt cao, khó thở hoặc đau ngực không?",
-        },
-      ]);
-    }, 300);
+      const normalizedText = text.toLowerCase();
+      if (
+        normalizedText.includes("phòng khám") ||
+        normalizedText.includes("phong kham") ||
+        normalizedText.includes("tìm phòng") ||
+        normalizedText.includes("tim phong")
+      ) {
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            from: "ai",
+            text: "Dưới đây là danh sách các phòng khám nổi bật liên kết với hệ thống của chúng tôi. Bạn có thể nhấn đặt lịch khám trực tiếp ở bên dưới:",
+            clinics: mockClinics,
+          },
+        ]);
+      } else {
+        const reply = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+        setChatMessages((prev) => [...prev, { from: "ai", text: reply }]);
+      }
+      setIsTyping(false);
+    }, 600 + Math.random() * 400);
   };
 
-  const sendDoctorMessage = () => {
-    const text = doctorInput.trim();
-    if (!text) return;
+  const handleBookClinic = (clinic: Clinic) => {
+    setChatMessages((prev) => [
+      ...prev,
+      { from: "user", text: `Tôi muốn đăng ký đặt lịch khám tại ${clinic.name}` },
+    ]);
+    setIsTyping(true);
 
-    setDoctorSessions((sessions) =>
-      sessions.map((session) =>
-        session.id === selectedDoctorSessionId ? { ...session, messages: [...session.messages, { role: "user", content: text }] } : session
-      )
-    );
-    setDoctorInput("");
+    setTimeout(() => {
+      if (clinic.isPremium) {
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            from: "ai",
+            text: `Để đặt lịch khám tại phòng khám cao cấp ${clinic.name}, tài khoản của bạn cần được nâng cấp lên hạng thành viên Premium/Vàng. Vui lòng bấm nâng cấp tài khoản dưới đây để mở khóa dịch vụ VIP này.`,
+            showUpgradeBtn: true,
+          },
+        ]);
+      } else {
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            from: "ai",
+            text: `Yêu cầu đặt lịch khám tại ${clinic.name} đã được ghi nhận vào hệ thống. Bạn có thể nhắn tin trực tiếp với bộ phận chăm sóc khách hàng của phòng khám này ở trang Tin nhắn để chọn giờ khám và hoàn tất thủ tục khám bệnh.`,
+            showChatLink: true,
+          },
+        ]);
+      }
+      setIsTyping(false);
+    }, 800);
   };
 
-  const handleSend = (value?: string) => {
-    if (mode === "ai") {
-      sendAiMessage(value ?? aiInput);
-      return;
-    }
-
-    sendDoctorMessage();
+  const handleUpgradeAccount = () => {
+    toast.success("Yêu cầu nâng cấp tài khoản Premium đã được gửi đi thành công! Đội ngũ CSKH của VitaCare sẽ liên hệ hỗ trợ bạn trong ít phút.");
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        from: "ai",
+        text: "Hệ thống đã ghi nhận yêu cầu nâng cấp tài khoản Premium của bạn. Nhân viên tư vấn đang xử lý hồ sơ và sẽ gọi điện hỗ trợ bạn sớm nhất.",
+      },
+    ]);
   };
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <section id="doctor-chat" className="flex h-[calc(100vh-150px)] min-h-[560px] max-h-[700px] scroll-mt-6 flex-col overflow-hidden rounded-[24px] border border-[#E2E8F0] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
-        <div className="border-b border-[#E2E8F0] p-5">
-          <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-[#F2F7FB] p-1">
-            <button
-              type="button"
-              onClick={() => setMode("ai")}
-              className={`h-11 rounded-xl text-sm font-extrabold transition ${
-                mode === "ai" ? "bg-white text-[#1C64D1] shadow-sm" : "text-[#64748B] hover:text-[#1E293B]"
-              }`}
-            >
-              Tư vấn sức khỏe với AI
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("doctor")}
-              className={`h-11 rounded-xl text-sm font-extrabold transition ${
-                mode === "doctor" ? "bg-white text-[#1C64D1] shadow-sm" : "text-[#64748B] hover:text-[#1E293B]"
-              }`}
-            >
-              Tư vấn chuyên sâu với bác sĩ
-            </button>
+    <div className="mx-auto w-full max-w-[1000px] h-[calc(100vh-140px)] min-h-[500px]">
+      <div className="relative flex flex-col h-full w-full rounded-[30px] border border-white/60 bg-white/70 shadow-[0_24px_70px_rgba(63,78,111,0.18)] backdrop-blur-xl overflow-hidden">
+        
+        {/* Chat header - Glassmorphic overlay */}
+        <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 border-b border-white/30 bg-white/35 backdrop-blur-xl px-6 py-4 shrink-0">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2563eb] to-[#27C3A2] text-white shadow-md shadow-blue-500/10">
+            <Bot className="h-5 w-5 animate-pulse" />
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EAF3FF] text-[#2F80ED]">
-              {mode === "ai" ? <Bot className="h-6 w-6" /> : <Stethoscope className="h-6 w-6" />}
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-[#1E293B]">
-                {mode === "ai" ? "Tư vấn sức khỏe AI" : selectedDoctorSession.name}
-              </h1>
-              <p className="mt-1 text-sm text-[#64748B]">
-                {mode === "ai" ? selectedAiSession.topic : selectedDoctorSession.topic}
-              </p>
-            </div>
+          <div>
+            <p className="font-black text-slate-800 text-base">Trợ lý sức khỏe AI</p>
+            <p className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+              AI tư vấn trực tuyến 24/7
+            </p>
+          </div>
+          <div className="ml-auto hidden sm:flex items-center gap-2 rounded-xl bg-white/40 px-3 py-1.5 border border-white/40 shadow-sm">
+            <ShieldCheck className="h-4 w-4 text-blue-600" />
+            <span className="text-[11px] font-bold text-slate-600">Bảo mật thông tin mã hóa</span>
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-[#F7FAFC] p-5">
-          {currentMessages.map((message, index) => (
-            <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`max-w-[72%] px-4 py-3 text-sm leading-6 shadow-sm ${
-                  message.role === "user"
-                    ? "rounded-[18px] rounded-br-md bg-gradient-to-r from-[#2F80ED] to-[#27C3A2] text-white"
-                    : "rounded-[18px] rounded-bl-md bg-white text-[#1E293B]"
-                }`}
-              >
-                {message.content}
+        {/* Chat messages - Scrolls behind header/input */}
+        <div
+          ref={messagesContainerRef}
+          className="flex-1 overflow-y-auto overscroll-contain pt-[84px] pb-[88px] px-6 py-6 space-y-4 min-h-0 custom-scrollbar"
+        >
+          {chatMessages.map((msg, i) => (
+            <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[85%] rounded-[22px] px-5 py-3.5 text-sm leading-relaxed shadow-sm ${
+                msg.from === "user"
+                  ? "rounded-br-none bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white font-semibold"
+                  : "rounded-bl-none bg-white/80 border border-white/50 text-slate-700 font-medium backdrop-blur-sm"
+              }`}>
+                <p>{msg.text}</p>
+
+                {/* Structured Clinics Cards */}
+                {msg.clinics && (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-2 max-w-full">
+                    {msg.clinics.map((clinic) => (
+                      <div
+                        key={clinic.id}
+                        className="flex flex-col justify-between rounded-2xl border border-slate-200/50 bg-white/60 p-4 shadow-sm backdrop-blur-sm relative overflow-hidden"
+                      >
+                        {/* Premium Tag */}
+                        {clinic.isPremium && (
+                          <div className="absolute top-2 right-2 z-10 rounded-md bg-gradient-to-r from-amber-500 to-yellow-500 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-wider shadow-sm flex items-center gap-1">
+                            <Sparkles className="h-2.5 w-2.5" /> VIP
+                          </div>
+                        )}
+
+                        <div className="flex gap-3 items-start">
+                          {/* Clinic Image */}
+                          <div className="h-16 w-16 rounded-xl overflow-hidden shrink-0 border border-slate-100 bg-slate-50 relative">
+                            <img
+                              src={clinic.image}
+                              alt={clinic.name}
+                              className={`h-full w-full object-cover transition-all duration-300 ${
+                                clinic.isPremium ? "blur-md select-none pointer-events-none scale-105" : ""
+                              }`}
+                            />
+                            {clinic.isPremium && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/10 text-white font-black text-xs select-none">
+                                VIP
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0">
+                            <h4 className="font-extrabold text-slate-800 text-xs truncate">{clinic.name}</h4>
+                            <p className="text-[10px] text-slate-500 font-bold mt-0.5">{clinic.specialty}</p>
+                            
+                            {/* Blurred Address for VIP clinics */}
+                            <p className={`text-[10px] text-slate-400 mt-1 font-medium leading-4 flex items-center gap-1 ${
+                              clinic.isPremium ? "blur-[3.5px] select-none pointer-events-none" : ""
+                            }`}>
+                              📍 {clinic.address}
+                            </p>
+                            
+                            <p className="text-[10px] text-amber-500 font-bold mt-1.5 flex items-center gap-1">
+                              {clinic.rating}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleBookClinic(clinic)}
+                          className={`mt-4 flex h-8 w-full items-center justify-center rounded-xl text-[11px] font-bold text-white shadow-sm transition-all duration-300 cursor-pointer ${
+                            clinic.isPremium
+                              ? "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 shadow-amber-500/10"
+                              : "bg-blue-600 hover:bg-blue-700 shadow-blue-500/10"
+                          }`}
+                        >
+                          {clinic.isPremium ? "Đặt lịch VIP (Premium)" : "Đặt lịch khám"}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upgrade Button for VIP clinics */}
+                {msg.showUpgradeBtn && (
+                  <button
+                    type="button"
+                    onClick={handleUpgradeAccount}
+                    className="mt-3 flex h-10 w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 px-5 text-xs font-extrabold text-white shadow-md hover:scale-[1.01] hover:shadow-lg transition cursor-pointer"
+                  >
+                    <Sparkles className="h-4 w-4" /> Nâng cấp tài khoản ngay
+                  </button>
+                )}
+
+                {/* Chat Redirect Link */}
+                {msg.showChatLink && (
+                  <Link
+                    to="/patient/chat"
+                    className="mt-3 inline-flex h-10 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2563eb] to-[#27C3A2] px-5 text-xs font-extrabold text-white shadow-md hover:scale-[1.01] hover:shadow-lg transition cursor-pointer"
+                  >
+                    <MessageSquare className="h-4 w-4" /> Nhắn tin với phòng khám
+                  </Link>
+                )}
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="border-t border-[#E2E8F0] bg-white p-4">
-          {mode === "ai" && (
-            <div className="mb-3 flex flex-wrap gap-2">
-              {quickSymptoms.map((symptom) => (
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="rounded-[22px] rounded-bl-none bg-white/85 border border-white/50 px-5 py-3.5 backdrop-blur-sm">
+                <div className="flex gap-1.5 items-center h-4">
+                  <div className="h-2.5 w-2.5 animate-bounce rounded-full bg-blue-500" style={{ animationDelay: "0ms" }} />
+                  <div className="h-2.5 w-2.5 animate-bounce rounded-full bg-emerald-500" style={{ animationDelay: "160ms" }} />
+                  <div className="h-2.5 w-2.5 animate-bounce rounded-full bg-indigo-500" style={{ animationDelay: "320ms" }} />
+                </div>
+              </div>
+            </div>
+          )}
+          {chatMessages.length === 1 && !isTyping && (
+            <div className="flex flex-wrap gap-2 pl-12 pt-1 animate-in fade-in duration-300">
+              {quickReplies.map((q) => (
                 <button
-                  key={symptom}
+                  key={q}
                   type="button"
-                  onClick={() => sendAiMessage(symptom)}
-                  className="rounded-full border border-[#E2E8F0] px-3 py-1.5 text-sm font-semibold text-[#64748B] hover:bg-[#F2F7FB]"
+                  onClick={() => sendMessage(q)}
+                  className="rounded-full border border-blue-200 bg-blue-50/80 px-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-600 hover:text-white hover:-translate-y-0.5 transition duration-300 shadow-sm cursor-pointer"
                 >
-                  {symptom}
+                  {q}
                 </button>
               ))}
             </div>
           )}
-
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              {showAttachMenu && (
-                <div className="absolute bottom-14 left-0 z-20 w-44 rounded-2xl border border-[#E2E8F0] bg-white p-2 shadow-[0_14px_40px_rgba(15,23,42,0.12)]">
-                  {attachmentOptions.map(({ label, icon: Icon }) => (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() => setShowAttachMenu(false)}
-                      className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-bold text-[#1E293B] hover:bg-[#F2F7FB]"
-                    >
-                      <Icon className="h-4 w-4 text-[#2F80ED]" />
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={() => setShowAttachMenu((current) => !current)}
-                className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2F7FB] text-[#64748B] hover:bg-[#EAF3FF] hover:text-[#2F80ED]"
-              >
-                <Paperclip className="h-5 w-5" />
-              </button>
-            </div>
-            <input
-              value={currentInput}
-              onChange={(event) => setCurrentInput(event.target.value)}
-              onKeyDown={(event) => event.key === "Enter" && handleSend()}
-              placeholder={mode === "ai" ? "Nhập tình trạng sức khỏe của bạn..." : "Nhập tin nhắn với bác sĩ..."}
-              className="h-12 flex-1 rounded-full border border-[#E2E8F0] px-5 text-sm outline-none focus:ring-2 focus:ring-[#2F80ED] disabled:bg-[#F7FAFC] disabled:text-[#94A3B8]"
-            />
-            <button className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-[#F2F7FB] text-[#64748B] sm:flex">
-              <Mic className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSend()}
-              className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#2F80ED] text-white hover:bg-[#1C64D1] disabled:bg-[#CFE3FF]"
-            >
-              <Send className="h-5 w-5" />
-            </button>
-          </div>
         </div>
-      </section>
 
-      <aside className="flex flex-col gap-5">
-        {mode === "ai" || mode === "doctor" ? (
-          <section className="rounded-[24px] border border-[#E2E8F0] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
-            <h2 className="text-lg font-extrabold text-[#1E293B]">
-              {mode === "ai" ? "Lịch sử chat với AI" : "Lịch sử chat với bác sĩ"}
-            </h2>
-            <div className="mt-4 space-y-3">
-              {mode === "ai"
-                ? aiSessions.map((session) => (
-                    <button
-                      key={session.id}
-                      type="button"
-                      onClick={() => setSelectedAiSessionId(session.id)}
-                      className={`block w-full rounded-2xl border p-4 text-left transition ${
-                        selectedAiSessionId === session.id ? "border-[#CFE3FF] bg-[#EAF3FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F7FAFC]"
-                      }`}
-                    >
-                      <p className="text-sm font-extrabold leading-6 text-[#1E293B]">{session.topic}</p>
-                      <p className="mt-2 text-xs font-bold text-[#94A3B8]">{session.date}</p>
-                    </button>
-                  ))
-                : doctorSessions.map((session) => (
-                    <button
-                      key={session.id}
-                      type="button"
-                      onClick={() => setSelectedDoctorSessionId(session.id)}
-                      className={`block w-full rounded-2xl border p-4 text-left transition ${
-                        selectedDoctorSessionId === session.id ? "border-[#CFE3FF] bg-[#EAF3FF]" : "border-[#E2E8F0] bg-white hover:bg-[#F7FAFC]"
-                      }`}
-                    >
-                      <p className="font-extrabold text-[#1E293B]">{session.name}</p>
-                      <p className="mt-1 text-sm font-medium leading-6 text-[#64748B]">{session.topic}</p>
-                      <p className="mt-2 text-xs font-bold text-[#94A3B8]">{session.date}</p>
-                    </button>
-                  ))}
-            </div>
-          </section>
-        ) : null}
-
-        <section className="rounded-[24px] border border-[#E2E8F0] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
-          <h2 className="text-lg font-extrabold text-[#1E293B]">Tóm tắt thông tin</h2>
-          <div className="mt-5 space-y-4 text-sm">
-            <div className="rounded-2xl bg-[#F2F7FB] p-4">
-              <div className="font-bold text-[#1E293B]">Triệu chứng ghi nhận</div>
-              <div className="mt-1 text-[#64748B]">
-                {(mode === "ai" ? selectedAiSession.messages : selectedDoctorSession.messages).some((message) => message.role === "user") ? "Đã có mô tả ban đầu" : "Chưa có triệu chứng"}
-              </div>
-            </div>
-            <div className="rounded-2xl bg-[#FFF7E8] p-4 text-[#C77805]">
-              <div className="font-bold">Mức độ ưu tiên</div>
-              <div className="mt-1">{mode === "ai" ? "Trung bình, tiếp tục theo dõi thêm." : "Bác sĩ đang theo dõi phiên tư vấn."}</div>
-            </div>
-            <div className="rounded-2xl border border-[#BEF4E7] bg-[#E8FFF9] p-4 text-[#148E77]">
-              <div className="font-bold">Khuyến nghị chăm sóc</div>
-              <ul className="mt-2 list-disc space-y-2 pl-5 leading-6">
-                <li>Nghỉ ngơi, tránh làm việc quá sức.</li>
-                <li>Uống đủ nước trong ngày.</li>
-                <li>Theo dõi dấu hiệu nặng hơn để liên hệ bác sĩ.</li>
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-[#FBD0D0] bg-[#FFECEC] p-4 text-[#D42D2D]">
-              {mode === "ai"
-                ? "Kết quả tư vấn AI chỉ mang tính tham khảo, không thay thế chẩn đoán của bác sĩ."
-                : "Phiên tư vấn chuyên sâu được lưu vào lịch sử tư vấn của bạn."}
-            </div>
-          </div>
-        </section>
-
-        {mode === "ai" ? (
-          <section className="rounded-[24px] border border-[#E2E8F0] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
-            <h2 className="text-sm font-extrabold text-[#1E293B]">Hỗ trợ tiếp theo</h2>
-            <div className="mt-4 space-y-3">
-              <Link to="/patient/book" className="flex h-11 items-center justify-center gap-2 rounded-full border border-[#2F80ED] text-sm font-bold text-[#1C64D1] hover:bg-[#EAF3FF]">
-                <CalendarPlus className="h-4 w-4" />
-                Đặt lịch khám
-              </Link>
-              <Link to="/patient/doctors" className="flex h-11 items-center justify-center gap-2 rounded-full bg-[#2F80ED] text-sm font-bold text-white hover:bg-[#1C64D1]">
-                <Stethoscope className="h-4 w-4" />
-                Kết nối bác sĩ
-              </Link>
-            </div>
-          </section>
-        ) : null}
-      </aside>
+        {/* Input - Glassmorphic overlay */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center gap-3 bg-white/35 backdrop-blur-xl border-t border-white/30 px-6 py-4 shrink-0">
+          <input
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") sendMessage(chatInput);
+            }}
+            placeholder="Mô tả triệu chứng hoặc hỏi thông tin tại đây..."
+            className="h-12 flex-1 rounded-full border border-white/85 bg-white/60 px-5 text-sm font-semibold outline-none placeholder:text-slate-400 backdrop-blur-lg focus:bg-white/90 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 text-slate-800 transition-all duration-300 shadow-inner"
+          />
+          <button
+            type="button"
+            onClick={() => sendMessage(chatInput)}
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-[#2563eb] to-[#27C3A2] text-white shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition hover:scale-105 hover:rotate-6 active:scale-95 cursor-pointer"
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
