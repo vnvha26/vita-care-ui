@@ -69,8 +69,8 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
   const CurrentIcon = current.icon;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 p-4 backdrop-blur-md">
-      <div className="relative grid w-full max-h-[96vh] max-w-[940px] overflow-hidden rounded-[34px] border border-white/70 bg-white/90 shadow-[0_28px_90px_rgba(44,71,146,0.22)] lg:grid-cols-[0.92fr_1.08fr]">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/35 p-4 backdrop-blur-md overflow-y-auto lg:items-center">
+      <div className="relative grid w-full max-w-[940px] rounded-[34px] border border-white/70 bg-white/90 shadow-[0_28px_90px_rgba(44,71,146,0.22)] lg:max-h-[96vh] lg:overflow-hidden lg:grid-cols-[0.92fr_1.08fr]">
         <button
           type="button"
           onClick={onClose}
@@ -118,7 +118,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           </div>
         </section>
 
-        <section className="min-h-0 overflow-y-auto p-5 sm:p-8 custom-scrollbar">
+        <section className="p-5 sm:p-8 lg:min-h-0 lg:overflow-y-auto custom-scrollbar">
           <div className="pr-12">
             <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-600">
               <Bot className="h-4 w-4" />
