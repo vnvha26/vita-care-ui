@@ -118,7 +118,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           </div>
         </section>
 
-        <section className="p-5 sm:p-8 lg:min-h-0 lg:overflow-y-auto custom-scrollbar">
+        <section className="p-5 sm:p-8 lg:min-h-0 lg:max-h-[82vh] lg:overflow-y-auto custom-scrollbar">
           <div className="pr-12">
             <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-600">
               <Bot className="h-4 w-4" />
