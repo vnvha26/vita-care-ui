@@ -75,6 +75,40 @@ export default function ExpertChat() {
   const [threadMessages, setThreadMessages] = useState<Record<string, ChatMessage[]>>(initialMessages);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const layoutWrapper = containerRef.current?.closest(".overflow-y-auto");
+    const originalLayoutOverflow = layoutWrapper instanceof HTMLElement ? layoutWrapper.style.overflowY : "";
+    if (layoutWrapper instanceof HTMLElement) {
+      layoutWrapper.style.overflowY = "hidden";
+    }
+
+    const mainElement = containerRef.current?.closest("main");
+    const originalMainHeight = mainElement instanceof HTMLElement ? mainElement.style.height : "";
+    const originalMainDisplay = mainElement instanceof HTMLElement ? mainElement.style.display : "";
+    const originalMainFlexDirection = mainElement instanceof HTMLElement ? mainElement.style.flexDirection : "";
+    const originalMainMinHeight = mainElement instanceof HTMLElement ? mainElement.style.minHeight : "";
+
+    if (mainElement instanceof HTMLElement) {
+      mainElement.style.height = "100%";
+      mainElement.style.display = "flex";
+      mainElement.style.flexDirection = "column";
+      mainElement.style.minHeight = "0";
+    }
+
+    return () => {
+      if (layoutWrapper instanceof HTMLElement) {
+        layoutWrapper.style.overflowY = originalLayoutOverflow;
+      }
+      if (mainElement instanceof HTMLElement) {
+        mainElement.style.height = originalMainHeight;
+        mainElement.style.display = originalMainDisplay;
+        mainElement.style.flexDirection = originalMainFlexDirection;
+        mainElement.style.minHeight = originalMainMinHeight;
+      }
+    };
+  }, []);
 
   const threads = activeTab === "user" ? userThreads : doctorThreads;
   const activeThread = threads.find((t) => t.id === selectedId) ?? threads[0];
@@ -104,7 +138,7 @@ export default function ExpertChat() {
   };
 
   return (
-    <div>
+    <div className="h-full flex flex-col min-h-0 min-w-0 overflow-hidden" ref={containerRef}>
       <PageHeader
         title="Chat & yêu cầu"
         description="Trao đổi với người dùng, bác sĩ và đội vận hành về các ca cần kiểm duyệt phản hồi AI."
@@ -120,15 +154,15 @@ export default function ExpertChat() {
         }
       />
 
-      <div className="grid min-h-[calc(100vh-190px)] gap-5 xl:grid-cols-[320px_minmax(0,1fr)_340px]">
+      <div className="grid flex-1 min-h-0 gap-5 xl:grid-cols-[320px_minmax(0,1fr)_340px]">
         {/* Thread list */}
-        <SectionCard className="p-4">
+        <SectionCard className="h-full flex flex-col min-h-0 overflow-hidden p-4">
           <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#F2F7FB] p-1">
             <button type="button" onClick={() => switchTab("user")} className={`rounded-xl px-3 py-2 text-sm font-bold transition ${activeTab === "user" ? "bg-white text-[#1C64D1] shadow-sm" : "text-[#64748B]"}`}>Người dùng</button>
             <button type="button" onClick={() => switchTab("doctor")} className={`rounded-xl px-3 py-2 text-sm font-bold transition ${activeTab === "doctor" ? "bg-white text-[#1C64D1] shadow-sm" : "text-[#64748B]"}`}>Bác sĩ</button>
           </div>
 
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 flex-1 space-y-2 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
             {threads.map((thread) => {
               const isSelected = thread.id === selectedId;
               const unread = isSelected ? 0 : Math.floor(Math.random() * 2);
@@ -162,9 +196,9 @@ export default function ExpertChat() {
           title={activeThread.name}
           description={activeThread.subtitle}
           actions={<StatusBadge tone="amber">{activeThread.id}</StatusBadge>}
-          className="flex min-h-[620px] flex-col"
+          className="h-full flex flex-col min-h-0 overflow-hidden"
         >
-          <div className="flex-1 space-y-4 overflow-y-auto pr-1 py-2">
+          <div className="flex-1 min-h-0 space-y-4 overflow-y-auto pr-1 py-2 custom-scrollbar">
             {activeMessages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <Bot className="h-10 w-10 text-[#E2E8F0] mb-3" />
@@ -218,7 +252,7 @@ export default function ExpertChat() {
         </SectionCard>
 
         {/* Right panel */}
-        <div className="space-y-5">
+        <div className="h-full flex flex-col gap-5 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
           <SectionCard title="Ca liên quan" description="Thông tin đang được trao đổi.">
             <div className="space-y-3 text-sm">
               <DataRow

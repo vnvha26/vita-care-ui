@@ -98,6 +98,40 @@ export default function PatientChat() {
   const [draft, setDraft] = useState("");
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const layoutWrapper = containerRef.current?.closest(".overflow-y-auto");
+    const originalLayoutOverflow = layoutWrapper instanceof HTMLElement ? layoutWrapper.style.overflowY : "";
+    if (layoutWrapper instanceof HTMLElement) {
+      layoutWrapper.style.overflowY = "hidden";
+    }
+
+    const mainElement = containerRef.current?.closest("main");
+    const originalMainHeight = mainElement instanceof HTMLElement ? mainElement.style.height : "";
+    const originalMainDisplay = mainElement instanceof HTMLElement ? mainElement.style.display : "";
+    const originalMainFlexDirection = mainElement instanceof HTMLElement ? mainElement.style.flexDirection : "";
+    const originalMainMinHeight = mainElement instanceof HTMLElement ? mainElement.style.minHeight : "";
+
+    if (mainElement instanceof HTMLElement) {
+      mainElement.style.height = "100%";
+      mainElement.style.display = "flex";
+      mainElement.style.flexDirection = "column";
+      mainElement.style.minHeight = "0";
+    }
+
+    return () => {
+      if (layoutWrapper instanceof HTMLElement) {
+        layoutWrapper.style.overflowY = originalLayoutOverflow;
+      }
+      if (mainElement instanceof HTMLElement) {
+        mainElement.style.height = originalMainHeight;
+        mainElement.style.display = originalMainDisplay;
+        mainElement.style.flexDirection = originalMainFlexDirection;
+        mainElement.style.minHeight = originalMainMinHeight;
+      }
+    };
+  }, []);
 
   const filteredConversations = useMemo(() => {
     if (filter === "all") return conversations.filter((item) => item.status !== "archived");
@@ -173,13 +207,13 @@ export default function PatientChat() {
   };
 
   return (
-    <div className="min-w-0 overflow-hidden">
+    <div className="h-full flex flex-col min-h-0 min-w-0 overflow-hidden" ref={containerRef}>
       <PageHeader
         title="Hộp thư tư vấn"
         description="Nhắn tin trò chuyện với các bác sĩ chuyên khoa hoặc các phòng khám liên kết."
       />
 
-      <div className="grid h-[calc(100vh-230px)] min-h-[420px] lg:h-[calc(100vh-190px)] lg:min-h-[500px] min-w-0 gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
+      <div className="grid flex-1 min-h-0 min-w-0 gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
         {/* Left column - Conversations list */}
         <SectionCard
           title="Cuộc trò chuyện"
@@ -277,7 +311,7 @@ export default function PatientChat() {
               </ActionButton>
             </div>
           }
-          className={cn("h-full flex min-w-0 flex-col", showChatOnMobile ? "flex" : "hidden lg:flex")}
+          className={cn("h-full flex min-w-0 flex-col overflow-hidden", showChatOnMobile ? "flex" : "hidden lg:flex")}
         >
           <div className="flex-1 min-h-0 space-y-4 overflow-y-auto rounded-2xl bg-[#F7FAFC] p-5 custom-scrollbar">
             {selectedConversation.messages.map((message, index) => (
