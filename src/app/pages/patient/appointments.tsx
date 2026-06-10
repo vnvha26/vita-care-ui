@@ -1,65 +1,18 @@
-import { useState, type ReactNode } from "react";
-import { Link } from "react-router";
-import { CalendarClock, Clock, MapPin, Stethoscope, UserRound } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
+import { Link, useLocation } from "react-router";
+import { CalendarClock, CalendarPlus, Clock, MapPin, Stethoscope, UserRound } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard, StatusBadge } from "../../components/layout/role-page";
-
-type Appointment = {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  doctor: string;
-  specialty: string;
-  clinic: string;
-  address: string;
-  status: "Chờ khám" | "Đã xác nhận" | "Đã đổi lịch";
-  reason: string;
-  note: string;
-};
-
-const appointments: Appointment[] = [
-  {
-    id: "a001",
-    title: "Tái khám nội tổng quát",
-    date: "07/06/2026",
-    time: "09:00 - 09:30",
-    doctor: "BS. Nguyễn Văn A",
-    specialty: "Nội tổng quát",
-    clinic: "VitaCare AI Clinic",
-    address: "Tầng 2, 25 Nguyễn Trãi, Hà Nội",
-    status: "Chờ khám",
-    reason: "Theo dõi đau thượng vị và tình trạng ợ chua sau ăn.",
-    note: "Mang theo đơn thuốc cũ, đến trước giờ khám 15 phút để xác nhận thông tin.",
-  },
-  {
-    id: "a002",
-    title: "Khám tiêu hóa",
-    date: "12/06/2026",
-    time: "14:00 - 14:30",
-    doctor: "BS. Trần Thị B",
-    specialty: "Tiêu hóa",
-    clinic: "Phòng khám Chuyên khoa Tiêu hóa",
-    address: "105 Lý Thường Kiệt, Hà Nội",
-    status: "Đã xác nhận",
-    reason: "Đánh giá đau dạ dày, trào ngược và chế độ ăn.",
-    note: "Không dùng cà phê trước buổi khám, ghi lại các món ăn dễ làm đau bụng.",
-  },
-  {
-    id: "a003",
-    title: "Tư vấn kết quả xét nghiệm",
-    date: "18/06/2026",
-    time: "10:00 - 10:20",
-    doctor: "BS. Lê Minh C",
-    specialty: "Nội tổng quát",
-    clinic: "Tư vấn trực tuyến",
-    address: "Cuộc gọi video trong ứng dụng",
-    status: "Đã đổi lịch",
-    reason: "Bác sĩ giải thích kết quả xét nghiệm máu và chỉ số men gan.",
-    note: "Kiểm tra kết nối mạng trước 5 phút, chuẩn bị câu hỏi cần tư vấn.",
-  },
-];
+import { getPatientAppointments, type PatientAppointment } from "../../lib/patient-appointments";
 
 export default function PatientAppointments() {
+  const location = useLocation();
+  const visibleAppointments = useMemo(() => {
+    const appointments = getPatientAppointments();
+    const temporaryAppointment = (location.state as { appointment?: PatientAppointment } | null)?.appointment;
+    if (!temporaryAppointment?.id) return appointments;
+
+    return [temporaryAppointment, ...appointments.filter((appointment) => appointment.id !== temporaryAppointment.id)];
+  }, [location.state]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
@@ -69,14 +22,14 @@ export default function PatientAppointments() {
         description="Quản lý lịch hẹn đã đặt, trạng thái xác nhận và các thay đổi cần xử lý."
         actions={
           <Link to="/patient/book">
-            <ActionButton>Đặt lịch mới</ActionButton>
+            <ActionButton icon={<CalendarPlus className="h-4 w-4" />}>Đặt lịch khám mới</ActionButton>
           </Link>
         }
       />
 
       <SectionCard title="Danh sách lịch khám">
         <div className="space-y-3">
-          {appointments.map((appointment) => (
+          {visibleAppointments.map((appointment) => (
             <div
               key={appointment.id}
               className={`rounded-[18px] border p-4 transition ${
@@ -91,6 +44,7 @@ export default function PatientAppointments() {
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-extrabold text-[#1E293B]">{appointment.title}</h3>
                     <StatusBadge tone={getStatusTone(appointment.status)}>{appointment.status}</StatusBadge>
+                    {appointment.isOverdue && <StatusBadge tone="rose">Quá hạn</StatusBadge>}
                   </div>
                   <p className="mt-1 text-sm font-bold text-[#2D4A86]">
                     {appointment.time} · {appointment.date} · {appointment.doctor}
@@ -111,7 +65,7 @@ export default function PatientAppointments() {
   );
 }
 
-function AppointmentDetail({ appointment }: { appointment: Appointment }) {
+function AppointmentDetail({ appointment }: { appointment: PatientAppointment }) {
   return (
     <div className="mt-4 rounded-2xl border border-[#CFE3FF] bg-white p-4">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -145,8 +99,8 @@ function Info({ icon, label, value }: { icon: ReactNode; label: string; value: s
   );
 }
 
-function getStatusTone(status: Appointment["status"]) {
-  if (status === "Chờ khám") return "amber";
+function getStatusTone(status: PatientAppointment["status"]) {
+  if (status === "Chờ khám" || status === "Chờ xác nhận") return "amber";
   if (status === "Đã đổi lịch") return "violet";
   return "green";
 }

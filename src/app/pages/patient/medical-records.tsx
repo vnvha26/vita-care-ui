@@ -36,7 +36,7 @@ const defaultConsultations: ConsultationSession[] = [
   },
   {
     id: "consult-demo-2",
-    doctor: "BS. Nguyễn Văn A",
+    doctor: "BS. Nguyễn Văn B",
     specialty: "Tim mạch",
     date: "12/05/2026",
     price: "250.000 VND",
@@ -99,14 +99,7 @@ const records: MedicalRecord[] = [
 export default function PatientMedicalRecords() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [consultations] = useState<ConsultationSession[]>(() => {
-    try {
-      const saved = JSON.parse(window.localStorage.getItem("patient-consultation-history") ?? "[]") as ConsultationSession[];
-      return [...saved, ...defaultConsultations];
-    } catch {
-      return defaultConsultations;
-    }
-  });
+  const consultations = defaultConsultations;
 
   const filteredRecords = records.filter((record) => {
     const keyword = query.trim().toLowerCase();

@@ -34,11 +34,11 @@ interface NavItem {
 
 const patientNav: NavItem[] = [
   { title: "Trang chủ", href: "/patient/dashboard", icon: LayoutDashboard },
-  { title: "Tư vấn sức khỏe", href: "/patient/consultation", icon: Bot },
+  { title: "Trợ lý AI", href: "/patient/consultation", icon: Bot },
   { title: "Tin nhắn", href: "/patient/chat", icon: MessageCircle },
+  { title: "Bác sĩ", href: "/patient/doctors", icon: Stethoscope },
   { title: "Lịch khám", href: "/patient/appointments", icon: Calendar },
   { title: "Lịch sử khám", href: "/patient/medical-records", icon: ClipboardList },
-  { title: "Dữ liệu y tế", href: "/patient/profile", icon: Database },
 ];
 
 const doctorNav: NavItem[] = [
@@ -85,6 +85,13 @@ const roleLabels: Record<Role, string> = {
   expert: "Chuyên gia",
 };
 
+const roleDashboardMap: Record<Role, string> = {
+  patient: "/patient/dashboard",
+  doctor: "/doctor",
+  manager: "/manager",
+  expert: "/expert",
+};
+
 interface SidebarProps {
   role: Role;
   userName: string;
@@ -94,6 +101,7 @@ export function Sidebar({ role, userName }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const navItems = roleNavMap[role];
+  const isProfileActive = role === "patient" && location.pathname === "/patient/profile";
 
   return (
     <aside
@@ -111,7 +119,7 @@ export function Sidebar({ role, userName }: SidebarProps) {
         {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
       </button>
 
-      <Link to="/" className={cn("flex h-14 items-center gap-3", isCollapsed ? "justify-center" : "px-2")}>
+      <Link to={roleDashboardMap[role]} className={cn("flex h-14 items-center gap-3", isCollapsed ? "justify-center" : "px-2")}>
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#EAF3FF] text-[#2F80ED] shadow-sm">
           <ShieldCheck className="h-6 w-6" />
         </div>
@@ -151,7 +159,15 @@ export function Sidebar({ role, userName }: SidebarProps) {
 
       {!isCollapsed && (
         <div className="border-t border-[#E2E8F0] pt-3">
-          <div className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F2F7FB] p-2.5">
+          <Link
+            to={role === "patient" ? "/patient/profile" : roleDashboardMap[role]}
+            className={cn(
+              "flex items-center gap-3 rounded-2xl border p-2.5 transition-colors",
+              isProfileActive
+                ? "border-[#CFE3FF] bg-gradient-to-r from-[#EAF3FF] to-[#E8FFF9] text-[#1C64D1] shadow-sm"
+                : "border-[#E2E8F0] bg-[#F2F7FB] hover:bg-[#EAF3FF]"
+            )}
+          >
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EAF3FF] text-sm font-bold text-[#2F80ED]">
               {userName
                 .split(" ")
@@ -163,7 +179,7 @@ export function Sidebar({ role, userName }: SidebarProps) {
               <p className="truncate text-sm font-bold text-[#1E293B]">{userName}</p>
               <p className="truncate text-xs font-medium text-[#64748B]">{roleLabels[role]}</p>
             </div>
-          </div>
+          </Link>
           <Link
             to="/"
             className="mt-2 flex h-10 items-center gap-2 rounded-[14px] px-3 text-sm font-bold text-[#64748B] hover:bg-[#F2F7FB] hover:text-[#1E293B]"
