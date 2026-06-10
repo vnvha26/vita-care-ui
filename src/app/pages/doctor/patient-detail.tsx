@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router";
-import { ArrowLeft, ClipboardPenLine, UserRound } from "lucide-react";
+import { ArrowLeft, ClipboardPenLine, UserRound, ShieldAlert } from "lucide-react";
 import { ActionButton, PageHeader, SectionCard } from "../../components/layout/role-page";
 import { patientRecords } from "./patient-data";
 
@@ -46,6 +46,28 @@ export default function PatientDetail() {
           <MetricItem label="Cân nặng" value={patient.weight} />
           <MetricItem label="Chỉ số BMI" value={patient.bmi} emphasis />
         </div>
+
+        {patient.vitals && (
+          <div className="mt-5 border-b border-dashed border-[#E2E8F0] pb-5 space-y-4">
+            {patient.vitals.isAbnormal && (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 shadow-sm flex items-start gap-3 border-l-4 border-l-rose-600">
+                <ShieldAlert className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-black text-rose-700 uppercase tracking-wide">Cảnh báo đỏ sinh hiệu bất thường</h4>
+                  <p className="mt-1 text-xs font-semibold leading-relaxed text-rose-600">
+                    Bệnh nhân ghi nhận chỉ số vượt ngưỡng an toàn lâm sàng (Huyết áp tâm thu &gt; 140 mmHg hoặc Thân nhiệt &gt; 38.5 °C).
+                  </p>
+                </div>
+              </div>
+            )}
+            <div className="grid gap-4 md:grid-cols-4">
+              <MetricItem label="Thân nhiệt" value={patient.vitals.temp} emphasis={Number(patient.vitals.temp.split(" ")[0]) >= 38.5} />
+              <MetricItem label="Huyết áp" value={patient.vitals.bp} emphasis={patient.vitals.bp.startsWith("14") || patient.vitals.bp.startsWith("15")} />
+              <MetricItem label="SpO2" value={patient.vitals.spo2} emphasis={Number(patient.vitals.spo2.split("%")[0]) < 95} />
+              <MetricItem label="Nhịp tim" value={patient.vitals.hr} emphasis={Number(patient.vitals.hr.split(" ")[0]) > 100} />
+            </div>
+          </div>
+        )}
 
         <p className="mt-5 text-sm font-bold text-[#1E293B]">
           Ghi chú tiền sử & Dị ứng: <span className="text-[#EF6155]">{patient.notes}</span>
